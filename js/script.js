@@ -21,7 +21,7 @@ function login(event) {
         return;
     }
 
-    const url = `/login_check?id=${userId}&name=${userName}`;
+    const url = `/login_check?id=${encodeURIComponent(userId)}&name=${encodeURIComponent(userName)}`;
     
     getData(url, (data) => {
         if (!data.valid) {
