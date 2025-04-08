@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식수 신청 시스템</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>식수 신청 시스템</h1>
+
+    <!-- 로그인 영역 -->
+    <div id="login-container">
+        <div class="login-field">
+            <label for="userId">사번</label>
+            <input type="text" id="userId" placeholder="사번 입력">
+        </div>
+        <div class="login-field">
+            <label for="userName">이름</label>
+            <input type="text" id="userName" placeholder="이름 입력">
+        </div>
+        <button onclick="login(event)">로그인</button>        
+                
+    </div>
+
+    <!-- ✅ 로그인 후 보이는 영역 전체 감싸기 -->
+    <div id="mainArea" style="display: none;">
+        <!-- 달력 선택 -->
+        <div id="date-picker-container">
+            <label>주 선택: <input type="date" id="weekPicker" onchange="loadWeekData()"></label>
+        </div>
+
+        <!-- 이름 표시 -->
+        <div id="welcome" style="margin-bottom: 20px; font-weight: bold; font-size: 18px;">
+            <button onclick="logout()">로그아웃</button></div>
+        <div id="weekRangeText" style="margin-bottom: 20px; font-weight: bold; font-size: 18px;"></div>
+        <div id="mealSummary" style="margin-top: 10px; font-weight: bold;"></div>
+        <!-- 신청 화면 -->
+        
+        <div class="table-wrapper" id="meal-container">
+            <h2>식수 신청 내역</h2>
+            <table id="meal-table">
+              <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>요일</th>
+                        <th>조식</th>
+                        <th>중식</th>
+                        <th>석식</th>
+                    </tr>
+                </thead>
+                <tbody id="meal-body"></tbody>
+            </table>
+            <div class="button-row">
+                <button onclick="saveMeals()">저장</button>
+                <button onclick="logout()">로그아웃</button>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
+    <!-- ✅ 공통 유틸 먼저 불러오기 -->
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/script.js"></script>
+</body>
+
+</html>

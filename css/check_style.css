@@ -1,0 +1,204 @@
+/* 전체 페이지 스타일 */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+.table-container {
+  width: 90%;
+  margin: auto;
+  overflow-x: auto;
+  max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
+  overflow-y: auto;    /* ✅ 세로 스크롤 활성화 */
+}
+
+/* 테이블 헤더 고정 (선택적으로 사용할 경우) */
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 헤더 스타일 */
+th {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+}
+
+th[colspan] {
+  background-color: #007bff !important; 
+  color: white;
+  font-size: 16px;
+  padding: 8px;
+}
+
+th.holiday-header {
+  background-color: #ffdddd !important;
+  color: red !important;
+}
+
+/* 날짜 표시 스타일 */
+.date-header {
+    background-color: #007bff;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* 테이블 본문 스타일 */
+td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+/* 신청 여부 스타일 */
+.meal-yes {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.meal-no {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* 홀수/짝수 행 색상 변경 */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* 마우스를 올리면 강조 효과 */
+tr:hover {
+    background-color: #d6e4ff;
+    transition: 0.3s;
+}
+
+/* 신청/미신청 버튼 스타일 */
+.meal-btn {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+/* 신청 버튼 (선택된 경우) */
+.meal-btn.selected {
+    background-color: #28a745;
+    color: white;
+}
+
+/* 미신청 버튼 (기본 상태) */
+.meal-btn {
+    background-color: #e0e0e0;
+    color: black;
+}
+
+/* 버튼 클릭 시 색상 변경 효과 */
+.meal-btn:hover {
+    background-color: #c0c0c0;
+}
+
+/* 로그인 및 주 선택 영역 스타일 */
+.login-container, #date-picker-container {
+    margin-bottom: 20px;
+}
+
+/* 저장 버튼 스타일 */
+button {
+    padding: 10px 20px;
+    margin-top: 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  table {
+    font-size: 12px;
+    width: 100%;
+  }
+
+  th, td {
+    padding: 6px;
+  }
+
+  .filter-container,
+  .search-container,
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  select,
+  button {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  h1, h2 {
+    font-size: 18px;
+  }
+}
+
+.toast {
+  visibility: hidden;
+  min-width: 160px;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 10px;
+  position: fixed;
+  z-index: 9999;
+  top: 20px;
+  right: 20px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+}

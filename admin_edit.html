@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - 신청 내역 변경</title>
+    <link rel="stylesheet" href="css/check_style.css">
+</head>
+<body>
+    <h1>신청 내역 변경</h1>
+
+    <!-- 요약 정보 -->
+    <div class="summary">
+        📋 총 신청 인원: <span id="totalPeople">0</span>명 |
+        조식: <span id="totalBreakfast">0</span> |
+        중식: <span id="totalLunch">0</span> |
+        석식: <span id="totalDinner">0</span>
+    </div>
+
+    <div class="filter-container">
+        <label>부서: <input type="text" id="searchDept"></label>
+        <label>사번: <input type="text" id="searchEmpId"></label>
+        <label>이름: <input type="text" id="searchName"></label>
+        <button onclick="loadEditData()">🔍신청자 조회</button> 
+        <button onclick="loadAllEmployeesForEdit()">🔄 전체조회</button>
+
+        <!--<button onclick="loadEditData()"> 🔍조회</button>-->
+        <label>주 선택: <input type="date" id="editWeekPicker"></label>
+    </div>
+
+    <!-- 신청 내역 변경 테이블 -->
+    <div class="table-container">
+        <table id="edit-table">
+            <thead id="table-head"></thead>
+            <tbody id="edit-body"></tbody>
+        </table>
+    </div>
+
+    <!-- 저장 및 뒤로가기 버튼 -->
+    <div class="action-buttons">
+        <button onclick="saveEditChanges()">💾 저장</button> 
+        <!--<button onclick="saveEditMeals()">💾 저장</button>-->
+        <button onclick="window.location.href='admin_dashboard.html'">← 관리자 대시보드</button>
+    </div>
+
+
+    
+    <div id="toast" class="toast"></div>
+    <!-- ✅ 공통 유틸 먼저 불러오기 -->
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/admin_edit.js"></script>
+</body>
+</html>

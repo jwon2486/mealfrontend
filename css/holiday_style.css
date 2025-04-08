@@ -1,0 +1,146 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f8f9fa;
+    padding: 20px;
+}
+
+/* 연도 선택 */
+.holiday-container {
+    margin-bottom: 10px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4개월씩 한 줄 */
+  gap: 12px;
+  padding: 20px;
+}
+
+.month-calendar {
+  border: 1px solid #aaa;
+  font-size: 12px;
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.month-calendar caption {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.month-calendar th,
+.month-calendar td {
+  padding: 2px;
+  width: 14%;
+  height: 22px;
+}
+
+.month-calendar th {
+  background-color: #eee;
+  color: #333;
+}
+
+.month-calendar td.sunday {
+  color: crimson;
+  font-weight: bold;
+}
+
+.month-calendar td.holiday {
+  background-color: #ffe5e5;
+  color: crimson;
+  font-weight: bold;
+}
+
+/* 공휴일 표시용 클래스 */
+td.holiday {
+    background-color: #ffe5e5;
+    color: crimson;
+    font-weight: bold;
+}
+
+.saturday {
+    color: gray;
+}
+
+.holiday-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ✅ 3열로 정렬 */
+  gap: 8px;
+}
+
+.holiday-item {
+  background: #f0f0f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  table {
+    font-size: 12px;
+    width: 100%;
+  }
+
+  th, td {
+    padding: 6px;
+  }
+
+  .filter-container,
+  .search-container,
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  select,
+  button {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  h1, h2 {
+    font-size: 18px;
+  }
+}
+
+.toast {
+  visibility: hidden;
+  min-width: 160px;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 10px;
+  position: fixed;
+  z-index: 9999;
+  top: 20px;
+  right: 20px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+}

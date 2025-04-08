@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드</title>
+    <link rel="stylesheet" href="css/dashboard_style.css">
+</head>
+<body>
+    <h1>관리자 대시보드</h1>
+
+    <div class="admin-menu">
+        <button onclick="goToPage('admin_stats.html')">통계</button>
+        <button onclick="goToPage('admin_check.html')">신청 내역 확인</button>
+        <button onclick="goToPage('admin_edit.html')">신청 내역 변경</button>
+        <button onclick="goToPage('admin_holiday.html')">공휴일 관리</button>
+        <button onclick="goToPage('admin_employees.html')">식수 인력 변경</button>
+        <button onclick="goToPage('admin_logs.html')">변경 신청 내역</button>
+        <button onclick="goToPage('index.html')">← 로그인 화면으로</button>
+    </div>
+
+    <script>
+        function goToPage(page) {
+            window.location.href = page;
+        }
+    </script>
+    
+    <div id="toast" class="toast"></div>
+    <!-- ✅ 공통 유틸 먼저 불러오기 -->
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+</body>
+</html>

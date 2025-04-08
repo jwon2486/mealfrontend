@@ -1,0 +1,45 @@
+<!-- admin_logs.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>신청 변경 내역</title>
+  <link rel="stylesheet" href="css/check_style.css" />
+</head>
+<body>
+  <h2>📋 식수 신청 변경 내역</h2>
+
+  <div class="filter-container">
+    <input type="date" id="logStartDate" />
+    <input type="date" id="logEndDate" />
+    <input type="text" id="logEmpName" placeholder="이름" />
+    <input type="text" id="logEmpDept" placeholder="부서" />
+    <button onclick="loadLogs()">🔍 조회</button>
+    <button onclick="downloadExcel()">📥 다운로드</button>
+    <button onclick="window.location.href='admin_dashboard.html'">← 관리자 대시보드</button>
+  </div>
+  </br>
+  </br>
+  <div class="table-container">
+    <table>
+      <thead id="log-head">
+        <tr>
+          <th>날짜</th>
+          <th>식사유형</th>
+          <th>부서명</th>
+          <th>이름</th>
+          <th>이전상태</th>
+          <th>변경상태</th>
+          <th>변경일시</th>
+        </tr>
+      </thead>
+      <tbody id="log-body"></tbody>
+    </table>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="js/config.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/admin_logs.js"></script>
+</body>
+</html>
