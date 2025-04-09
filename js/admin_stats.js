@@ -411,6 +411,7 @@ function renderDeptStats(data) {
 
   const direct = [];
   const partner = [];
+  const visitor = [];
 
   // ✅ 부서별 데이터 분리
   data.forEach(row => {
@@ -422,9 +423,12 @@ function renderDeptStats(data) {
     };
     if (row.type === "직영") {
       direct.push(item);
-    } else {
+    } else if(row.type === "협력사"){
       partner.push(item);
+    } else{
+      visitor.push(item);
     }
+
   });
 
   // ✅ 정렬 함수
@@ -469,20 +473,21 @@ function renderDeptStats(data) {
   // ✅ 렌더링 순서대로 실행
   const subDirect = renderRows(direct, "직영");
   const subPartner = renderRows(partner, "협력사");
+  const subVisitor = renderRows(visitor, "방문자");
 
   // ✅ 총계
   const tr = document.createElement("tr");
   tr.className = "total-row";
-  const total = subDirect.breakfast + subPartner.breakfast +
-                subDirect.lunch + subPartner.lunch +
-                subDirect.dinner + subPartner.dinner;
+  const total = subDirect.breakfast + subPartner.breakfast + subVisitor.breakfast +
+                subDirect.lunch + subPartner.lunch + subVisitor.lunch +
+                subDirect.dinner + subPartner.dinner + subVisitor.dinner;
 
   tr.innerHTML = `
     <td>총계</td>
     <td>${total}</td>
-    <td>${subDirect.breakfast + subPartner.breakfast}</td>
-    <td>${subDirect.lunch + subPartner.lunch}</td>
-    <td>${subDirect.dinner + subPartner.dinner}</td>
+    <td>${subDirect.breakfast + subPartner.breakfast + subVisitor.breakfast}</td>
+    <td>${subDirect.lunch + subPartner.lunch + subVisitor.lunch}</td>
+    <td>${subDirect.dinner + subPartner.dinner + subVisitor.dinner}</td>
   `;
   tbody.appendChild(tr);
 }
@@ -567,10 +572,15 @@ function renderWeeklyDeptStats(data, holidays, range) {
   // 🔹 부서 데이터를 분리 (직영/협력사)
   const direct = [];
   const partner = [];
+  const visitor = [];
 
   data.forEach(item => {
-    if (item.type === "직영") direct.push(item);
-    else partner.push(item);
+    if (item.type === "직영"){
+      direct.push(item);
+    } else if(item.type === "협력사"){
+      partner.push(item);  
+    }
+    else visitor.push(item);
   });
 
   const sortByDept = (a, b) => a.dept.localeCompare(b.dept);
@@ -618,10 +628,13 @@ function renderWeeklyDeptStats(data, holidays, range) {
   const partnerSums = processRows(partner);
   appendSummaryRow("협력사 소계", partnerSums, tbody);
 
+  const visitorSums = processRows(visitor);
+  appendSummaryRow("방문자 소계", visitorSums, tbody);
+
   const totalSums = directSums.map((v, i) => ({
-    b: v.b + partnerSums[i].b,
-    l: v.l + partnerSums[i].l,
-    d: v.d + partnerSums[i].d
+    b: v.b + partnerSums[i].b + visitorSums[i].b,
+    l: v.l + partnerSums[i].l + visitorSums[i].l,
+    d: v.d + partnerSums[i].d + visitorSums[i].d
   }));
   appendSummaryRow("총계", totalSums, tbody, true);
 }
