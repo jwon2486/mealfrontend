@@ -111,6 +111,13 @@ body {
     border-radius: 4px;
     cursor: pointer;
 }
+
+/* 📌 사유 입력 필드를 넓게 설정 */
+.reason-input {
+  width: 100%;
+  min-width: 200px;
+  text-align: left;
+}
   
   /* ✅ 모바일 반응형 */
   @media (max-width: 768px) {
@@ -134,5 +141,10 @@ body {
   
     h2, h3 {
       font-size: 18px;
+    }
+    .reason-input {
+      font-size: 13px;
+      padding: 6px;
+      width: 100%;
     }
   }
