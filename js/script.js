@@ -454,7 +454,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function goToVisitor() {
-    location.href = "visitor_request.html";
+    location.href = "/meal_management/visitor_request.html";
 }
 
 // ✅ 전역 함수 등록
