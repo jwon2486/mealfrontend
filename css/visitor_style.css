@@ -115,7 +115,7 @@ body {
 /* 📌 사유 입력 필드를 넓게 설정 */
 .reason-input {
   width: 100%;
-  min-width: 50px;
+  min-width: 30px;
   text-align: left;
 }
   
