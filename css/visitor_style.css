@@ -132,16 +132,17 @@ body {
   /* ✅ 모바일 반응형 */
   @media (max-width: 768px) {
     body {
-      padding: 5px;
+      padding: 10px;
     }
   
     table, th, td {
       font-size: 12px;
+      padding: 2px;
     }
   
     td input {
       font-size: 12px;
-      padding: 4px;
+      padding: 3px;
     }
   
     button {
@@ -160,6 +161,6 @@ body {
     .date-input {
       width: 80px;
       padding: 0px;
-      font-size: 10px;
+      font-size: 8px;
     }
   }
