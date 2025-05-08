@@ -162,7 +162,7 @@ body {
     .date-input {
       height: 3.5em;    /* 높이를 늘림 */
       line-height: 1.2; /* 내부 여백 */
-      width: 70px;
+      width: 90px;
       padding: 0px;
       font-size: 10px;
       white-space: nowrap;
