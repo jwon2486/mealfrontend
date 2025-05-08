@@ -158,7 +158,8 @@ body {
       width: 100%;
     }
     .date-input {
-      width: 50px;
+      width: 30px;
+      padding: 1px;
       font-size: 13px;
     }
   }
