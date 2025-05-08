@@ -1,6 +1,7 @@
 // import { getData, postData, fetchHolidayList, normalizeDate } from "./util.js";
 
 let holidayList = [];  // 서버에서 불러온 공휴일 날짜 배열
+let flag_type = "직영";
 
 // ✅ 로그인 처리
 function login(event) {
@@ -22,6 +23,7 @@ function login(event) {
     }
 
     const url = `/login_check?id=${encodeURIComponent(userId)}&name=${encodeURIComponent(userName)}`;
+
     
     getData(url, (data) => {
         if (!data.valid) {
@@ -29,15 +31,32 @@ function login(event) {
             return;
         }
 
-        // 로그인 성공
-        window.currentUser = {
-        userId: data.id,
-        userName: data.name,
-        dept: data.dept,
-        rank: data.rank,
+        // ✅ 로그인 성공: 사용자 정보 저장
+            window.currentUser = {
+            userId: data.id,
+            userName: data.name,
+            dept: data.dept,
+            rank: data.rank,
+            type: data.type  // ✅ type 추가
         };
 
+        // alert(data.type);
+        
+        
+        localStorage.setItem("flagType", data.type);
+        flag_type = localStorage.getItem("flagType");
+        //alert(flag_type + 'flag');
+
+
         localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
+
+        // ✅ 사용자 type에 따라 화면 분기
+        if (data.type === "협력사" || data.type === "방문자") {
+            window.location.href = "visitor_request.html";
+            return;
+        }
+
+        
 
         document.getElementById("login-container").style.display = "none";
         document.getElementById("mainArea").style.display = "block";
@@ -58,11 +77,13 @@ function login(event) {
     }, (err) => {
         alert("❌ 로그인 실패: " + err.message);
     });
+    
         
 }
 
 function logout() {
     localStorage.removeItem("currentUser");
+    localStorage.removeItem("flag_type");
     window.location.reload();
 
     // 모든 화면 초기화
@@ -72,39 +93,9 @@ function logout() {
     document.getElementById("welcome").innerText = "";
     document.getElementById("weekRangeText").innerText = "";
     document.getElementById("mealSummary").innerText = "";
+
+    
 }
-
-/*function login(event) {
-    if (event) event.preventDefault(); // 기본 submit 동작 막기
-
-    const userId = document.getElementById("userId").value.trim();
-    const userName = document.getElementById("userName").value.trim();
-
-    if (!userId || !userName) {
-        showToast("사번과 이름을 입력해주세요.");
-        return;
-    }
-
-    if (userId === "admin" && userName === "admin") {
-        window.location.href = "admin_dashboard.html";
-        return;
-    }
-
-    // 사용자 정보 전역 저장 + localStorage 저장
-    window.currentUser = { userId, userName };
-    localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
-
-    // 로그인 UI 숨기고 식수신청 UI 표시
-    document.getElementById("login-container").style.display = "none";
-    document.getElementById("date-picker-container").style.display = "block";
-    document.getElementById("meal-container").style.display = "block";
-
-    // ✅ 이름 및 범위 표시 요소 보이기 추가
-    document.getElementById("welcome").style.display = "block";
-    document.getElementById("weekRangeText").style.display = "block";
-
-    loadWeekData(); // 로그인 후 자동 로드
-}*/
 
 // ✅ 로그아웃 처리
 function logout() {
@@ -125,6 +116,8 @@ function logout() {
 function getCurrentWeekDates() {
     const selected = document.getElementById("weekPicker").value;
     const selectedDate = new Date(selected);
+
+
     const dayOfWeek = selectedDate.getDay(); // 0(일) ~ 6(토)
 
     // 🟡 월요일 계산 (일요일이면 -6, 나머진 1-day)
@@ -280,7 +273,16 @@ function loadWeekData() {
 
 // ✅ 저장 요청 (선택된 버튼 → 서버로 전송)
 function saveMeals() {
-    if (!window.currentUser) return;
+    if (!window.currentUser) {
+        const savedUser = localStorage.getItem("currentUser");
+        if (savedUser) {
+            window.currentUser = JSON.parse(savedUser);  // 복원 시도
+        } else {
+            alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요.");
+            location.href = "index.html";
+            return;
+        }
+    }
 
     const userId = window.currentUser.userId;
     const userName = window.currentUser.userName;
@@ -309,6 +311,7 @@ function saveMeals() {
     postData("/meals", { meals },
         () => {
             showToast("✅ 저장 완료");
+            alert("✅ 저장되었습니다.");
             loadWeekData(); // 저장 후 다시 불러오기
         },
         (err) => showToast("❌ 저장 실패: " + err.message)
@@ -360,7 +363,7 @@ function updateMealSummary() {
 
 // ✅ 오늘 기준으로 이번 주 월요일 날짜 반환
 function setDefaultWeek() {
-    const today = new Date();
+    const today = new getKSTDate();
     const monday = new Date(today);
     const day = today.getDay();
 
@@ -373,7 +376,7 @@ function setDefaultWeek() {
 
 // ✅ 특정 식사 버튼이 마감되었는지 여부 반환
 function isDeadlinePassed(dateStr, mealType) {
-    const now = new Date(); // 현재 시간
+    const now = getKSTDate(); // 현재 시간
     const mealDate = new Date(dateStr);
 
     // 마감 기준 시간 계산
@@ -395,11 +398,38 @@ function isDeadlinePassed(dateStr, mealType) {
 
 // ✅ 자동 로그인 및 주차 변경 이벤트
 document.addEventListener("DOMContentLoaded", function () {
-    
+
+
     setDefaultWeek(); // ✅ 이번 주 자동 설정
     
     const savedUser = localStorage.getItem("currentUser");
     const year = new Date().getFullYear();
+
+
+    if (savedUser) {
+        window.currentUser = JSON.parse(savedUser);
+        flag_type = window.currentUser.type;
+       
+        if (flag_type !== "직영"){
+            //const userId = sessionStorage.getItem("id");
+            //const userType = sessionStorage.getItem("type");
+    
+            // 로그인 정보 없으면 로그인 페이지로 리디렉션
+            // if (!userId || !userType) {
+            //     alert("로그인이 필요합니다.");
+            //     location.href = "index.html";
+            //     return;
+            // }
+    
+            // 협력사나 방문자가 index.html에 접근한 경우 강제 이동
+            if (flag_type !== "직영" && location.pathname.includes("index.html")) {
+                logout();
+                window.location.reload();
+                //location.href = "visitor_request.html";
+            }
+        }
+    }
+
 
     fetchHolidayList(`/holidays?year=${year}`, (holidays) => {
         //window.holidayList = holidays;
@@ -423,8 +453,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("weekPicker").addEventListener("change", loadWeekData);
 });
 
+function goToVisitor() {
+    location.href = "visitor_request.html";
+}
+
 // ✅ 전역 함수 등록
 window.login = login;
 window.logout = logout;
 window.saveMeals = saveMeals;
 window.loadWeekData = loadWeekData;
+window.goToVisitor = goToVisitor;

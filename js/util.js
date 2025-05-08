@@ -22,6 +22,7 @@ function postData(path, data, onSuccess, onError) {
     .then(onSuccess)
     .catch(err => {
         console.error("❌ 요청 실패:", err);
+        alert(err + '❌ 요청 실패:');
         if (onError) {
             onError(err);
         } else {
@@ -94,14 +95,24 @@ function getData(path, onSuccess, onError) {
     
     fetch(url)
         .then(async res => {
+            const text = await res.text();  // 💬 원문 텍스트
+
             if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.error || "서버 응답 오류");
+                console.error("❌ 서버 오류 응답:", text);
+                if (onError) onError(new Error(text));
+                else showToast("❌ 서버 오류: " + text);
+                return;
             }
 
-            const data = await res.json().catch(() => {
-                throw new Error("JSON 파싱 실패");
-            });
+            // 🔄 JSON 파싱 시도
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (err) {
+                console.error("⚠️ JSON 파싱 실패:", text);
+                if (onError) onError(new Error("JSON 파싱 실패"));
+                return;
+            }
 
             // ✅ 안전하게 성공 콜백 실행
             try {
@@ -201,7 +212,7 @@ function fetchHolidayList(path, onSuccess, onError) {
 }
 
 function getCurrentWeekRange() {
-    const today = new Date();
+    const today = getKSTDate();
     const day = today.getDay(); // 일요일: 0, 월요일: 1 ...
     const diffToMonday = day === 0 ? -6 : 1 - day;
 
@@ -215,3 +226,46 @@ function getCurrentWeekRange() {
     return { start: format(monday), end: format(friday) };
 }
 
+// 요일을 한글로 반환하는 유틸 함수
+function getWeekdayName(dateStr) {
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const date = new Date(dateStr);
+    return days[date.getDay()];
+}
+
+// ✅ 특정 날짜 기준의 월~금 주간 범위 계산 함수
+function getWeekStartAndEnd(dateStr) {
+    const date = new Date(dateStr);
+    const day = date.getDay(); // 0=일 ~ 6=토
+  
+    const monday = new Date(date);
+    const diffToMonday = day === 0 ? -6 : 1 - day; // 일요일이면 -6, 월요일이면 0
+    monday.setDate(date.getDate() + diffToMonday);
+  
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+  
+    const format = (d) => d.toISOString().split("T")[0];
+    return { start: format(monday), end: format(friday) };
+}
+
+function getLoginInfo() {
+    const id = localStorage.getItem("userId") || sessionStorage.getItem("id");      // ✅ 보완
+    const name = localStorage.getItem("userName") || sessionStorage.getItem("name");
+    const type = localStorage.getItem("userType") || sessionStorage.getItem("type");
+    return { id, name, type };
+}
+
+// ✅ 한국시간 기준 YYYY-MM-DD 반환 함수
+function getKSTDateString(date) {
+    const tzOffset = date.getTimezoneOffset() * 60000; // 분 → 밀리초
+    const kst = new Date(date.getTime() - tzOffset + (9 * 60 * 60 * 1000)); // UTC → KST(+9h)
+    return kst.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function getKSTDate() {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000; // 현재 시간 → UTC 기준
+    const KST_OFFSET = 9 * 60 * 60000; // 9시간 → 밀리초
+    return new Date(utc + KST_OFFSET);
+}

@@ -12,6 +12,7 @@ function loadEmployees() {
       row.innerHTML = `
         <td>${emp.id}</td>
         <td>${emp.name}</td>
+        <td>${emp.region}</td>
         <td>${emp.dept}</td>
         <td>${emp.type}</td>
         <td>${emp.rank || ""}</td> 
@@ -34,13 +35,14 @@ function addEmployee() {
   const dept = document.getElementById("empDept").value.trim();
   const type = document.getElementById("empType").value.trim();
   const rank = document.getElementById("empRank").value.trim();
+  const region = document.getElementById("empRegion").value.trim();
 
-  if (!id || !name || !dept || !type) {
+  if (!id || !name || !dept || !type || !region) {
     alert("⚠️ 모든 입력값을 채워주세요.");
     return;
   }
 
-  postData(baseUrl, { id, name, dept, rank, type }, () => {
+  postData(baseUrl, { id, name, dept, rank, type, region }, () => {
     alert("✅ 직원 추가 완료");
     loadEmployees();
     clearForm();
@@ -56,14 +58,15 @@ function updateEmployee() {
   const dept = document.getElementById("empDept").value.trim();
   const type = document.getElementById("empType").value.trim();
   const rank = document.getElementById("empRank").value.trim();
+  const region = document.getElementById("empRegion").value.trim();
   
 
-  if (!id || !name || !dept || !type) {
+  if (!id || !name || !dept || !type || !region) {
     alert("⚠️ 모든 입력값을 채워주세요.");
     return;
   }
 
-  putData(`${baseUrl}/${id}`, { name, dept, rank, type }, () => {
+  putData(`${baseUrl}/${id}`, { name, dept, rank, type, region }, () => {
     alert("✅ 수정 완료");
     loadEmployees();
     clearForm();
@@ -91,9 +94,12 @@ function selectEmployeeToEdit(btn) {
 
   document.getElementById("empId").value = cells[0].innerText;
   document.getElementById("empName").value = cells[1].innerText;
-  document.getElementById("empDept").value = cells[2].innerText;
-  document.getElementById("empType").value = cells[3].innerText;
-  document.getElementById("empRank").value = cells[4].innerText;
+  document.getElementById("empRegion").value = cells[2].innerText;
+  document.getElementById("empDept").value = cells[3].innerText;
+  document.getElementById("empType").value = cells[4].innerText;
+  document.getElementById("empRank").value = cells[5].innerText;
+  
+  
 
   // 사번은 수정 비활성화
   document.getElementById("empId").disabled = true;
@@ -106,6 +112,7 @@ function clearForm() {
   document.getElementById("empDept").value = "";
   document.getElementById("empType").value = "";
   document.getElementById("empRank").value = "";
+  document.getElementById("empRegion").value = "";
   document.getElementById("empId").disabled = false;
 }
 
@@ -113,18 +120,22 @@ function clearForm() {
 function filterEmployees() {
     const deptFilter = document.getElementById("filterDept").value.trim().toLowerCase();
     const nameFilter = document.getElementById("filterName").value.trim().toLowerCase();
+    const regionFilter = document.getElementById("filterRegion").value.trim().toLowerCase();
   
     const rows = document.querySelectorAll("#emp-table tbody tr");
   
     rows.forEach(row => {
-      const deptText = row.children[2].innerText.toLowerCase();
       const nameText = row.children[1].innerText.toLowerCase();
+      const regionText = row.children[2].innerText.toLowerCase();
+      const deptText = row.children[3].innerText.toLowerCase();
+      
   
       const deptMatch = deptText.includes(deptFilter);
       const nameMatch = nameText.includes(nameFilter);
+      const regionMatch = regionText.includes(regionFilter);
   
       // 둘 다 포함될 경우만 보이기
-      row.style.display = (deptMatch && nameMatch) ? "" : "none";
+      row.style.display = (deptMatch && nameMatch && regionMatch) ? "" : "none";
     });
 }
   
@@ -132,6 +143,7 @@ function filterEmployees() {
   function resetFilter() {
     document.getElementById("filterDept").value = "";
     document.getElementById("filterName").value = "";
+    document.getElementById("filterRegion").value = "";
     filterEmployees(); // 전체 다시 보여줌
 }
 

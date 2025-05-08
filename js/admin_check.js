@@ -16,11 +16,12 @@ function getDateRange(start, end) {
 
 // ✅ 현재 주 월~금 범위 반환
 function getCurrentWeekRange() {
-  const today = new Date();
+  const today = getKSTDate();
   const day = today.getDay();
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(today);
   monday.setDate(today.getDate() + diff);
+  
   const friday = new Date(monday);
   friday.setDate(monday.getDate() + 4);
   return {
@@ -83,6 +84,13 @@ function generateTableHeader(dates) {
 function generateTableBody(dates, data) {
   const tbody = document.getElementById("table-body");
   tbody.innerHTML = "";
+
+  if (data.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="${3 + (dates.length * 3)}" style="text-align:center; color: gray;">신청한 사람이 없습니다.</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
 
   data.forEach(emp => {
     const row = document.createElement("tr");
@@ -155,7 +163,15 @@ function loadCheckData() {
       };
     });
 
-    const structured = Object.values(grouped);
+    const structured = Object.values(grouped).sort((a, b) => {
+      if (a.dept < b.dept) return -1;
+      if (a.dept > b.dept) return 1;
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
+      return 0;
+    });
+
+
     generateTableBody(dates, structured);
     updateSummary(structured, dates);
   }, (err) => {
@@ -168,7 +184,7 @@ function loadCheckData() {
 function downloadExcel() {
   const table = document.getElementById("check-table");
   const tableHtml = table.outerHTML.replace(/ /g, '%20');
-  const filename = `식수신청내역_${new Date().toISOString().split("T")[0]}.xls`;
+  const filename = `식수신청내역_${new Date().toString().split("T")[0]}.xls`;
 
   const link = document.createElement("a");
   link.href = 'data:application/vnd.ms-excel,' + tableHtml;
@@ -210,8 +226,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("startDate").value = range.start;
   document.getElementById("endDate").value = range.end;
 
+  // alert(range.start + range.end + '페이지 오픈')
+
   const year = new Date().getFullYear();
-  fetchHolidayList(`holidays?year=${year}`, (holidays) => {
+
+  // holidayList = []; // 초기화
+  // loadCheckData();
+
+  fetchHolidayList(`/holidays?year=${year}`, (holidays) => {
     holidayList = holidays;
     loadCheckData();  // 공휴일 받아온 후 조회
   });

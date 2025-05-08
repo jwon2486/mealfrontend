@@ -115,7 +115,7 @@ function getWeekKey(dateStr) {
 
   // ✅ 기본 날짜를 "이번 달 1일 ~ 말일"로 설정
 function setDefaultDateRange() {
-    const now = new Date();
+    const now = getKSTDate();
     const first = new Date(now.getFullYear(), now.getMonth(), 1);
     const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
@@ -277,7 +277,7 @@ function groupDataByWeekAndMeal(rawData) {
     const dowAvg = { labels: ["월", "화", "수", "목", "금"], breakfast: [0,0,0,0,0], lunch: [0,0,0,0,0], dinner: [0,0,0,0,0], count: [0,0,0,0,0] };
     
     
-    const today = new Date();
+    const today = getKSTDate();
     const monday = getMonday(today);
     const nextMonday = new Date(monday);
     nextMonday.setDate(monday.getDate() + 7);
@@ -559,85 +559,204 @@ function getWeeklyDateRange(dateStr) {
   return result;
 }
 
+// function renderWeeklyDeptStats(data, holidays, range) {
+//   const tbody = document.getElementById("weekly-dept-body");
+//   const thead = document.getElementById("weekly-dept-thead");
+//   tbody.innerHTML = "";
+//   thead.innerHTML = "";
+
+//   createWeeklyTableHeaders(range, holidays);
+
+//   const direct = [], partner = [], visitor = [];
+
+//   // ✅ 1. 타입별로 구분
+//   data.forEach(item => {
+//     if (item.type === "직영") direct.push(item);
+//     else if (item.type === "협력사") partner.push(item);
+//     else visitor.push(item);
+//   });
+
+//   // ✅ 2. 식수 수량 추출
+//   function extractQuantity(name) {
+//     const match = name.match(/\((\d+)\)$/);
+//     return match ? parseInt(match[1]) : 1;
+//   }
+
+//   // ✅ 3. 행 렌더링
+//   function processRows(rows) {
+//     const sums = range.map(() => ({ b: 0, l: 0, d: 0 }));
+
+//     rows.sort((a, b) => a.dept.localeCompare(b.dept)).forEach(row => {
+//       const tr = document.createElement("tr");
+
+//       // ✅ 방문자/협력사 → 총합 / 직영 → 인원수
+//       const totalCount = row.type === "직영"
+//         ? row.total
+//         : range.reduce((sum, date) => {
+//             const meals = row.days[date] || { b: [], l: [], d: [] };
+//             return sum +
+//               meals.b.reduce((s, n) => s + extractQuantity(n), 0) +
+//               meals.l.reduce((s, n) => s + extractQuantity(n), 0) +
+//               meals.d.reduce((s, n) => s + extractQuantity(n), 0);
+//           }, 0);
+
+//         // ✅ 조식: 인원 + 명단
+//       tr.innerHTML = `
+//         <td class="weekly-dept-cell">${row.dept}</td>
+//         <td class="weekly-count-cell">${totalCount}</td>
+//       `;
+//       range.forEach((date, i) => {
+//         const v = row.days[date] || { b: [], l: [], d: [] };
+
+//         const bQty = v.b.reduce((acc, name) => acc + extractQuantity(name), 0);
+//         const lQty = v.l.reduce((acc, name) => acc + extractQuantity(name), 0);
+//         const dQty = v.d.reduce((acc, name) => acc + extractQuantity(name), 0);
+
+//         sums[i].b += bQty;
+//         sums[i].l += lQty;
+//         sums[i].d += dQty;
+
+//         // ✅ 조식
+//         tr.innerHTML += `
+//           <td class="weekly-count-cell">${bQty}</td>
+//           <td class="weekly-name-cell">${v.b.join(", ") || "-"}</td>
+//         `;
+//         // ✅ 중식
+//         tr.innerHTML += `<td class="weekly-count-cell">${lQty}</td>`;
+//         // ✅ 석식
+//         tr.innerHTML += `
+//           <td class="weekly-count-cell">${dQty}</td>
+//           <td class="weekly-name-cell">${v.d.join(", ") || "-"}</td>
+//         `;
+//       });
+
+//       tbody.appendChild(tr);
+//     });
+
+//     return sums;
+//   }
+
+//   // ✅ 출력 순서 및 요약 행 추가
+//   const directSums = processRows(direct);
+//   appendSummaryRow("직영 소계", directSums, tbody);
+
+//   const partnerSums = processRows(partner);
+//   appendSummaryRow("협력사 소계", partnerSums, tbody);
+
+//   const visitorSums = processRows(visitor);
+//   appendSummaryRow("방문자 소계", visitorSums, tbody);
+
+//   const totalSums = range.map((_, i) => ({
+//     b: directSums[i].b + partnerSums[i].b + visitorSums[i].b,
+//     l: directSums[i].l + partnerSums[i].l + visitorSums[i].l,
+//     d: directSums[i].d + partnerSums[i].d + visitorSums[i].d
+//   }));
+
+//   appendSummaryRow("총계", totalSums, tbody, true);
+// }
+
+// ✅ 유틸: 이름(3)에서 숫자 3 추출
+function extractQuantity(name) {
+  const match = name.match(/\((\d+)\)$/);
+  return match ? parseInt(match[1]) : 1;
+}
+
+// ✅ 핵심 렌더링 함수
 function renderWeeklyDeptStats(data, holidays, range) {
   const tbody = document.getElementById("weekly-dept-body");
   const thead = document.getElementById("weekly-dept-thead");
   tbody.innerHTML = "";
   thead.innerHTML = "";
-  
-  console.log("🔍 공휴일 목록:", holidays);
-  
-  createWeeklyTableHeaders(range, holidays);  // ✅ 머리글 생성
 
-  // 🔹 부서 데이터를 분리 (직영/협력사)
-  const direct = [];
-  const partner = [];
-  const visitor = [];
+  // ✅ 공휴일 포함한 3행 헤더 생성
+  createWeeklyTableHeaders(range, holidays);
 
-  data.forEach(item => {
-    if (item.type === "직영"){
-      direct.push(item);
-    } else if(item.type === "협력사"){
-      partner.push(item);  
+  // ✅ 부서 유형 분류
+  const direct = [], directTrip = [], partner = [], visitor = [];
+
+  data.forEach(row => {
+    if (row.type === "직영" && row.dept.includes("(출장)")) {
+      directTrip.push(row);
+    } else if (row.type === "직영") {
+      direct.push(row);
+    } else if (row.type === "협력사") {
+      partner.push(row);
+    } else {
+      visitor.push(row);
     }
-    else visitor.push(item);
   });
 
-  const sortByDept = (a, b) => a.dept.localeCompare(b.dept);
 
-  const allRows = [];
-
+  // ✅ 실제 테이블 렌더링 함수
   function processRows(rows) {
-    rows.sort(sortByDept).forEach(row => {
+    const sums = range.map(() => ({ b: 0, l: 0, d: 0 }));
+
+    rows.sort((a, b) => a.dept.localeCompare(b.dept)).forEach(row => {
       const tr = document.createElement("tr");
+
       tr.innerHTML = `
-        <td class="weekly-dept-cell">${row.dept}</td>
-        <td>${row.total || 0}</td>
-        ${range.map(d => {
-          const r = row.days[d] || { b: [], l: [], d: [] };
-          const isHoliday = holidays.includes(d);
-          const tdClass = isHoliday ? ' class="holiday-cell"' : '';
-          return `
-            <td${tdClass}>${r.b.length}</td>
-            <td class="weekly-name-cell"${tdClass}>${r.b.join(", ") || "-"}</td>
-            <td${tdClass}>${r.l.length}</td>
-            <td${tdClass}>${r.d.length}</td>
-            <td class="weekly-name-cell"${tdClass}>${r.d.join(", ") || "-"}</td>
-          `;
-        }).join("")}
+        <td class="weekly-dept-cell">${row.display_dept || row.dept}</td>
+        <td class="weekly-count-cell">${row.total || 0}</td>
       `;
+
+      range.forEach((date, i) => {
+        const isHoliday = holidays.includes(date);
+        const style = isHoliday ? ' style="background-color:#ffe6e6"' : '';
+
+        const v = row.days[date] || { b: [], l: [], d: [] };
+
+        const bQty = v.b.reduce((acc, n) => acc + extractQuantity(n), 0);
+        const lQty = v.l.reduce((acc, n) => acc + extractQuantity(n), 0);
+        const dQty = v.d.reduce((acc, n) => acc + extractQuantity(n), 0);
+
+        sums[i].b += bQty;
+        sums[i].l += lQty;
+        sums[i].d += dQty;
+
+        const bNames = v.b.length ? v.b.join(", ") : "-";
+        const dNames = v.d.length ? v.d.join(", ") : "-";
+
+        tr.innerHTML += `
+          <td class="weekly-count-cell"${style}>${bQty}</td>
+          <td class="weekly-name-cell"${style}>${bNames}</td>
+          <td class="weekly-count-cell"${style}>${lQty}</td>
+          <td class="weekly-count-cell"${style}>${dQty}</td>
+          <td class="weekly-name-cell"${style}>${dNames}</td>
+        `;
+      });
+
       tbody.appendChild(tr);
-      allRows.push(row);
     });
 
-    return range.map(d => {
-      const sum = { b: 0, l: 0, d: 0 };
-      rows.forEach(r => {
-        const v = r.days[d] || { b: [], l: [], d: [] };
-        sum.b += v.b.length;
-        sum.l += v.l.length;
-        sum.d += v.d.length;
-      });
-      return sum;
-    });
+    return sums;
   }
 
-  const directSums = processRows(direct);
-  appendSummaryRow("직영 소계", directSums, tbody);
+  // ✅ 직영 출력
+  const sum1 = processRows(direct);
+  appendSummaryRow("직영 소계", sum1, tbody);
 
-  const partnerSums = processRows(partner);
-  appendSummaryRow("협력사 소계", partnerSums, tbody);
+  const sum1_trip = processRows(directTrip);
+  if (sum1_trip.length > 0) {
+    appendSummaryRow("직영(출장자)", sum1_trip, tbody);
+  }
 
-  const visitorSums = processRows(visitor);
-  appendSummaryRow("방문자 소계", visitorSums, tbody);
+  // ✅ 협력사 출력
+  const sum2 = processRows(partner);
+  appendSummaryRow("협력사 소계", sum2, tbody);
 
-  const totalSums = directSums.map((v, i) => ({
-    b: v.b + partnerSums[i].b + visitorSums[i].b,
-    l: v.l + partnerSums[i].l + visitorSums[i].l,
-    d: v.d + partnerSums[i].d + visitorSums[i].d
+  // ✅ 방문자 출력
+  const sum3 = processRows(visitor);
+  appendSummaryRow("방문자 소계", sum3, tbody);
+
+  // ✅ 총계 출력
+  const totalSums = range.map((_, i) => ({
+    b: sum1[i].b + sum1_trip[i].b + sum2[i].b + sum3[i].b,
+    l: sum1[i].l + sum1_trip[i].l + sum2[i].l + sum3[i].l,
+    d: sum1[i].d + sum1_trip[i].d + sum2[i].d + sum3[i].d
   }));
   appendSummaryRow("총계", totalSums, tbody, true);
 }
+
 
 function createWeeklyTableHeaders(range, holidays) {
   const thead = document.getElementById("weekly-dept-thead");
@@ -647,7 +766,7 @@ function createWeeklyTableHeaders(range, holidays) {
   const tr2 = document.createElement("tr");
   const tr3 = document.createElement("tr");
 
-  tr1.innerHTML = `<th rowspan="3">부서</th><th rowspan="3">인원수</th>`;
+  tr1.innerHTML = `<th rowspan="3">부서</th><th rowspan="3">현 인원수</th>`;
   tr2.innerHTML = "";
   tr3.innerHTML = "";
 
@@ -676,25 +795,35 @@ function createWeeklyTableHeaders(range, holidays) {
 }
 
 function appendSummaryRow(label, sums, tbody, isTotal = false) {
+  if (!Array.isArray(sums)) {
+    console.error("📛 appendSummaryRow: sums가 배열이 아님!", sums);
+    return;
+  }
+
   const tr = document.createElement("tr");
   tr.className = isTotal ? "total-row" : "subtotal-row";
 
-  let total = 0;
-  tr.innerHTML = `<td>${label}</td><td></td>`;
-  sums.forEach(day => {
-    total += day.b + day.l + day.d;
+  // ✅ 앞 두 칸: 소계/총계 라벨, 인원수는 생략
+  tr.innerHTML = `
+    <td class="weekly-type-cell" colspan="2">${label}</td>
+  `;
+
+  // ✅ 요일별 조/중/석 인원만 출력 (명단 제외)
+  sums.forEach((day) => {
     tr.innerHTML += `
-      <td>${day.b}</td><td>-</td>
-      <td>${day.l}</td>
-      <td>${day.d}</td><td>-</td>
+      <td class="weekly-count-cell">${day.b || 0}</td>
+      <td class="weekly-count-cell">-</td>  <!-- 명단 없음 -->
+      <td class="weekly-count-cell">${day.l || 0}</td>
+      <td class="weekly-count-cell">${day.d || 0}</td>
+      <td class="weekly-count-cell">-</td>  <!-- 명단 없음 -->
     `;
   });
-  tr.children[1].textContent = total;
+
   tbody.appendChild(tr);
 }
 
 function setDefaultWeeklyDate() {
-  const today = new Date();
+  const today = getKSTDate();
   const monday = getMonday(today);
   const yyyy = monday.getFullYear();
   const mm = String(monday.getMonth() + 1).padStart(2, "0");

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>식수 신청 시스템</title>
-    <link rel="stylesheet" href="/meal_management/css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <h1>식수 신청 시스템</h1>
@@ -32,7 +32,8 @@
 
         <!-- 이름 표시 -->
         <div id="welcome" style="margin-bottom: 20px; font-weight: bold; font-size: 18px;">
-            <button onclick="logout()">로그아웃</button></div>
+            <button onclick="logout()">로그아웃</button>
+        </div>
         <div id="weekRangeText" style="margin-bottom: 20px; font-weight: bold; font-size: 18px;"></div>
         <div id="mealSummary" style="margin-top: 10px; font-weight: bold;"></div>
         <!-- 신청 화면 -->
@@ -54,14 +55,15 @@
             <div class="button-row">
                 <button onclick="saveMeals()">저장</button>
                 <button onclick="logout()">로그아웃</button>
+                <button onclick="goToVisitor()">방문자 신청</button>
             </div>
         </div>
     </div>
     <div id="toast" class="toast"></div>
     <!-- ✅ 공통 유틸 먼저 불러오기 -->
-    <script src="/meal_management/js/config.js"></script>
-    <script src="/meal_management/js/util.js"></script>
-    <script src="/meal_management/js/script.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/script.js"></script>
 </body>
 
 </html>

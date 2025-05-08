@@ -10,7 +10,7 @@ function formatDateWithDay(dateStr) {
 }
 
 // ✅ 서버에서 식수 신청 내역 조회 (관리자용)
-function loadEditData(selectedWeek = null) {
+function loadEditData(selectedWeek) {
     editMode = "apply";  // ✅ 신청자 모드 설정
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
@@ -21,6 +21,7 @@ function loadEditData(selectedWeek = null) {
     }
 
     const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;  // ✅ mode=apply 추가!
+
 
     getData(url, (flatData) => {
         console.log("✅ 서버에서 받은 data:", flatData);
@@ -72,7 +73,13 @@ function loadEditData(selectedWeek = null) {
 
     
             const dates = getDateArray(start, end);
-            const groupedValues = Object.values(grouped);
+            const groupedValues = Object.values(grouped).sort((a, b) => {
+                if (a.dept < b.dept) return -1;
+                if (a.dept > b.dept) return 1;
+                if (a.name < b.name) return -1;
+                if (a.name > b.name) return 1;
+                return 0;
+            });
 
             generateTableHeader(dates);
             generateTableBody(dates, groupedValues);
@@ -80,11 +87,11 @@ function loadEditData(selectedWeek = null) {
 
             filterEditData();  // ✅ 필터 적용 추가
 
-            if (groupedValues.length > 0) {
-                updateSummary(groupedValues, dates);
-            } else {
-                console.warn("📭 불러온 데이터가 없습니다.");
-            }
+            // if (groupedValues.length > 0) {
+            //     updateSummary(groupedValues, dates);
+            // } else {
+            //     console.warn("📭 불러온 데이터가 없습니다.");
+            // }
 
         } catch (e) {
             console.error("📛 데이터 처리 중 오류:", e);
@@ -289,7 +296,9 @@ function saveEditChanges() {
             alert("✅ 저장되었습니다.");
             //setTimeout(() => loadEditData(), 300); // 약간 지연 후 재조회
             const selectedDate = document.getElementById("editWeekPicker").value;
-            loadEditData(selectedDate); // 저장 후 다시 로딩
+            setTimeout(() => {
+                loadEditData(selectedDate);
+            }, 700);  // 0.7초 대기 (300~1000ms 사이 추천)
         },
         (err) => alert("❌ 저장 실패: " + err.message)
     );
@@ -323,13 +332,13 @@ function getDateArray(start, end) {
 
 // ✅ 마감 여부 판단 함수 (조식/중식/석식)
 function isDeadlinePassed(dateStr, mealType) {
-    const now = new Date();
+    const now = getKSTDate();
     const mealDate = new Date(dateStr);
 
     let deadline = new Date(mealDate);
     if (mealType === "조식") {
         deadline.setDate(mealDate.getDate() - 1);
-        deadline.setHours(17, 0, 0, 0);
+        deadline.setHours(20, 0, 0, 0);
     } else if (mealType === "중식") {
         deadline.setHours(12, 0, 0, 0);
     } else if (mealType === "석식") {
@@ -341,7 +350,7 @@ function isDeadlinePassed(dateStr, mealType) {
 
 // ✅ 이번 주 날짜 범위
 function getCurrentWeekRange() {
-    return getWeekRange(new Date().toISOString().split("T")[0]);
+    return getWeekRange(getKSTDate().toISOString().split("T")[0]);
 }
 
 function updateSummary(data, dates) {
@@ -417,7 +426,15 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
             };
         });
 
-        const groupedValues = Object.values(grouped);
+        const groupedValues = Object.values(grouped).sort((a, b) => {
+            if (a.dept < b.dept) return -1;
+            if (a.dept > b.dept) return 1;
+            if (a.name < b.name) return -1;
+            if (a.name > b.name) return 1;
+            return 0;
+        });
+        
+        
         generateTableHeader(dates);
         generateTableBody(dates, groupedValues);
         updateSummary(groupedValues, dates);
