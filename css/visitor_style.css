@@ -127,6 +127,7 @@ body {
   padding: 3px;
   font-size: 14px;
   box-sizing: border-box;
+  white-space: nowrap;
 }
   
   /* ✅ 모바일 반응형 */
@@ -162,5 +163,6 @@ body {
       width: 80px;
       padding: 0px;
       font-size: 8px;
+      white-space: nowrap;
     }
   }
