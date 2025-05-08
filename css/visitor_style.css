@@ -118,6 +118,16 @@ body {
   min-width: 30px;
   text-align: left;
 }
+
+/* 📌 사유 입력 필드를 넓게 설정 */
+.date-input {
+  width: 120px;
+  min-width: 50px;
+  max-width: 140px;
+  padding: 3px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
   
   /* ✅ 모바일 반응형 */
   @media (max-width: 768px) {
@@ -146,5 +156,9 @@ body {
       font-size: 13px;
       padding: 3px;
       width: 100%;
+    }
+    .date-input {
+      width: 50px;
+      font-size: 13px;
     }
   }
