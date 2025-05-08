@@ -121,8 +121,8 @@ body {
 
 /* 📌 사유 입력 필드를 넓게 설정 */
 .date-input {
-  width: 120px;
-  min-width: 50px;
+  width: 50px;
+  min-width: 30px;
   max-width: 140px;
   padding: 3px;
   font-size: 14px;
