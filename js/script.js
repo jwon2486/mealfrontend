@@ -289,20 +289,30 @@ function saveMeals() {
     const dept =  window.currentUser.dept;
     const meals = [];
 
-    // 선택된 버튼만 모아서 구성
-    document.querySelectorAll(".meal-btn.selected").forEach(btn => {
-        const date = btn.dataset.date;
-        const type = btn.dataset.type;
+    const dates = getCurrentWeekDates();
 
-        let meal = meals.find(m => m.date === date);
-        if (!meal) {
-            meal = { user_id: userId, name: userName, dept, date, breakfast: 0, lunch: 0, dinner: 0 };
-            meals.push(meal);
-        }
+    dates.forEach(date => {
+        const meal = {
+            user_id: userId,
+            name: userName,
+            dept,
+            date,
+            breakfast: 0,
+            lunch: 0,
+            dinner: 0
+        };
 
-        if (type === "조식") meal.breakfast = 1;
-        else if (type === "중식") meal.lunch = 1;
-        else if (type === "석식") meal.dinner = 1;
+        // 버튼 상태 조회
+        document.querySelectorAll(`.meal-btn[data-date="${date}"]`).forEach(btn => {
+            const type = btn.dataset.type;
+            if (btn.classList.contains("selected")) {
+                if (type === "조식") meal.breakfast = 1;
+                if (type === "중식") meal.lunch = 1;
+                if (type === "석식") meal.dinner = 1;
+            }
+        });
+
+        meals.push(meal); // 무조건 포함
     });
 
     console.log("🧪 전송할 meals:", meals);  // 추가
@@ -454,7 +464,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function goToVisitor() {
-    location.href = "/meal_management/visitor_request.html";
+    location.href = "visitor_request.html";
 }
 
 // ✅ 전역 함수 등록
