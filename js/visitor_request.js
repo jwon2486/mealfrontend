@@ -456,15 +456,24 @@ function getExpiredMeals(date, mealData) {
   const bLimit = new Date(mealDate);
   bLimit.setDate(mealDate.getDate() - 1);
   bLimit.setHours(15, 0, 0, 0);
-  if (mealData.breakfast > 0 && now > bLimit) expired.push("breakfast");
+  if (mealData.breakfast > 0 && now > bLimit){
+    expired.push("breakfast");
+    // alert("breakfast");
+  }
 
   const lLimit = new Date(mealDate);
   lLimit.setHours(10, 0, 0, 0);
-  if (mealData.lunch > 0 && now > lLimit) expired.push("lunch");
+  if (mealData.lunch > 0 && now > lLimit){
+    expired.push("lunch");
+    // alert("lunch");
+  } 
 
   const dLimit = new Date(mealDate);
   dLimit.setHours(15, 0, 0, 0);
-  if (mealData.dinner > 0 && now > dLimit) expired.push("dinner");
+  if (mealData.dinner > 0 && now > dLimit){
+    expired.push("dinner");
+    // alert("dinner");
+  }
 
   return expired;  // ex: ["lunch", "dinner"]
 }
