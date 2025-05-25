@@ -206,13 +206,14 @@ th {
 }
 
 .form-grid {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  flex-wrap: wrap;
   margin-bottom: 10px;
-  height: 32px;
   padding: 4px 8px;
   font-size: 14px;
+  /* height 제거 */
 }
 
 .form-buttons {

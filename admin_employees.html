@@ -17,27 +17,27 @@
     <button onclick="loadEmployees()">전체 조회</button>
     <button onclick="window.location.href='admin_dashboard.html'">← 관리자 대시보드</button>
     </br></br>
-    <table id="search_table" border="0">
-      <tr>
-        <td>
-          <h3>🔍 직원 검색 </h3>
-          <input type="text" id="filterRegion" placeholder="지역 검색" />
-          <input type="text" id="filterDept" placeholder="부서 검색" />
-          <input type="text" id="filterName" placeholder="이름 검색" />
-          <button onclick="filterEmployees()">검색</button>
-          <button onclick="resetFilter()">전체보기</button>
-        </td>
-        <td>
-          <h3>📤 직원 목록 업로드</h3>
-          <input type="file" id="uploadFile" accept=".csv,.xlsx" />
-          <button onclick="uploadEmployeeFile()">파일 업로드</button>
-        </td>
-        <td>
-          <h3>📥 템플릿 다운로드</h3>
-          <button onclick="downloadEmployeeTemplate()">엑셀 템플릿 다운로드</button>
-        </td>
-      </tr>
-    </table>
+    <div class="search-container">
+  <div class="search-block">
+    <h3>🔍 직원 검색</h3>
+    <input type="text" id="filterRegion" placeholder="지역 검색" />
+    <input type="text" id="filterDept" placeholder="부서 검색" />
+    <input type="text" id="filterName" placeholder="이름 검색" />
+    <button onclick="filterEmployees()">검색</button>
+    <button onclick="resetFilter()">전체보기</button>
+  </div>
+
+  <div class="search-block">
+    <h3>📤 직원 목록 업로드</h3>
+    <input type="file" id="uploadFile" accept=".csv,.xlsx" />
+    <button onclick="uploadEmployeeFile()">파일 업로드</button>
+  </div>
+
+  <div class="search-block">
+    <h3>📥 템플릿 다운로드</h3>
+    <button onclick="downloadEmployeeTemplate()">엑셀 템플릿 다운로드</button>
+  </div>
+</div>
   </div>
   </br>  
   <!-- 직원 목록 테이블 -->
