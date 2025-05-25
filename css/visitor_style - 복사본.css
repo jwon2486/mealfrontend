@@ -37,47 +37,12 @@ body {
     font-size: 14px;
   }
   
-  /* ✅ 테이블 안의 input 요소 정렬 및 크기 조정 */
-  td input[type="number"],
-  td input[type="text"],
-  td select {
-  height: 36px;
-  font-size: clamp(11px, 3.2vw, 15px);  /* ✅ 반응형 폰트 크기 */
-  padding: 0 6px;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 100px;
-  text-align: center;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  line-height: normal;
-  appearance: textfield; /* Safari 등에서 기본 화살표 제거 */
-}
-
-
-/* 크롬에서 스핀 버튼 제거 */
-td input[type="number"]::-webkit-inner-spin-button,
-td input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-
-
-/* ✅ 내부 텍스트가 완전 중앙 정렬되도록 input wrapper도 정렬 */
-td {
-  vertical-align: middle;
-  text-align: center;
-  padding: 4px;
-}
-
-/* ✅ 테이블 셀 안 요소의 정렬 */
-th, td {
-  vertical-align: middle;
-  text-align: center;
-}
+  td input {
+    width: 90%;
+    padding: 6px;
+    font-size: 14px;
+    text-align: center;
+  }
 
   td select, td textarea {
     text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
@@ -167,37 +132,40 @@ th, td {
   
   /* ✅ 모바일 반응형 */
   @media (max-width: 768px) {
-  td input[type="number"],
-  td input[type="text"],
-  td select {
-    font-size: clamp(10px, 3.5vw, 13px);
-    padding: 4px;
-    height: 28px;
+    body {
+      padding: 10px;
+    }
+  
+    table, th, td {
+      font-size: 12px;
+      padding: 5px;
+    }
+  
+    td input {
+      font-size: 12px;
+      padding: 5px;
+    }
+  
+    button {
+      font-size: 13px;
+      padding: 6px 10px;
+    }
+  
+    h2, h3 {
+      font-size: 18px;
+    }
+    .reason-input {
+      font-size: 13px;
+      padding: 3px;
+      width: 100%;
+    }
+    .date-input {
+      height: 3.5em;    /* 높이를 늘림 */
+      line-height: 1.2; /* 내부 여백 */
+      width: 90px;
+      padding: 2px;
+      font-size: 10px;
+      text-align: center;
+      white-space: nowrap;
+    }
   }
-
-  table, th, td {
-    font-size: clamp(10px, 3vw, 13px);
-    padding: 5px;
-  }
-
-  button {
-    font-size: clamp(11px, 3vw, 14px);
-    padding: 6px 10px;
-  }
-
-  .reason-input {
-    font-size: clamp(11px, 3vw, 13px);
-    padding: 3px;
-    width: 100%;
-  }
-
-  .date-input {
-    font-size: clamp(10px, 2.5vw, 13px);
-    height: 3.5em;
-    line-height: 1.2;
-    width: 90px;
-    padding: 2px;
-    text-align: center;
-    white-space: nowrap;
-  }
-}
