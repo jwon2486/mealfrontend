@@ -2,6 +2,6 @@
 
 // ✅ 환경별로 URL만 수정하면 전체 코드에 자동 반영됩니다.
 // const API_BASE_URL = "http://localhost:5000"; // 개발 환경
-const API_BASE_URL = "https://meal-eoi7.onrender.com/"; // 배포 환경
+const API_BASE_URL = "https://mealbackend-cmub.onrender.com/"; // 배포 환경
 
 
