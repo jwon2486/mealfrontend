@@ -66,10 +66,21 @@
     <script src="js/util.js"></script>
     <script src="js/script.js"></script>
     <script>
-        function goToAdminDashboard() {
+    function goToAdminDashboard() {
         window.location.href = "admin_dashboard.html";
     }
-    </script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const savedUser = localStorage.getItem("currentUser");
+        if (savedUser) {
+            const currentUser = JSON.parse(savedUser);
+            const adminBtn = document.getElementById("adminButton");
+            if (currentUser.level === 3 && adminBtn) {
+                adminBtn.style.display = "inline-block";
+            }
+        }
+    });
+</script>
 </body>
 
 </html>
