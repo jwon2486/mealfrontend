@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 대시보드</title>
     <link rel="stylesheet" href="css/dashboard_style.css">
+<script>
+    const savedUser = localStorage.getItem("currentUser");
+    if (!savedUser) {
+      location.href = "index.html"; // 로그인 안 됐으면 홈으로
+    } else {
+      const user = JSON.parse(savedUser);
+      if (user.level !== 3) {
+        alert("관리자만 접근 가능합니다.");
+        location.href = "index.html"; // 관리자 외 접근 차단
+      }
+    }
+</script>
 </head>
 <body>
     <h1>관리자 대시보드</h1>
