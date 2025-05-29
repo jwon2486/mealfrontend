@@ -269,3 +269,8 @@ function getKSTDate() {
     const KST_OFFSET = 9 * 60 * 60000; // 9시간 → 밀리초
     return new Date(utc + KST_OFFSET);
 }
+
+// ✅ 페이지 이동 함수
+function goToPage(pageUrl) {
+    window.location.href = pageUrl;
+}
