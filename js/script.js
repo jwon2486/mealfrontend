@@ -51,6 +51,14 @@ function login(event) {
 
         localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
 
+        // ✅ 관리자 레벨일 경우 버튼 표시
+            if (data.level === 3) {
+                const adminBtn = document.getElementById("adminButton");
+                if (adminBtn) {
+                    adminBtn.style.display = "inline-block";
+                }
+            }
+
         // ✅ 사용자 type에 따라 화면 분기
         if (data.type === "협력사" || data.type === "방문자") {
             window.location.href = "visitor_request.html";
