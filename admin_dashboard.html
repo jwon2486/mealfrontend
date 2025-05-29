@@ -21,18 +21,21 @@
         <button onclick="goToPage('admin_holiday.html')">공휴일 관리</button>
     </div>
     <div class="admin-menu">
-        <button onclick="goToPage('index.html')">← 로그인 화면으로</button>
+        <button onclick="logoutAndGoToLogin()">← 로그인 화면으로</button>
     </div>
 
     <script>
-        function goToPage(page) {
-            window.location.href = page;
-        }
+        function logoutAndGoToLogin() {
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("flagType");
+        window.location.href = "index.html";
+    }
     </script>
     
     <div id="toast" class="toast"></div>
     <!-- ✅ 공통 유틸 먼저 불러오기 -->
     <script src="js/config.js"></script>
     <script src="js/util.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
