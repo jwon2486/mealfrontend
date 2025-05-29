@@ -460,6 +460,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (savedUser) {
             window.currentUser = JSON.parse(savedUser);
+            // ✅ 관리자 버튼 다시 보이기
+            const adminBtn = document.getElementById("adminButton");
+            if (window.currentUser.level === 3 && adminBtn) {
+            adminBtn.style.display = "inline-block";
+            }
             document.getElementById("userId").value = window.currentUser.userId;
             document.getElementById("userName").value = window.currentUser.userName;
 
