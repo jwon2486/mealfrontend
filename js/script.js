@@ -26,6 +26,10 @@ function login(event) {
 
     
     getData(url, (data) => {
+        // 항상 숨기고 시작
+        const adminBtn = document.getElementById("adminButton");
+        if (adminBtn) adminBtn.style.display = "none";
+
         if (!data.valid) {
             alert("❌ 등록되지 않은 사용자입니다.");
             return;
