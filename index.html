@@ -57,7 +57,7 @@
                 <button onclick="logout()">로그아웃</button>
                 <button onclick="goToVisitor()">방문자 신청</button>
                 <button id="adminButton" onclick="goToAdminDashboard()" style="display: none;">관리자 페이지</button> <!-- ✅ 추가 -->
-            </div>
+        </div>
         </div>
     </div>
     <div id="toast" class="toast"></div>
@@ -65,6 +65,11 @@
     <script src="js/config.js"></script>
     <script src="js/util.js"></script>
     <script src="js/script.js"></script>
+    <script>
+        function goToAdminDashboard() {
+        window.location.href = "admin_dashboard.html";
+    }
+    </script>
 </body>
 
 </html>

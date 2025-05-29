@@ -480,6 +480,7 @@ function goToVisitor() {
     location.href = "visitor_request.html";
 }
 
+
 // ✅ 전역 함수 등록
 window.login = login;
 window.logout = logout;
