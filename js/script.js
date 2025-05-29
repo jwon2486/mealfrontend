@@ -37,7 +37,8 @@ function login(event) {
             userName: data.name,
             dept: data.dept,
             rank: data.rank,
-            type: data.type  // ✅ type 추가
+            type: data.type,
+            level: data.level,  // ✅ level 추가
         };
 
         // alert(data.type);
