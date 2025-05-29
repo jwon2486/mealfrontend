@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <title>통계 대시보드</title>
   <link rel="stylesheet" href="css/stats.css" />
+  <script>
+  const savedUser = localStorage.getItem("currentUser");
+  if (!savedUser) {
+    location.href = "index.html";  // 로그인 안 되어 있음
+  } else {
+    const user = JSON.parse(savedUser);
+    if (user.level !== 3) {
+      alert("관리자만 접근 가능합니다.");
+      location.href = "index.html"; // 관리자 권한 아님
+    }
+  }
+</script>
 </head>
 <body>
   <h2>🍱 식사 신청 통계 대시보드</h2>

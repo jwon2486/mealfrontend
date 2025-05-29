@@ -5,6 +5,18 @@
   <meta charset="UTF-8" />
   <title>직원 관리</title>
   <link rel="stylesheet" href="css/employees.css" />
+<script>
+  const savedUser = localStorage.getItem("currentUser");
+  if (!savedUser) {
+    location.href = "index.html";  // 로그인 안 되어 있음
+  } else {
+    const user = JSON.parse(savedUser);
+    if (user.level !== 3) {
+      alert("관리자만 접근 가능합니다.");
+      location.href = "index.html"; // 관리자 권한 아님
+    }
+  }
+</script>
 </head>
 <body>
   

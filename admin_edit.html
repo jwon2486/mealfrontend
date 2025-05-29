@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 - 신청 내역 변경</title>
     <link rel="stylesheet" href="css/check_style.css">
+<script>
+  const savedUser = localStorage.getItem("currentUser");
+  if (!savedUser) {
+    location.href = "index.html";  // 로그인 안 되어 있음
+  } else {
+    const user = JSON.parse(savedUser);
+    if (user.level !== 3) {
+      alert("관리자만 접근 가능합니다.");
+      location.href = "index.html"; // 관리자 권한 아님
+    }
+  }
+</script>
 </head>
 <body>
     <h1>신청 내역 변경</h1>
