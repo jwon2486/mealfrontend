@@ -285,6 +285,8 @@ document.addEventListener("DOMContentLoaded", () => {
         location.href = "index.html";
         return;
     }
+    window.currentUser = currentUser; // ← 전역 등록
+    console.log("✅ 현재 로그인한 사용자 정보:", window.currentUser);
 
     const picker = document.getElementById("editWeekPicker");
     const { start } = getCurrentWeekRange();
