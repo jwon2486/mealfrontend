@@ -55,13 +55,18 @@ function login(event) {
 
         localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
 
-        // ✅ 관리자 레벨일 경우 버튼 표시
-            if (data.level === 3) {
-                const adminBtn = document.getElementById("adminButton");
-                if (adminBtn) {
-                    adminBtn.style.display = "inline-block";
-                }
-            }
+        // ✅ 버튼 초기화 및 표시 처리
+const adminBtn = document.getElementById("adminButton");
+const teamEditBtn = document.getElementById("teamEditButton");
+if (adminBtn) adminBtn.style.display = "none";
+if (teamEditBtn) teamEditBtn.style.display = "none";
+
+if (window.currentUser.level === 3 && adminBtn) {
+    adminBtn.style.display = "inline-block";
+}
+if (window.currentUser.level === 2 && teamEditBtn) {
+    teamEditBtn.style.display = "inline-block";
+}
 
         // ✅ 사용자 type에 따라 화면 분기
         if (data.type === "협력사" || data.type === "방문자") {
