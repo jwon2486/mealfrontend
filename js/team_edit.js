@@ -311,3 +311,8 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("editWeekPicker").addEventListener("change", function () {
     loadEditData(this.value);
 });
+
+// ✅ 전역 등록 (HTML 버튼에서 호출 가능하게 하기)
+window.loadEditData = loadEditData;
+window.loadEditData = loadEditData;
+window.onSearch = onSearch;
