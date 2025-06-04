@@ -432,6 +432,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (savedUser) {
         window.currentUser = JSON.parse(savedUser);
         flag_type = window.currentUser.type;
+
+        // ✅ 관리자 버튼 노출 여부 처리
+        const adminBtn = document.getElementById("adminButton");
+        if (window.currentUser?.level === 3 && adminBtn) {
+            adminBtn.style.display = "inline-block";
+        }
        
         if (flag_type !== "직영"){
             //const userId = sessionStorage.getItem("id");
@@ -475,6 +481,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 주 선택 시 자동 갱신
     document.getElementById("weekPicker").addEventListener("change", loadWeekData);
 });
+
 
 function goToVisitor() {
     location.href = "visitor_request.html";

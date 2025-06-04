@@ -57,6 +57,7 @@
                 <button onclick="logout()">로그아웃</button>
                 <button onclick="goToVisitor()">방문자 신청</button>
                 <button id="adminButton" onclick="goToAdminDashboard()" style="display: none;">관리자 페이지</button> <!-- ✅ 추가 -->
+                <button id="teamEditButton" onclick="goToTeamEdit()" style="display: none;">부서원 신청 관리</button>
         </div>
         </div>
     </div>
@@ -65,22 +66,7 @@
     <script src="js/config.js"></script>
     <script src="js/util.js"></script>
     <script src="js/script.js"></script>
-    <script>
-    function goToAdminDashboard() {
-        window.location.href = "admin_dashboard.html";
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const savedUser = localStorage.getItem("currentUser");
-        if (savedUser) {
-            const currentUser = JSON.parse(savedUser);
-            const adminBtn = document.getElementById("adminButton");
-            if (currentUser.level === 3 && adminBtn) {
-                adminBtn.style.display = "inline-block";
-            }
-        }
-    });
-</script>
+    
 </body>
 
 </html>
