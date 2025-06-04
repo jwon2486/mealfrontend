@@ -57,7 +57,8 @@
                 <button onclick="logout()">로그아웃</button>
                 <button onclick="goToVisitor()">방문자 신청</button>
                 <button id="adminButton" onclick="goToAdminDashboard()" style="display: none;">관리자 페이지</button>
-                <button id="teamEditButton" onclick="goToTeamEdit()" style="display: none;">부서원 신청 관리</button>
+                <button id="teamEditButton" onclick="goToTeamEdit()" style="display: none;">팀 관리</button> <!-- ✅ 추가 -->
+
         </div>
         </div>
     </div>
@@ -67,31 +68,30 @@
     <script src="js/util.js"></script>
     <script src="js/script.js"></script>
     <script>
-function goToAdminDashboard() {
-    window.location.href = "admin_dashboard.html";
-}
-
-function goToTeamEdit() {
+    function goToAdminDashboard() {
+        window.location.href = "admin_dashboard.html";
+    }
+    function goToTeamEdit() {
     window.location.href = "team_edit.html";
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    const adminButton = document.getElementById("adminButton");
-    const teamEditButton = document.getElementById("teamEditButton");
+    document.addEventListener("DOMContentLoaded", function () {
+    const savedUser = localStorage.getItem("currentUser");
+    if (savedUser) {
+        const currentUser = JSON.parse(savedUser);
+        const adminBtn = document.getElementById("adminButton");
+        const teamEditBtn = document.getElementById("teamEditButton");
 
-    if (adminButton) adminButton.style.display = "none";
-    if (teamEditButton) teamEditButton.style.display = "none";
+        if (currentUser.level === 3 && adminBtn) {
+            adminBtn.style.display = "inline-block";
+        }
 
-    if (currentUser?.level === 3 && adminButton) {
-        adminButton.style.display = "inline-block";
+        if (currentUser.level === 2 && teamEditBtn) {
+            teamEditBtn.style.display = "inline-block";
+        }
     }
-    if (currentUser?.level === 2 && teamEditButton) {
-        teamEditButton.style.display = "inline-block";
-    }
-});
+    });
 </script>
-
 </body>
 
 </html>
