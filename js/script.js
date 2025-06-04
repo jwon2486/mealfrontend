@@ -496,9 +496,14 @@ function goToAdminDashboard() {
     location.href = "admin_dashboard.html";
 }
 
+function goToTeamEdit() {
+    location.href = "team_edit.html";
+}
+
 // ✅ 전역 함수 등록
 window.login = login;
 window.logout = logout;
 window.saveMeals = saveMeals;
 window.loadWeekData = loadWeekData;
 window.goToVisitor = goToVisitor;
+window.goToTeamEdit = goToTeamEdit;
