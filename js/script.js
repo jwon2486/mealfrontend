@@ -26,9 +26,6 @@ function login(event) {
 
     
     getData(url, (data) => {
-        // 항상 숨기고 시작
-        const adminBtn = document.getElementById("adminButton");
-        if (adminBtn) adminBtn.style.display = "none";
 
         if (!data.valid) {
             alert("❌ 등록되지 않은 사용자입니다.");
@@ -56,9 +53,9 @@ function login(event) {
         localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
 
         // ✅ 버튼 초기화 및 표시 처리
-const adminBtn = document.getElementById("adminButton");
+const adminButton = document.getElementById("adminButton");
 const teamEditBtn = document.getElementById("teamEditButton");
-if (adminBtn) adminBtn.style.display = "none";
+if (adminBtn) adminButton.style.display = "none";
 if (teamEditBtn) teamEditBtn.style.display = "none";
 
 if (window.currentUser.level === 3 && adminBtn) {
@@ -426,10 +423,7 @@ function isDeadlinePassed(dateStr, mealType) {
 
 // ✅ 자동 로그인 및 주차 변경 이벤트
 document.addEventListener("DOMContentLoaded", function () {
-
-
     setDefaultWeek(); // ✅ 이번 주 자동 설정
-    
     const savedUser = localStorage.getItem("currentUser");
     const year = new Date().getFullYear();
 
