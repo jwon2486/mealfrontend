@@ -438,6 +438,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (window.currentUser?.level === 3 && adminBtn) {
             adminBtn.style.display = "inline-block";
         }
+        // ✅ 부서원 신청 관리 버튼 노출 조건
+        const teamEditBtn = document.getElementById("teamEditButton");
+        if (window.currentUser?.level === 2 && teamEditBtn) {
+        teamEditBtn.style.display = "inline-block";
+        }
        
         if (flag_type !== "직영"){
             //const userId = sessionStorage.getItem("id");
