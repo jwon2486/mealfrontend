@@ -54,7 +54,7 @@ function login(event) {
         localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
 
         // ✅ 버튼 초기화 및 표시 처리
-const adminButton = document.getElementById("adminButton");
+const adminBtn = document.getElementById("adminBtn");
 const teamEditBtn = document.getElementById("teamEditButton");
 if (adminBtn) adminButton.style.display = "none";
 if (teamEditBtn) teamEditBtn.style.display = "none";

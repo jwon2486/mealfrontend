@@ -12,14 +12,10 @@ document.addEventListener("DOMContentLoaded", function () {
     "admin_visitor.html"
   ];
 
-  const teamPages = [
-    "team_edit.html"  // ✅ 중간관리자 페이지 추가
-  ];
-
   const currentPage = location.pathname.split("/").pop();
-  const protectedPages = [...adminPages, ...teamPages];
 
-  if (protectedPages.includes(currentPage)) {
+  // admin 페이지에 해당될 경우만 검사
+  if (adminPages.includes(currentPage)) {
     const savedUser = localStorage.getItem("currentUser");
 
     if (!savedUser) {
@@ -31,20 +27,13 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const user = JSON.parse(savedUser);
 
-      if (adminPages.includes(currentPage) && user.level !== 3) {
-        alert("관리자만 접근할 수 있습니다.");
+      if (user.level !== 3) {
+        alert("접근 권한이 없습니다!");
         location.href = "index.html";
-        return;
-      }
-
-      if (teamPages.includes(currentPage) && user.level !== 2) {
-        alert("중간관리자만 접근할 수 있습니다.");
-        location.href = "index.html";
-        return;
       }
     } catch (err) {
       console.error("사용자 정보 파싱 오류:", err);
-      alert("로그인 정보를 다시 확인해주세요.");
+      alert("관리자 계정으로 다시 로그인해주세요.");
       location.href = "index.html";
     }
   }
