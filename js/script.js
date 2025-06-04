@@ -56,7 +56,7 @@ function login(event) {
         // ✅ 버튼 초기화 및 표시 처리
 const adminBtn = document.getElementById("adminBtn");
 const teamEditBtn = document.getElementById("teamEditButton");
-if (adminBtn) adminButton.style.display = "none";
+if (adminBtn) adminBtn.style.display = "none";
 if (teamEditBtn) teamEditBtn.style.display = "none";
 
 if (window.currentUser.level === 3 && adminBtn) {
