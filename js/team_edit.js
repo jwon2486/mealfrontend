@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const year = new Date().getFullYear();
     fetchHolidayList(`/holidays?year=${year}`, (holidays) => {
         holidayList = holidays;
-        loadEditData(start);
+        //loadEditData(start);
     });
 
     ["searchName", "searchEmpId"].forEach(id => {
