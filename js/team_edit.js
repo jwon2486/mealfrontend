@@ -184,27 +184,41 @@ function filterEditData() {
 function saveEditChanges() {
     if (!confirm("변경사항을 저장하시겠습니까?")) return;
 
-    const selectedBtns = document.querySelectorAll(".meal-btn.selected");
-    const meals = [];
+    const allBtns = document.querySelectorAll(".meal-btn");
+    const mealsMap = {};
 
-    selectedBtns.forEach(btn => {
+    allBtns.forEach(btn => {
         const userId = btn.dataset.id;
         const name = btn.dataset.name;
         const dept = btn.dataset.dept;
         const date = btn.dataset.date;
         const type = btn.dataset.type;
 
-        let meal = meals.find(m => m.user_id === userId && m.date === date);
-        if (!meal) {
-            meal = { user_id: userId, name, dept, date, breakfast: 0, lunch: 0, dinner: 0 };
-            meals.push(meal);
+        const key = `${userId}_${date}`;
+        if (!mealsMap[key]) {
+            mealsMap[key] = {
+                user_id: userId,
+                name: name,
+                dept: dept,
+                date: date,
+                breakfast: 0,
+                lunch: 0,
+                dinner: 0
+            };
         }
 
-        const selected = btn.classList.contains("selected");
-        if (type === "조식") meal.breakfast = selected ? 1 : 0;
-        if (type === "중식") meal.lunch = selected ? 1 : 0;
-        if (type === "석식") meal.dinner = selected ? 1 : 0;
+        const isSelected = btn.classList.contains("selected");
+
+        if (type === "조식") {
+            mealsMap[key].breakfast = isSelected ? 1 : 0;
+        } else if (type === "중식") {
+            mealsMap[key].lunch = isSelected ? 1 : 0;
+        } else if (type === "석식") {
+            mealsMap[key].dinner = isSelected ? 1 : 0;
+        }
     });
+
+    const meals = Object.values(mealsMap); // 모든 유저+날짜 조합 포함
 
     postData("/admin/edit_meals", { meals },
         () => {
@@ -215,6 +229,7 @@ function saveEditChanges() {
         (err) => alert("❌ 저장 실패: " + err.message)
     );
 }
+
 
 function getWeekRange(dateStr) {
     const date = new Date(dateStr);
