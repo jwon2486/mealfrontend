@@ -256,53 +256,56 @@ function resetFilter() {
 function saveEditChanges() {
     if (!confirm("변경사항을 저장하시겠습니까?")) return;
 
-    const selectedBtns = document.querySelectorAll(".meal-btn.selected");
-    
-    const meals = [];  // ✅ 반드시 선언해줘야 함
+    const allBtns = document.querySelectorAll(".meal-btn");
+    const mealsMap = {};
 
-    selectedBtns.forEach(btn => {
+    allBtns.forEach(btn => {
         const userId = btn.dataset.id;
         const name = btn.dataset.name;
         const dept = btn.dataset.dept;
         const date = btn.dataset.date;
         const type = btn.dataset.type;
 
-        let meal = meals.find(m => m.user_id === userId && m.date === date);
-        if (!meal) {
-            meal = {
+        const key = `${userId}_${date}`;
+        if (!mealsMap[key]) {
+            mealsMap[key] = {
                 user_id: userId,
-                name,
-                dept,
-                date,
+                name: name,
+                dept: dept,
+                date: date,
                 breakfast: 0,
                 lunch: 0,
                 dinner: 0
             };
-            meals.push(meal);
         }
 
-        const selected = btn.classList.contains("selected");
+        const isSelected = btn.classList.contains("selected");
 
-        if (type === "조식") meal.breakfast = selected ? 1 : 0;
-        if (type === "중식") meal.lunch = selected ? 1 : 0;
-        if (type === "석식") meal.dinner = selected ? 1 : 0;
-        
+        if (type === "조식") {
+            mealsMap[key].breakfast = isSelected ? 1 : 0;
+        } else if (type === "중식") {
+            mealsMap[key].lunch = isSelected ? 1 : 0;
+        } else if (type === "석식") {
+            mealsMap[key].dinner = isSelected ? 1 : 0;
+        }
     });
 
-    console.log("📤 관리자 수정 요청", meals);  // 추가
-    
+    const meals = Object.values(mealsMap);
+
+    console.log("📤 관리자 저장 요청:", meals);
+
     postData("/admin/edit_meals", { meals },
         () => {
             alert("✅ 저장되었습니다.");
-            //setTimeout(() => loadEditData(), 300); // 약간 지연 후 재조회
             const selectedDate = document.getElementById("editWeekPicker").value;
             setTimeout(() => {
                 loadEditData(selectedDate);
-            }, 700);  // 0.7초 대기 (300~1000ms 사이 추천)
+            }, 700);
         },
         (err) => alert("❌ 저장 실패: " + err.message)
     );
 }
+
 
 // ✅ 선택한 날짜 기준 주간 범위 계산
 function getWeekRange(dateStr) {
