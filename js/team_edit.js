@@ -35,24 +35,29 @@ function loadEditData(selectedWeek) {
 
         const grouped = {};
         flatData.forEach(entry => {
-            if (!entry.user_id || !entry.name || !entry.dept || !entry.date) return;
-            if (entry.dept !== myDept) return;
+    if (!entry.user_id || !entry.name || !entry.dept) return;  // ✅ entry.date 조건 제거
+    if (entry.dept !== myDept) return;
 
-            const uid = entry.user_id;
-            if (!grouped[uid]) {
-                grouped[uid] = {
-                    id: entry.user_id,
-                    name: entry.name,
-                    dept: entry.dept,
-                    meals: {}
-                };
-            }
-            grouped[uid].meals[entry.date] = {
-                breakfast: entry.breakfast === 1,
-                lunch: entry.lunch === 1,
-                dinner: entry.dinner === 1
-            };
-        });
+    const uid = entry.user_id;
+    if (!grouped[uid]) {
+        grouped[uid] = {
+            id: entry.user_id,
+            name: entry.name,
+            dept: entry.dept,
+            meals: {}
+        };
+    }
+
+    // ✅ entry.date가 있을 때만 meals 추가
+    if (entry.date) {
+        grouped[uid].meals[entry.date] = {
+            breakfast: entry.breakfast === 1,
+            lunch: entry.lunch === 1,
+            dinner: entry.dinner === 1
+        };
+    }
+});
+
 
         const dates = getDateArray(start, end);
         const groupedValues = Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
