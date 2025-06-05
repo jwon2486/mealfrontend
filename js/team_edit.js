@@ -1,7 +1,7 @@
 // team_edit.js - 수정된 전체 코드
 
 let holidayList = [];
-let editMode = "apply";
+let editMode = "all";
 
 function formatDateWithDay(dateStr) {
     const date = new Date(dateStr);
@@ -11,7 +11,7 @@ function formatDateWithDay(dateStr) {
 }
 
 function loadEditData(selectedWeek) {
-    editMode = "apply";
+    editMode = "all";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
