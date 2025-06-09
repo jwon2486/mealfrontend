@@ -64,6 +64,11 @@ td input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 } */
 
+/* 스핀버튼 사이즈 조절 */
+td input[type="number"]::-webkit-inner-spin-button {
+    -webkit-transform: scale(1.4);  /* 원하는 배율 적용 */
+    transform: scale(1.4);
+}
 
 
 /* ✅ 내부 텍스트가 완전 중앙 정렬되도록 input wrapper도 정렬 */
