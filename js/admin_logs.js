@@ -43,8 +43,8 @@ function renderLogs(logs) {
         <td>${log.name || "-"}</td>
         <td>${log.before_status === 1 ? "✅ 신청" : "❌ 미신청"}</td>
         <td>${log.after_status === 1 ? "✅ 신청" : "❌ 미신청"}</td>
-        <td>${log.changed_at || "-"}</td>
-      `;
+        <td>${formatToKoreanTime(log.changed_at)}</td> 
+      `; //formatToKoreanTime: 데이터 저장 시간을 한국시간으로 표시
       tbody.appendChild(row);
     });
 }
@@ -147,4 +147,18 @@ document.addEventListener("DOMContentLoaded", () => {
     loadLogs();
     loadVisitorLogs();
 });
-  
+
+//프론트엔드 시간값 보정 함수
+function formatToKoreanTime(datetimeStr) {
+    if (!datetimeStr) return "-";
+    const date = new Date(datetimeStr.replace(' ', 'T') + 'Z');
+    return date.toLocaleString('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
