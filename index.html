@@ -79,7 +79,7 @@
     const savedUser = localStorage.getItem("currentUser");
     if (savedUser) {
         const currentUser = JSON.parse(savedUser);
-        const adminBtn = document.getElementById("adminButton");
+        const adminBtn = document.getElementById("adminBtn");
         const teamEditBtn = document.getElementById("teamEditButton");
 
         if (currentUser.level === 3 && adminBtn) {
