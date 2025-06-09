@@ -43,7 +43,7 @@ body {
   td select {
   height: 36px;
   font-size: clamp(11px, 3.2vw, 15px);  /* ✅ 반응형 폰트 크기 */
-  padding: 0 6px;
+  padding: 0;
   box-sizing: border-box;
   width: 100%;
   min-width: 100px;
