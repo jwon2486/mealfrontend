@@ -200,4 +200,83 @@ th, td {
     text-align: center;
     white-space: nowrap;
   }
+  /* ✅ 모바일 전용 레이아웃 스타일 추가 */
+@media (max-width: 768px) {
+  /* 기존 PC 테이블 숨김 */
+  .table-container {
+    display: none;
+  }
+
+  /* 모바일용 입력 영역 */
+  #mobile-form-container {
+    display: block;
+    padding: 15px;
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+  }
+
+  #mobile-form-container label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  #mobile-form-container input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  /* 모바일용 신청 내역 카드 영역 */
+  #mobile-summary-container {
+    display: block;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+  }
+
+  #mobile-summary-list .summary-card {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+  }
+
+  #mobile-summary-list .summary-card h4 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+  }
+
+  #mobile-summary-list .summary-card p {
+    margin: 3px 0;
+    font-size: 14px;
+  }
+
+  /* 모바일용 버튼 */
+  #mobile-form-container button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+
+  #mobile-form-container button:hover {
+    background-color: #0056b3;
+  }
+}
+
 }

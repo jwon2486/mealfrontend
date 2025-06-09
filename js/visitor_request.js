@@ -318,6 +318,34 @@ function saveVisit(data) {
     });
 }
 
+// 모바일 디자인 코드
+function submitMobileVisit() {
+  const date = document.getElementById('mobile-visit-date').value;
+  const bCount = document.getElementById('mobile-b-count').value;
+  const lCount = document.getElementById('mobile-l-count').value;
+  const dCount = document.getElementById('mobile-d-count').value;
+  const reason = document.getElementById('mobile-visit-reason').value;
+
+  if (!date) {
+    alert('날짜를 선택하세요');
+    return;
+  }
+
+  const list = document.getElementById('mobile-summary-list');
+  const card = document.createElement('div');
+  card.className = 'summary-card';
+  card.innerHTML = `
+    <h4>${date}</h4>
+    <p>조식: ${bCount}명</p>
+    <p>중식: ${lCount}명</p>
+    <p>석식: ${dCount}명</p>
+    <p>사유: ${reason}</p>
+  `;
+  list.prepend(card);
+
+  // 입력 초기화
+  document.getElementById('mobile-visit-form').reset();
+}
  
 // 입력 초기화
 function clearInput() {
