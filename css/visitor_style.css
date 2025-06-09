@@ -57,12 +57,12 @@ body {
 }
 
 
-/* 크롬에서 스핀 버튼 제거 */
+/* 크롬에서 스핀 버튼 제거
 td input[type="number"]::-webkit-inner-spin-button,
 td input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
+} */
 
 
 
