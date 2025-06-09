@@ -69,27 +69,6 @@
     </table>
   </div>
 
-  <!-- ✅ 모바일용 신청 입력 영역 -->
-<div id="mobile-form-container" style="display:none;">
-  <h3>방문자 식사 신청 (모바일)</h3>
-  <form id="mobile-visit-form">
-    <label>날짜<br><input type="date" id="mobile-visit-date" required></label><br><br>
-    <label>조식 인원<br><input type="number" id="mobile-b-count" min="0" max="50" value="0"></label><br><br>
-    <label>중식 인원<br><input type="number" id="mobile-l-count" min="0" max="50" value="0"></label><br><br>
-    <label>석식 인원<br><input type="number" id="mobile-d-count" min="0" max="50" value="0"></label><br><br>
-    <label>사유<br><input type="text" id="mobile-visit-reason" placeholder="사유를 입력하세요"></label><br><br>
-    <button type="button" onclick="submitMobileVisit()">💾 저장</button>
-  </form>
-</div>
-
-<!-- ✅ 모바일용 신청 내역 영역 -->
-<div id="mobile-summary-container" style="display:none; margin-top:20px;">
-  <h3>신청 내역 (모바일)</h3>
-  <div id="mobile-summary-list">
-    <!-- JavaScript로 카드 추가 -->
-  </div>
-</div>
-
   <!-- ✅ 공통 스크립트 로딩 -->
   <script src="js/config.js"></script>
   <script src="js/util.js"></script>

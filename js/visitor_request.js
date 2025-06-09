@@ -61,30 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // // const temp = new date();
     // // alert(temp.now);
 
-
     loadLoginInfo();         // 로그인 유저 표시
     //setTodayDefault();       // 날짜 기본값 설정
-    
-    //모바일 화면 코드
-    if (window.innerWidth <= 768) {
-    // 모바일 화면이면 기본값 설정
-    const weekField = document.getElementById("visit-week-date");
-    if (!weekField.value) {
-      const today = getKSTDate();
-      const adjusted = getNearestWeekday(today);
-      weekField.value = adjusted.toISOString().split("T")[0];
-    }
-
-    // ✅ 반드시 모바일에서는 weekField 값 설정 후 loadWeeklyVisitData 다시 호출
-      updateWeekday();
-      loadWeeklyVisitData();
-    } else {
-      // PC는 기존 로직 유지
-      updateWeekday();
-      loadWeeklyVisitData();
-    }
-
-
     updateWeekday();         // 요일 표시
     loadWeeklyVisitData();   // 주간 신청 내역 불러오기
   
@@ -340,34 +318,6 @@ function saveVisit(data) {
     });
 }
 
-// 모바일 디자인 코드
-function submitMobileVisit() {
-  const date = document.getElementById('mobile-visit-date').value;
-  const bCount = document.getElementById('mobile-b-count').value;
-  const lCount = document.getElementById('mobile-l-count').value;
-  const dCount = document.getElementById('mobile-d-count').value;
-  const reason = document.getElementById('mobile-visit-reason').value;
-
-  if (!date) {
-    alert('날짜를 선택하세요');
-    return;
-  }
-
-  const list = document.getElementById('mobile-summary-list');
-  const card = document.createElement('div');
-  card.className = 'summary-card';
-  card.innerHTML = `
-    <h4>${date}</h4>
-    <p>조식: ${bCount}명</p>
-    <p>중식: ${lCount}명</p>
-    <p>석식: ${dCount}명</p>
-    <p>사유: ${reason}</p>
-  `;
-  list.prepend(card);
-
-  // 입력 초기화
-  document.getElementById('mobile-visit-form').reset();
-}
  
 // 입력 초기화
 function clearInput() {
@@ -457,30 +407,6 @@ function loadWeeklyVisitData() {
           `;
           tbody.appendChild(tr);
         });
-
-        // ✅ 모바일 카드 초기화
-          const mobileList = document.getElementById("mobile-summary-list");
-          if (mobileList) {
-            mobileList.innerHTML = ""; // 초기화
-
-            if (!result || result.length === 0) {
-              mobileList.innerHTML = `<p style="text-align:center; color: gray;">신청 내역이 없습니다.</p>`;
-            } else {
-              result.forEach(row => {
-                const card = document.createElement("div");
-                card.className = "summary-card";
-                card.innerHTML = `
-                  <h4>${row.date} (${getWeekdayName(row.date)})</h4>
-                  <p>조식: ${row.breakfast}명</p>
-                  <p>중식: ${row.lunch}명</p>
-                  <p>석식: ${row.dinner}명</p>
-                  ${userType === "협력사" ? "" : `<p>사유: ${row.reason}</p>`}
-                `;
-                mobileList.appendChild(card);
-              });
-            }
-          }
-
       },
       (err) => {
         console.error("❌ 주간 신청 내역 불러오기 실패:", err);
