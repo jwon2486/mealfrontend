@@ -218,16 +218,19 @@ th, td {
 
     /* ✅ 이 부분 추가 필요 */
   #mobile-summary-list {
-    display: block;   /* 반드시 추가 */
+    display: flex;           /* flex로 바꾸면 카드가 아래로 쌓이면서 자연스럽게 구분됨 */
+    flex-direction: column;
+    gap: 10px;               /* 카드 사이 여백 */
     padding: 10px;
   }
 
   #mobile-summary-list .summary-card {
     border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);   /* 그림자 추가 → 카드 느낌 강조 */
+    transition: transform 0.2s ease;            /* 마우스 hover 시 살짝 반응 가능 */
   }
 
   #mobile-summary-list .summary-card h4 {
@@ -252,8 +255,8 @@ th, td {
   }
 
   #mobile-form-container button:hover {
-    background-color: #0056b3;
-  }
+    transform: translateY(-2px);
+}
 
   #mobile-form-container label {
     display: block;
