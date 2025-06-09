@@ -165,98 +165,37 @@ th, td {
   white-space: nowrap;
 }
   
-  /* ✅ 모바일 반응형 */
-  @media (max-width: 768px) {
-  td input[type="number"],
-  td input[type="text"],
-  td select {
-    font-size: clamp(10px, 3.5vw, 13px);
-    padding: 4px;
-    height: 28px;
-  }
+ /* 모바일용 반응형 스타일 적용 */
+@media (max-width: 768px) {
 
-  table, th, td {
-    font-size: clamp(10px, 3vw, 13px);
-    padding: 5px;
-  }
-
-  button {
-    font-size: clamp(11px, 3vw, 14px);
-    padding: 6px 10px;
-  }
-
-  .reason-input {
-    font-size: clamp(11px, 3vw, 13px);
-    padding: 3px;
-    width: 100%;
-  }
-
-  .date-input {
-    font-size: clamp(10px, 2.5vw, 13px);
-    height: 3.5em;
-    line-height: 1.2;
-    width: 90px;
-    padding: 2px;
-    text-align: center;
-    white-space: nowrap;
- 
-  /* 기존 PC 테이블 숨김 */
+  /* PC 테이블 숨김 */
   .table-container {
     display: none;
   }
 
-  /* 모바일용 입력 영역 */
+  /* 모바일용 date-input 조정 */
+  .date-input {
+    width: 90px;
+    min-width: 80px;
+    max-width: 120px;
+    padding: 2px;
+    font-size: clamp(10px, 2.5vw, 13px);
+    height: 3.5em;
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* 모바일 입력 영역 */
   #mobile-form-container {
     display: block;
     padding: 15px;
-    margin-bottom: 20px;
+    margin: 15px;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     text-align: left;
   }
-
-    /* ✅ 이 부분 추가 필요 */
-  #mobile-summary-list {
-    display: flex;           /* flex로 바꾸면 카드가 아래로 쌓이면서 자연스럽게 구분됨 */
-    flex-direction: column;
-    gap: 10px;               /* 카드 사이 여백 */
-    padding: 10px;
-  }
-
-  #mobile-summary-list .summary-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 12px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);   /* 그림자 추가 → 카드 느낌 강조 */
-    transition: transform 0.2s ease;            /* 마우스 hover 시 살짝 반응 가능 */
-  }
-
-  #mobile-summary-list .summary-card h4 {
-    margin: 0 0 5px 0;
-    font-size: 16px;
-  }
-
-  #mobile-summary-list .summary-card p {
-    margin: 3px 0;
-    font-size: 14px;
-  }
-
-  #mobile-form-container button {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
-  }
-
-  #mobile-form-container button:hover {
-    transform: translateY(-2px);
-}
 
   #mobile-form-container label {
     display: block;
@@ -274,22 +213,51 @@ th, td {
     margin-top: 4px;
   }
 
-  /* 모바일용 신청 내역 카드 영역 */
+  #mobile-form-container button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  #mobile-form-container button:hover {
+    background-color: #0056b3;
+  }
+
+  /* 모바일 신청 내역 영역 */
   #mobile-summary-container {
     display: block;
     padding: 15px;
+    margin: 15px;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     text-align: left;
   }
 
+  #mobile-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+
   #mobile-summary-list .summary-card {
     border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+  }
+
+  #mobile-summary-list .summary-card:hover {
+    transform: translateY(-2px);
   }
 
   #mobile-summary-list .summary-card h4 {
@@ -301,22 +269,5 @@ th, td {
     margin: 3px 0;
     font-size: 14px;
   }
-
-  /* 모바일용 버튼 */
-  #mobile-form-container button {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
-  }
-
-  #mobile-form-container button:hover {
-    background-color: #0056b3;
-  }
-}
 
 }
