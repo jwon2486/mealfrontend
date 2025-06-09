@@ -435,6 +435,30 @@ function loadWeeklyVisitData() {
           `;
           tbody.appendChild(tr);
         });
+
+        // ✅ 모바일 카드 초기화
+          const mobileList = document.getElementById("mobile-summary-list");
+          if (mobileList) {
+            mobileList.innerHTML = ""; // 초기화
+
+            if (!result || result.length === 0) {
+              mobileList.innerHTML = `<p style="text-align:center; color: gray;">신청 내역이 없습니다.</p>`;
+            } else {
+              result.forEach(row => {
+                const card = document.createElement("div");
+                card.className = "summary-card";
+                card.innerHTML = `
+                  <h4>${row.date} (${getWeekdayName(row.date)})</h4>
+                  <p>조식: ${row.breakfast}명</p>
+                  <p>중식: ${row.lunch}명</p>
+                  <p>석식: ${row.dinner}명</p>
+                  ${userType === "협력사" ? "" : `<p>사유: ${row.reason}</p>`}
+                `;
+                mobileList.appendChild(card);
+              });
+            }
+          }
+
       },
       (err) => {
         console.error("❌ 주간 신청 내역 불러오기 실패:", err);
