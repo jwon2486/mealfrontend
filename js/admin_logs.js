@@ -110,7 +110,7 @@ function loadVisitorLogs() {
         <td>${row.applicant_name}</td>
         <td>${beforeStatus}</td>
         <td>${afterStatus}</td>
-        <td>${row.updated_at}</td>
+        <td>${formatToKoreanTime(row.updated_at)}</td>
       `;
       container.appendChild(tr);
     });
