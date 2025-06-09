@@ -64,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadLoginInfo();         // 로그인 유저 표시
     //setTodayDefault();       // 날짜 기본값 설정
+    
+    //모바일 화면 코드
     if (window.innerWidth <= 768) {
     // 모바일 화면이면 기본값 설정
     const weekField = document.getElementById("visit-week-date");
@@ -72,7 +74,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const adjusted = getNearestWeekday(today);
       weekField.value = adjusted.toISOString().split("T")[0];
     }
-  }
+
+    // ✅ 반드시 모바일에서는 weekField 값 설정 후 loadWeeklyVisitData 다시 호출
+      updateWeekday();
+      loadWeeklyVisitData();
+    } else {
+      // PC는 기존 로직 유지
+      updateWeekday();
+      loadWeeklyVisitData();
+    }
+
 
     updateWeekday();         // 요일 표시
     loadWeeklyVisitData();   // 주간 신청 내역 불러오기
