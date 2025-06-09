@@ -61,8 +61,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // // const temp = new date();
     // // alert(temp.now);
 
+
     loadLoginInfo();         // 로그인 유저 표시
     //setTodayDefault();       // 날짜 기본값 설정
+    if (window.innerWidth <= 768) {
+    // 모바일 화면이면 기본값 설정
+    const weekField = document.getElementById("visit-week-date");
+    if (!weekField.value) {
+      const today = getKSTDate();
+      const adjusted = getNearestWeekday(today);
+      weekField.value = adjusted.toISOString().split("T")[0];
+    }
+  }
+
     updateWeekday();         // 요일 표시
     loadWeeklyVisitData();   // 주간 신청 내역 불러오기
   
