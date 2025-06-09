@@ -48,9 +48,9 @@ body {
   width: 100%;
   min-width: 100px;
   text-align: center;
-  /* display: inline-flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center; */
+  justify-content: center;
   vertical-align: middle;
   line-height: normal;
   appearance: textfield; /* Safari 등에서 기본 화살표 제거 */
