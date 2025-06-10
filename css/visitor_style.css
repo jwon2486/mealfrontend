@@ -46,7 +46,6 @@ body {
   padding: 0;
   box-sizing: border-box;
   width: 100%;
-  min-width: 100px;
   text-align: center;
   display: inline-flex;
   align-items: center;
@@ -56,13 +55,6 @@ body {
   appearance: textfield; /* Safari 등에서 기본 화살표 제거 */
 }
 
-
-/* 크롬에서 스핀 버튼 제거
-td input[type="number"]::-webkit-inner-spin-button,
-td input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-} */
 
 /* 스핀버튼 사이즈 조절 */
 td input[type="number"]::-webkit-inner-spin-button {
@@ -175,10 +167,18 @@ th, td {
   td input[type="number"],
   td input[type="text"],
   td select {
-    font-size: clamp(10px, 3.5vw, 13px);
+    font-size: clamp(6px, 3.5vw, 13px);
     padding: 4px;
     height: 28px;
   }
+
+  /*크롬에서 스핀 버튼 제거*/
+  td input[type="number"]::-webkit-inner-spin-button,
+  td input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
 
   table, th, td {
     font-size: clamp(10px, 3vw, 13px);
