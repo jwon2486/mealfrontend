@@ -90,21 +90,6 @@ tr:hover {
     transition: 0.3s;
 }
 
-/* 이름칸 좌우폭*/
-.input-name {
-  min-width: 50px;   /* 최소 120px */
-  max-width: 170px;   /* 최대 300px */
-  width: 100%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
-}
-
-/* 사번칸 좌우폭*/
-.input-empid {
-  min-width: 100px;
-  max-width: 200px;
-  width: 100%;
-}
-
-
 /* 신청/미신청 버튼 스타일 */
 .meal-btn {
     padding: 8px 15px;
@@ -137,15 +122,13 @@ tr:hover {
     margin-bottom: 20px;
 }
 
-/* 버튼 스타일 */
+/* 저장 버튼 스타일 */
 button {
     padding: 10px 20px;
     margin-top: 15px;
     font-size: 16px;
     border: none;
     border-radius: 5px;
-    max-width: 140px;
-    width: 100%;
     background-color: #007bff;
     color: white;
     cursor: pointer;
@@ -156,33 +139,9 @@ button:hover {
     background-color: #0056b3;
 }
 
-.search-button-wrapper {
-  display: flex;
-  align-items: center;     /* 버튼과 주 선택 input 높이 맞춤 */
-  justify-content: center; /* 가운데 정렬 */
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.search-button {
-  height: 36px;
-  margin-top: 0px;
-  padding: 0 10;
-  font-size: 14px;
-  border-radius: 6px;
-}
-
-#editWeekPicker {
-  height: 20px;
-  padding: 6px 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
 @media (max-width: 768px) {
   body {
-    padding: 5px;
+    padding: 10px;
   }
 
   table {
@@ -198,66 +157,19 @@ button:hover {
   .search-container,
   .action-buttons {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 10px;
     margin-bottom: 10px;
   }
 
-  
-  select{
-    width: 100%;
-    font-size: 14px;
-  }
-
+  input[type="text"],
+  input[type="date"],
+  select,
   button {
     width: 100%;
     font-size: 14px;
   }
-  /* 부서원 조회버튼 */
-  .search-button-wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.search-button {
-    width: auto; /* 버튼이 꽉 차지 않도록 */
-  }
-}
-
- .filter-container {
-  display: flex;          /* ✅ 핵심! */
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;  /* ✅ 가운데 정렬 */
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-  .filter-container label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 15px;
-    width: auto; /* ✅ 100% 대신 내용 크기에 맞춤 */
-    white-space: nowrap; /* ✅ 줄바꿈 방지 */
-  }
-
-  /* 이름칸 좌우폭*/
-.input-name {
-  max-width: 100px;   /* 최대 300px */
-  width: 80%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
-  height: 15px
-}
-
-/* 사번칸 좌우폭*/
-.input-empid {
-  max-width: 100px;
-  width: 80%;
-  height: 15px
-}
 
   .login-container {
     display: flex;
@@ -267,14 +179,8 @@ button:hover {
 
   h1, h2 {
     font-size: 18px;
-    font-weight: bold;
   }
-
-  .summary {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
+}
 
 .toast {
   visibility: hidden;
@@ -283,7 +189,7 @@ button:hover {
   color: white;
   text-align: center;
   border-radius: 6px;
-  padding: 5px;
+  padding: 10px;
   position: fixed;
   z-index: 9999;
   top: 20px;
@@ -326,32 +232,4 @@ button:hover {
 /*테이블과  div라인 간격조정정*/
 .filter-container {
   margin-bottom: 20px; /* ✅ 버튼 아래 공간 확보 */
-}
-
-/* 데스크탑모드*/
-@media (min-width: 769px) {
-   .summary {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .filter-container label {
-    font-size: 19px;
-    font-weight: bold;
-  }
-
-  .input-name,
-  .input-empid {
-    font-size: 18px;
-    height: 20px;
-    font-weight: bold;
-    padding: 6px 8px;
-  }
-
-  h1 {
-    font-size: 26px;       /* ✅ 제목도 더 크게 */
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
 }

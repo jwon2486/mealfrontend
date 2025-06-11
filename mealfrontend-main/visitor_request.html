@@ -17,7 +17,6 @@
 
   <!-- ✅ 상단 신청 입력 영역 -->
   <div class="table-container">
-    <table class="visitor-form-table"> <!-- 상단: 식수 신청 테이블 -->
     <table>
       <thead>
         <tr>
@@ -37,7 +36,7 @@
           <td><input type="number" id="b-count" min="0" max="50" value="0" /></td>
           <td><input type="number" id="l-count" min="0" max="50" value="0" /></td>
           <td><input type="number" id="d-count" min="0" max="50" value="0" /></td>
-          <td><input type="text" id="visit-reason" class="reason-input" placeholder="신청 사유" /></td>
+          <td><input type="text" id="visit-reason" class="reason-input" placeholder="사유를 입력하세요" /></td>
           <td><button id="visit-data-save-btn" onclick="submitVisit()">💾 저장</button></td>
         </tr>
       </tbody>
@@ -48,7 +47,6 @@
   <div class="table-container" style="margin-top: 30px;">
     <h3>신청 내역 (해당 주)</h3>
     <input type="date" id="visit-week-date"> <button id="load-visit-data-btn">조회</button>
-    <table class="visitor-summary-table"> <!-- 하단: 신청 내역 테이블 -->
     <table>
       <thead>
         <tr>

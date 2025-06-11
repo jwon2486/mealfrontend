@@ -205,10 +205,9 @@ function renderMealTable(dates) {
             }
             else if (isDeadlinePassed(dateStr, type)) {
                 //btn.disabled = true;
-                btn.style.backgroundColor = "#ffe6e6";
+                btn.style.backgroundColor = "#ccc";
                 btn.style.color = "#666";
                 btn.title = "신청 마감됨";
-                btn.innerText = "❌ 마감됨";
                 btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
             }
             else{
@@ -264,7 +263,7 @@ function loadWeekData() {
 
     // 상단 사용자 이름 및 주간 범위 표시
     document.getElementById("welcome").innerText = `${userName}님, 안녕하세요.`;
-    document.getElementById("weekRangeText").innerText = `금주 날짜: ${start} ~ ${end} `;
+    document.getElementById("weekRangeText").innerText = `식수기간: ${start} ~ ${end} `;
 
     renderMealTable(dates); // 버튼 테이블 새로 생성
 

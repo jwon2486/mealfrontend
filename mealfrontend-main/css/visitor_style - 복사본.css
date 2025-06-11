@@ -1,0 +1,171 @@
+/* visitor_style.css */
+
+/* 기본 설정 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: 20px;
+    margin: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* 테이블 영역 */
+  .table-container {
+    width: 95%;
+    margin: 0 auto 30px auto;
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+  
+  th {
+    background-color: #007bff;
+    color: #fff;
+    font-size: 14px;
+  }
+  
+  td input {
+    width: 90%;
+    padding: 6px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  td select, td textarea {
+    text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
+  }
+  
+  button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* 데이터 없음 표시 */
+  td[colspan="8"] {
+    color: gray;
+    font-style: italic;
+  }
+
+  /* 기본 테이블 중앙 정렬 */
+.visitor-table th,
+.visitor-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* 저장 테이블 영역 */
+.visitor-form-table input,
+.visitor-form-table select {
+    text-align: center;
+}
+
+.expired-cell {
+    background-color: #ffe6e6 !important;
+}
+
+.expired-input {
+    background-color: #ffe6e6 !important;
+  }
+
+.expired-row {
+    background-color: #ffdddd !important;
+  }
+
+.expired-cell {
+    background-color: #ffe5e5;
+}
+  
+.row-expired td {
+    background-color: #ffcccc !important;
+}
+
+/* 저장 버튼 */
+.save-btn {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 📌 사유 입력 필드를 넓게 설정 */
+.reason-input {
+  width: 100%;
+  min-width: 30px;
+  text-align: left;
+}
+
+/* 📌 사유 입력 필드를 넓게 설정 */
+.date-input {
+  width: 120px;
+  min-width: 80px;
+  max-width: 140px;
+  padding: 3px;
+  font-size: 14px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+  
+  /* ✅ 모바일 반응형 */
+  @media (max-width: 768px) {
+    body {
+      padding: 10px;
+    }
+  
+    table, th, td {
+      font-size: 12px;
+      padding: 5px;
+    }
+  
+    td input {
+      font-size: 12px;
+      padding: 5px;
+    }
+  
+    button {
+      font-size: 13px;
+      padding: 6px 10px;
+    }
+  
+    h2, h3 {
+      font-size: 18px;
+    }
+    .reason-input {
+      font-size: 13px;
+      padding: 3px;
+      width: 100%;
+    }
+    .date-input {
+      height: 3.5em;    /* 높이를 늘림 */
+      line-height: 1.2; /* 내부 여백 */
+      width: 90px;
+      padding: 2px;
+      font-size: 10px;
+      text-align: center;
+      white-space: nowrap;
+    }
+  }

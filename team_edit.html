@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부서 식사 신청 관리</title>
+    <link rel="stylesheet" href="css/check_style.css">
+    <!-- <script>
+      const savedUser = localStorage.getItem("currentUser");
+      if (!savedUser) {
+        location.href = "index.html";
+      } else {
+        const user = JSON.parse(savedUser);
+        if (user.level !== 2) {
+          alert("레벨 2 사용자만 접근 가능합니다.");
+          location.href = "index.html";
+        }
+      }
+    </script> -->
+</head>
+<body>
+    <h1>부서 식사 신청 관리</h1>
+
+    <div class="summary">
+        📋 총 신청 인원: <span id="totalPeople">0</span>명 |
+        조식: <span id="totalBreakfast">0</span> |
+        중식: <span id="totalLunch">0</span> |
+        석식: <span id="totalDinner">0</span>
+    </div>
+
+    <div class="filter-container">
+        <label>이름: <input type="text" id="searchName" class="input-name"></label>
+        <label>사번: <input type="text" id="searchEmpId" class="input-empid"></label>
+    </div>
+    <div class="search-button-wrapper">
+      <button class="search-button" onclick="loadEditData()">🔍 부서원 조회</button>
+        <label>주 선택: <input type="date" id="editWeekPicker"></label>
+    </div>
+
+    <div class="table-container">
+        <table id="edit-table">
+            <thead id="table-head"></thead>
+            <tbody id="edit-body"></tbody>
+        </table>
+    </div>
+
+    <div class="action-buttons">
+        <button onclick="saveEditChanges()">💾 저장</button>
+        <button onclick="window.location.href='index.html'">← 메인으로</button>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/team_edit.js"></script>
+</body>
+</html>
