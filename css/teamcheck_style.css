@@ -68,21 +68,6 @@ td {
     font-size: 14px;
 }
 
-.filter-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;           /* 두 줄 간격 */
-  margin-bottom: 20px;
-}
-
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-
 /* 신청 여부 스타일 */
 .meal-yes {
     color: #28a745;
@@ -108,14 +93,14 @@ tr:hover {
 /* 이름칸 좌우폭*/
 .input-name {
   min-width: 50px;   /* 최소 120px */
-  max-width: 150px;   /* 최대 300px */
+  max-width: 170px;   /* 최대 300px */
   width: 100%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
 }
 
 /* 사번칸 좌우폭*/
 .input-empid {
   min-width: 100px;
-  max-width: 150px;
+  max-width: 200px;
   width: 100%;
 }
 
@@ -162,8 +147,8 @@ tr:hover {
 /* 버튼 스타일 */
 button {
     padding: 10px 20px;
-    margin-top: 0px;
-    font-size: 14px;
+    margin-top: 15px;
+    font-size: 16px;
     border: none;
     border-radius: 5px;
     max-width: 140px;
@@ -172,19 +157,6 @@ button {
     color: white;
     cursor: pointer;
     transition: background-color 0.3s;
-}
-
-.action-buttons {
-  margin-top: 20px;  /* ✅ 원하는 만큼 조절 가능 (예: 20~40px) */
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.dashboard-btn {
-  min-width: 150px;
-  padding: 10px 20px;
-  white-space: nowrap; /* ← 필수 */
 }
 
 button:hover {
@@ -197,40 +169,6 @@ button:hover {
   justify-content: center; /* 가운데 정렬 */
   gap: 10px;
   margin-bottom: 20px;
-}
-
-/* 버튼 개별 크기 조정 */
-.btn-search,
-.btn-all,
-.save-btn,
-.dashboard-btn {
-  width: auto !important; /* ✅ 공통 button 규칙 무시 */
-}
-
-.btn-search {
-  padding: 8px 16px;
-  font-size: 14px;
-  min-width: 90px;
-}
-
-.btn-all {
-  padding: 8px 16px;
-  font-size: 14px;
-  min-width: 110px;
-}
-
-.save-btn {
-  padding: 10px 10px;
-  font-size: 15px;
-  font-weight: bold;
-  min-width: 80px;
-}
-
-.dashboard-btn {
-  padding: 10px 20px;
-  font-size: 15px;
-  white-space: nowrap;
-  min-width: 150px;
 }
 
 .search-button {
@@ -284,8 +222,12 @@ button:hover {
     width: 100%;
     font-size: 14px;
   }
- 
-/*  */
+  /* 부서원 조회버튼 */
+  .search-button-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
 .search-button {
     width: auto; /* 버튼이 꽉 차지 않도록 */
@@ -310,18 +252,18 @@ button:hover {
     white-space: nowrap; /* ✅ 줄바꿈 방지 */
   }
 
-.input-dept {
-  width: 100px;       /* 고정 너비로 동일하게 맞추기 */
-  max-width: none;   /* 최대치 제한 없애기 */
-  min-width: 0;
+  /* 이름칸 좌우폭*/
+.input-name {
+  max-width: 100px;   /* 최대 300px */
+  width: 80%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
+  height: 15px
 }
 
-/* 사번 이름 입력칸 동일 사이즈 통일일 */
-.input-name,
+/* 사번칸 좌우폭*/
 .input-empid {
-  width: 80px;       /* 고정 너비로 동일하게 맞추기 */
-  max-width: none;   /* 최대치 제한 없애기 */
-  min-width: 0;
+  max-width: 100px;
+  width: 80%;
+  height: 15px
 }
 
   .login-container {

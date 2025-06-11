@@ -135,8 +135,7 @@ function generateTableBody(dates, data) {
                     btn.title = "공휴일에는 신청할 수 없습니다.";
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
                 } else if (isDeadlinePassed(date, type)) {
-                    btn.style.backgroundColor = "#ccc";
-                    btn.style.color = "#666";
+                    btn.classList.add("meal-deadline");  // ✅ 마감 클래스 추가
                     btn.title = "신청 마감됨";
                     btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
                 } else {
