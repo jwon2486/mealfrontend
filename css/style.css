@@ -45,6 +45,14 @@ tr:hover {
     transition: 0.3s;
 }
 
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* ⭐ 중앙 정렬 */
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
 /* 일반 화면(PC)에서 로그인 input 확대 */
 .login-field {
     display: flex;
@@ -62,12 +70,13 @@ tr:hover {
 }
 
 .login-field input[type="text"] {
-    font-size: 16px;          /* ⭐ input 글자 크기 확대 */
-    padding: 8px 12px;        /* ⭐ padding으로 input 박스 크기 확장 */
-    width: 250px;             /* ⭐ 입력창 넓이 지정 (원하시면 더 키울 수 있음) */
-    border: 1px solid #ccc;   /* ⭐ 테두리 추가 (원래 기본 있음) */
-    border-radius: 5px;       /* ⭐ 둥근 모서리 */
-    width: 50%;            /* ⭐ 부모(.login-container)에 맞춰서 꽉 채움 */
+    font-size: 16px;
+    padding: 8px 12px;
+    max-width: 300px;   /* ⭐ 최대 너비 제한 */
+    width: 100%;        /* 가로 꽉 채움 (flex-grow로 자연스럽게) */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* ⭐ 패딩 포함 너비 계산 */
 }
 
 /* 신청/미신청 버튼 스타일 */
