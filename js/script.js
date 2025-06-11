@@ -264,7 +264,7 @@ function loadWeekData() {
 
     // 상단 사용자 이름 및 주간 범위 표시
     document.getElementById("welcome").innerText = `${userName}님, 안녕하세요.`;
-    document.getElementById("weekRangeText").innerText = `금주 날짜: ${start} ~ ${end} `;
+    document.getElementById("weekRangeText").innerText = `선택 날짜: ${start} ~ ${end} `;
 
     renderMealTable(dates); // 버튼 테이블 새로 생성
 
