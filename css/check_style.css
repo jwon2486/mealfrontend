@@ -331,7 +331,7 @@ button:hover {
 /* 데스크탑모드*/
 @media (min-width: 769px) {
    .summary {
-    font-size: 18px;
+    font-size: clamp(14px, 2vw, 20px);
     font-weight: 600;
     margin-bottom: 6px;
   }
@@ -350,7 +350,7 @@ button:hover {
   }
 
   h1 {
-    font-size: 26px;       /* ✅ 제목도 더 크게 */
+    font-size: clamp(20px, 2vw, 26px);       /* ✅ 제목도 더 크게 */
     font-weight: bold;
     margin-bottom: 10px;
   }
