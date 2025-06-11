@@ -31,8 +31,8 @@ function renderLogs(logs) {
       // return;
     }
 
-    // ✅ 날짜 기준 오름차순 정렬 추가
-    logs.sort((a, b) => new Date(a.date) - new Date(b.date));
+   // ✅ 변경일시 기준 내림차순 정렬
+  logs.sort((a, b) => new Date(b.changed_at) - new Date(a.changed_at));
   
     logs.forEach(log => {
       const row = document.createElement("tr");
@@ -98,6 +98,9 @@ function loadVisitorLogs() {
       container.innerHTML = `<tr><td colspan="6" style="text-align:center;">조회된 로그가 없습니다.</td></tr>`;
       return;
     }
+
+// ✅ 데이터 변경일시(updated_at) 기준 내림차순 정렬
+data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
     data.forEach(row => {
       const beforeStatus = `조식(${row.before_breakfast}), 중식(${row.before_lunch}), 석식(${row.before_dinner})`;
