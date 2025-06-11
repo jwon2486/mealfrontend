@@ -45,6 +45,31 @@ tr:hover {
     transition: 0.3s;
 }
 
+/* 일반 화면(PC)에서 로그인 input 확대 */
+.login-field {
+    display: flex;
+    flex-direction: row;      /* ⭐ 가로 배치 유지 */
+    align-items: center;      /* ⭐ 수직 가운데 정렬 */
+    gap: 16px;                /* label 과 input 사이 간격 더 넓게 */
+    margin-bottom: 16px;      /* 아래 간격 여유 */
+}
+
+.login-field label {
+    font-size: 18px;          /* ⭐ label 글자 크기 확대 */
+    font-weight: bold;
+    width: 80px;              /* ⭐ label 고정 폭 주면 정렬 깔끔해짐 */
+    text-align: center;        /* ⭐ 오른쪽 정렬로 label 깔끔하게 붙임 */
+}
+
+.login-field input[type="text"] {
+    font-size: 16px;          /* ⭐ input 글자 크기 확대 */
+    padding: 8px 12px;        /* ⭐ padding으로 input 박스 크기 확장 */
+    width: 250px;             /* ⭐ 입력창 넓이 지정 (원하시면 더 키울 수 있음) */
+    border: 1px solid #ccc;   /* ⭐ 테두리 추가 (원래 기본 있음) */
+    border-radius: 5px;       /* ⭐ 둥근 모서리 */
+    width: 50%;            /* ⭐ 부모(.login-container)에 맞춰서 꽉 채움 */
+}
+
 /* 신청/미신청 버튼 스타일 */
 .meal-btn {
     padding: 8px 15px;
@@ -74,6 +99,10 @@ tr:hover {
 
 /* 로그인 및 주 선택 영역 스타일 */
 .login-container, #date-picker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* ⭐ 가운데 정렬 */
+    gap: 10px;
     margin-bottom: 20px;
 }
 
@@ -132,7 +161,7 @@ button:hover {
    /* 👉 .action-btn 만 따로 오버라이드 */
   .action-btn {
     width: auto;  /* 자동 너비 */
-    min-width: 100px;  /* 최소 너비 설정 (원하는 값 조절 가능) */
+    min-width: 10px;  /* 최소 너비 설정 (원하는 값 조절 가능) */
     padding: 8px 16px; /* 모바일에서 padding 조절 가능 */
     font-size: 14px;   /* 필요시 글씨도 조절 */
   }
@@ -140,12 +169,13 @@ button:hover {
   .login-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;   /* ⭐ 중앙 정렬 추가 */
+    gap: 2px;
   }
 
   .login-field {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
     margin-bottom: 12px;
   }
