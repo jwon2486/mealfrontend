@@ -49,6 +49,7 @@ tr:hover {
     display: flex;
     flex-direction: column;
     align-items: center;   /* ⭐ 중앙 정렬 */
+    margin: 0 auto;
     gap: 16px;
     margin-bottom: 20px;
 }
@@ -58,6 +59,7 @@ tr:hover {
     display: flex;
     flex-direction: row;      /* ⭐ 가로 배치 유지 */
     align-items: center;      /* ⭐ 수직 가운데 정렬 */
+    width: fit-content;       /* 내용에 맞게 크기 조절 */
     gap: 16px;                /* label 과 input 사이 간격 더 넓게 */
     margin-bottom: 16px;      /* 아래 간격 여유 */
 }
@@ -232,4 +234,17 @@ button:hover {
 .toast.show {
   visibility: visible;
   opacity: 1;
+}
+
+#login-wrapper {
+  display: flex;
+  justify-content: center;  /* 수평 중앙 */
+  margin-top: 40px;         /* 약간 위에서 시작 */
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* align-items 제거: 내부 요소 수직 방향으로 배치됨 */
 }

@@ -9,19 +9,20 @@
 <body>
     <h1>식수 신청 시스템</h1>
 
-    <!-- 로그인 영역 -->
+     <!-- 로그인 영역 -->
+  <div id="login-wrapper">
     <div id="login-container" class="login-container">
-        <div class="login-field">
-            <label for="userId">사번</label>
-            <input type="text" id="userId" placeholder="사번 입력">
-        </div>
-        <div class="login-field">
-            <label for="userName">이름</label>
-            <input type="text" id="userName" placeholder="이름 입력">
-        </div>
-        <button class="action-btn save-btn" onclick="login(event)">로그인</button>        
-                
+      <div class="login-field">
+        <label for="userId">사번</label>
+        <input type="text" id="userId" placeholder="사번 입력">
+      </div>
+      <div class="login-field">
+        <label for="userName">이름</label>
+        <input type="text" id="userName" placeholder="이름 입력">
+      </div>
+      <button class="action-btn save-btn" onclick="login(event)">로그인</button>
     </div>
+  </div>
 
     <!-- ✅ 로그인 후 보이는 영역 전체 감싸기 -->
     <div id="mainArea" style="display: none;">
