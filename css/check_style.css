@@ -8,7 +8,7 @@ body {
 }
 
 .table-container {
-  width: 90%;
+  width: 80%;
   margin: auto;
   overflow-x: auto;
   max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
@@ -34,7 +34,7 @@ table {
 th {
     background-color: #007bff;
     color: white;
-    padding: 12px;
+    padding: 8px;
     font-size: 16px;
     border: 1px solid #ddd;
 }
@@ -51,6 +51,8 @@ th.holiday-header {
   color: red !important;
 }
 
+
+
 /* 날짜 표시 스타일 */
 .date-header {
     background-color: #007bff;
@@ -62,7 +64,7 @@ th.holiday-header {
 
 /* 테이블 본문 스타일 */
 td {
-    padding: 10px;
+    padding: 5px;
     text-align: center;
     border: 1px solid #ddd;
     font-size: 14px;
@@ -72,7 +74,7 @@ td {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;           /* 두 줄 간격 */
+  gap: 100px;           /* 두 줄 간격 */
   margin-bottom: 20px;
 }
 
@@ -115,7 +117,7 @@ tr:hover {
 /* 사번칸 좌우폭*/
 .input-empid {
   min-width: 100px;
-  max-width: 150px;
+  max-width: 130px;
   width: 100%;
 }
 
@@ -357,37 +359,46 @@ button:hover {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
+
 .toast.show {
   visibility: visible;
   opacity: 1;
 }
-/* 첫 번째 헤더 줄 (날짜 줄) 고정 */
-#edit-table thead tr:nth-child(1) th {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: #007bff;
-  color: white;
-}
+
+  /* 첫 번째 헤더 줄 (날짜 줄) 고정 */
+  #edit-table thead tr:nth-child(1) th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: #007bff;
+    color: white;
+  }
 
 /* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
 #edit-table thead tr:nth-child(2) th {
   position: sticky;
-  top: 38px;  /* 첫 줄 높이에 맞게 조정 (필요 시 32~48px로 조정) */
+  top: 36px;  /* 첫 줄 높이에 맞게 조정 (필요 시 32~48px로 조정) */
   z-index: 2;
   background-color: #007bff;
   color: white;
 }
+
+#edit-table thead tr:nth-child(2) th {
+  height: 36px;
+  line-height: 36px;
+}
+
 #edit-table thead tr:nth-child(2) th::after {
   content: "";
   position: absolute;
-  top: -2px; /* ← 위로 2px 올라가도록 설정 */
+  top: 0px; /* ← 위로 2px 올라가도록 설정 */
   left: 0;
   width: 100%;
-  height: 2px; /* ← 덮을 높이 */
+  height: 1px; /* ← 덮을 높이 */
   background-color: white; /* ← 배경색과 동일하게 맞춤 */
   z-index: 3;
 }
+
 /*테이블과  div라인 간격조정정*/
 .filter-container {
   margin-bottom: 20px; /* ✅ 버튼 아래 공간 확보 */
