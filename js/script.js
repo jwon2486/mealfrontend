@@ -457,10 +457,10 @@ document.addEventListener("DOMContentLoaded", function () {
             // }
     
             // 협력사나 방문자가 index.html에 접근한 경우 강제 이동
-            if (flag_type !== "직영" && location.pathname.includes("index.html")) {
-                logout();
-                window.location.reload();
-                //location.href = "visitor_request.html";
+            const allowedTypes = ["직영", "파견"];
+            if (!allowedTypes.includes(flag_type) && location.pathname.includes("index.html")) {
+            logout();
+            window.location.reload();
             }
         }
     }
