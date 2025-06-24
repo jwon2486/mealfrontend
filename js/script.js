@@ -435,7 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
         flag_type = window.currentUser.type;
 
         // ✅ 관리자 버튼 노출 여부 처리
-        const adminBtn = document.getElementById("adminButton");
+        const adminBtn = document.getElementById("adminBtn");
         if (window.currentUser?.level === 3 && adminBtn) {
             adminBtn.style.display = "inline-block";
         }
