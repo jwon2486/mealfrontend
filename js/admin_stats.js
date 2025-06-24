@@ -421,7 +421,7 @@ function renderDeptStats(data) {
       lunch: row.lunch,
       dinner: row.dinner
     };
-    if (row.type === "직영") {
+    if (row.type === "직영" || row.type === "파견") {
       direct.push(item);
     } else if(row.type === "협력사"){
       partner.push(item);
