@@ -42,7 +42,7 @@ function addEmployee() {
     return;
   }
 
-  postData(baseUrl, { id, name, dept, rank, type, region }, () => {
+  postData(baseUrl, { id, name, dept,part, rank, type, region }, () => {
     alert("✅ 직원 추가 완료");
     loadEmployees();
     clearForm();
@@ -56,6 +56,7 @@ function updateEmployee() {
   const id = document.getElementById("empId").value.trim();
   const name = document.getElementById("empName").value.trim();
   const dept = document.getElementById("empDept").value.trim();
+  const part = document.getElementById("empPart").value.trim();
   const type = document.getElementById("empType").value.trim();
   const rank = document.getElementById("empRank").value.trim();
   const region = document.getElementById("empRegion").value.trim();
@@ -66,7 +67,7 @@ function updateEmployee() {
     return;
   }
 
-  putData(`${baseUrl}/${id}`, { name, dept, rank, type, region }, () => {
+  putData(`${baseUrl}/${id}`, { name, dept,part, rank, type, region }, () => {
     alert("✅ 수정 완료");
     loadEmployees();
     clearForm();
