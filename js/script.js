@@ -501,6 +501,18 @@ function goToTeamEdit() {
     location.href = "team_edit.html";
 }
 
+//#region 전체선택버튼
+function selectAllAvailableMeals() {
+    document.querySelectorAll(".meal-btn").forEach(btn => {
+        const date = btn.dataset.date;
+        const type = btn.dataset.type;
+
+        if (!isDeadlinePassed(date, type) && !btn.classList.contains("selected")) {
+            toggleMeal(btn);
+        }
+    });
+}
+
 // ✅ 전역 함수 등록
 window.login = login;
 window.logout = logout;
