@@ -14,7 +14,6 @@ function loadEmployees() {
         <td>${emp.name}</td>
         <td>${emp.region}</td>
         <td>${emp.dept}</td>
-        <td>${emp.part || ""}</td>
         <td>${emp.type}</td>
         <td>${emp.rank || ""}</td> 
         <td><button class="edit" onclick="selectEmployeeToEdit(this)">✏️</button></td>
@@ -43,7 +42,7 @@ function addEmployee() {
     return;
   }
 
-  postData(baseUrl, { id, name, dept,part, rank, type, region }, () => {
+  postData(baseUrl, { id, name, dept, rank, type, region }, () => {
     alert("✅ 직원 추가 완료");
     loadEmployees();
     clearForm();
@@ -57,7 +56,6 @@ function updateEmployee() {
   const id = document.getElementById("empId").value.trim();
   const name = document.getElementById("empName").value.trim();
   const dept = document.getElementById("empDept").value.trim();
-  const part = document.getElementById("empPart").value.trim();
   const type = document.getElementById("empType").value.trim();
   const rank = document.getElementById("empRank").value.trim();
   const region = document.getElementById("empRegion").value.trim();
@@ -68,7 +66,7 @@ function updateEmployee() {
     return;
   }
 
-  putData(`${baseUrl}/${id}`, { name, dept,part, rank, type, region }, () => {
+  putData(`${baseUrl}/${id}`, { name, dept, rank, type, region }, () => {
     alert("✅ 수정 완료");
     loadEmployees();
     clearForm();
@@ -98,9 +96,8 @@ function selectEmployeeToEdit(btn) {
   document.getElementById("empName").value = cells[1].innerText;
   document.getElementById("empRegion").value = cells[2].innerText;
   document.getElementById("empDept").value = cells[3].innerText;
-  document.getElementById("empPart").value = cells[4].innerText; 
-  document.getElementById("empType").value = cells[5].innerText;
-  document.getElementById("empRank").value = cells[6].innerText;
+  document.getElementById("empType").value = cells[4].innerText;
+  document.getElementById("empRank").value = cells[5].innerText;
   
   
 
