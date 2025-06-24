@@ -14,8 +14,8 @@ function loadEmployees() {
         <td>${emp.name}</td>
         <td>${emp.region}</td>
         <td>${emp.dept}</td>
-        <td>${emp.type}</td>
         <td>${emp.part || ""}</td>
+        <td>${emp.type}</td>
         <td>${emp.rank || ""}</td> 
         <td><button class="edit" onclick="selectEmployeeToEdit(this)">✏️</button></td>
         <td><button class="delete" onclick="deleteEmployee('${emp.id}')">🗑️</button></td>
