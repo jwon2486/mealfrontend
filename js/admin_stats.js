@@ -675,7 +675,7 @@ function renderWeeklyDeptStats(data, holidays, range) {
   const direct = [], directTrip = [], partner = [], visitor = [];
 
   data.forEach(row => {
-    if (row.type === "직영"||row.type === "파견" && row.dept.includes("(출장)")) {
+    if (row.type === "직영"|| row.type === "파견" && row.dept.includes("(출장)")) {
       directTrip.push(row);
     } else if (row.type === "직영") {
       direct.push(row);
