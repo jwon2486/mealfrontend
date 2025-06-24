@@ -14,7 +14,7 @@ function loadEmployees() {
         <td>${emp.name}</td>
         <td>${emp.region}</td>
         <td>${emp.dept}</td>
-        <td>${emp.type}</td>
+        <td>${emp.part || ""}</td>
         <td>${emp.rank || ""}</td> 
         <td><button class="edit" onclick="selectEmployeeToEdit(this)">✏️</button></td>
         <td><button class="delete" onclick="deleteEmployee('${emp.id}')">🗑️</button></td>
@@ -97,8 +97,9 @@ function selectEmployeeToEdit(btn) {
   document.getElementById("empName").value = cells[1].innerText;
   document.getElementById("empRegion").value = cells[2].innerText;
   document.getElementById("empDept").value = cells[3].innerText;
-  document.getElementById("empType").value = cells[4].innerText;
-  document.getElementById("empRank").value = cells[5].innerText;
+  document.getElementById("empPart").value = cells[4].innerText; 
+  document.getElementById("empType").value = cells[5].innerText;
+  document.getElementById("empRank").value = cells[6].innerText;
   
   
 
