@@ -435,7 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
         flag_type = window.currentUser.type;
 
         // ✅ 관리자 버튼 노출 여부 처리
-        const adminBtn = document.getElementById("adminBtn");
+        const adminBtn = document.getElementById("adminButton");
         if (window.currentUser?.level === 3 && adminBtn) {
             adminBtn.style.display = "inline-block";
         }
@@ -457,10 +457,10 @@ document.addEventListener("DOMContentLoaded", function () {
             // }
     
             // 협력사나 방문자가 index.html에 접근한 경우 강제 이동
-            const allowedTypes = ["직영", "파견"];
-            if (!allowedTypes.includes(flag_type) && location.pathname.includes("index.html")) {
-            logout();
-            window.location.reload();
+            if (flag_type !== "직영" && location.pathname.includes("index.html")) {
+                logout();
+                window.location.reload();
+                //location.href = "visitor_request.html";
             }
         }
     }
@@ -499,18 +499,6 @@ function goToAdminDashboard() {
 
 function goToTeamEdit() {
     location.href = "team_edit.html";
-}
-
-//#region 전체선택버튼
-function selectAllAvailableMeals() {
-    document.querySelectorAll(".meal-btn").forEach(btn => {
-        const date = btn.dataset.date;
-        const type = btn.dataset.type;
-
-        if (!isDeadlinePassed(date, type) && !btn.classList.contains("selected")) {
-            toggleMeal(btn);
-        }
-    });
 }
 
 // ✅ 전역 함수 등록

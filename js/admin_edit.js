@@ -141,21 +141,6 @@ function generateTableHeader(dates) {
     thead.appendChild(subRow);
 }
 
-/* th td 높이 조정*/
-function adjustStickyHeaderOffset() {
-  const firstHeaderRow = document.querySelector("#edit-table thead tr:nth-child(1)");
-  const secondHeaderCells = document.querySelectorAll("#edit-table thead tr:nth-child(2) th");
-
-  if (!firstHeaderRow || secondHeaderCells.length === 0) return;
-
-  const height = firstHeaderRow.getBoundingClientRect().height;
-
-  secondHeaderCells.forEach((th) => {
-    th.style.top = `${height}px`;
-  });
-}
-
-
 // ✅ 테이블 본문 생성
 function generateTableBody(dates, data) {
     const tbody = document.getElementById("edit-body");
@@ -401,18 +386,8 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchHolidayList(holidayApiUrl, (holidays) => {
         holidayList = holidays;
         loadEditData(start);  // 공휴일 불러온 후 실행
-         // ✅ 헤더 2번째 줄의 top 값을 동적으로 설정
-        setTimeout(() => {
-            const firstRow = document.querySelector("#edit-table thead tr:nth-child(1)");
-            const secondThs = document.querySelectorAll("#edit-table thead tr:nth-child(2) th");
-            if (firstRow && secondThs.length > 0) {
-                const height = firstRow.offsetHeight;
-                secondThs.forEach(th => {
-                    th.style.top = `${height}px`;
-                });
-            }
-        }, 100); // DOM 그리기 완료 후 약간의 지연
     });
+
 });
 
 // ✅ 주 선택 변경 시 자동 조회
@@ -424,8 +399,6 @@ document.getElementById("editWeekPicker").addEventListener("change", function ()
     }
 });
 
-// 👉 위치는 여기! 브라우저 창 크기 변경 시 sticky header 위치 다시 계산
-window.addEventListener("resize", adjustStickyHeaderOffset);
 
 // ✅ 전체 등록 인력 + 신청 여부 함께 조회
 function loadAllEmployeesForEdit(selectedWeek = null) {
