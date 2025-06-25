@@ -735,10 +735,11 @@ function renderWeeklyDeptStats(data, holidays, range) {
   const sum1 = processRows(direct);
   appendSummaryRow("직영 소계", sum1, tbody);
 
-  const sum1_trip = processRows(directTrip);
-  if (sum1_trip.length > 0) {
-    appendSummaryRow("직영(출장자)", sum1_trip, tbody);
-  }
+const sum1_trip = processRows(directTrip);
+const hasTripMeal = sum1_trip.some(day => day.b > 0 || day.l > 0 || day.d > 0);
+if (hasTripMeal) {
+  appendSummaryRow("직영(출장자)", sum1_trip, tbody);
+}
 
   // ✅ 협력사 출력
   const sum2 = processRows(partner);
