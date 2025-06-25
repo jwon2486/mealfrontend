@@ -52,37 +52,46 @@ function renderStats(data) {
 
     // ✅ 주간별로 출력 및 소계
     for (const [weekKey, rows] of Object.entries(weekGroups)) {
-        rows.forEach(row => {
-            const tr = document.createElement("tr");
-            tr.className = "normal-row";
-            tr.innerHTML = `
-                <td>${row.date}</td>
-                <td>${row.day}</td>
-                <td>${row.breakfast}</td>
-                <td>${row.lunch}</td>
-                <td>${row.dinner}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+  // 1. 신청 데이터가 있는 행만 필터링
+  const validRows = rows.filter(row =>
+    row.breakfast !== 0 || row.lunch !== 0 || row.dinner !== 0
+  );
 
-        // ✅ 주간 소계
-        const subtotal = rows.reduce((sum, r) => {
-            sum.breakfast += r.breakfast;
-            sum.lunch += r.lunch;
-            sum.dinner += r.dinner;
-            return sum;
-        }, { breakfast: 0, lunch: 0, dinner: 0 });
+  // 2. 유효한 데이터가 없으면 이 주차 생략
+  if (validRows.length === 0) continue;
 
-        const subtotalRow = document.createElement("tr");
-        subtotalRow.className = "subtotal-row";
-        subtotalRow.innerHTML = `
-            <td colspan="2">${weekKey} 소계</td>
-            <td>${subtotal.breakfast}</td>
-            <td>${subtotal.lunch}</td>
-            <td>${subtotal.dinner}</td>
-        `;
-        tbody.appendChild(subtotalRow);
-    }
+  // 3. 유효한 데이터만 렌더링
+  validRows.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.className = "normal-row";
+    tr.innerHTML = `
+      <td>${row.date}</td>
+      <td>${row.day}</td>
+      <td>${row.breakfast}</td>
+      <td>${row.lunch}</td>
+      <td>${row.dinner}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // 4. 유효한 데이터 기반 소계 계산
+  const subtotal = validRows.reduce((sum, r) => {
+    sum.breakfast += r.breakfast;
+    sum.lunch += r.lunch;
+    sum.dinner += r.dinner;
+    return sum;
+  }, { breakfast: 0, lunch: 0, dinner: 0 });
+
+  const subtotalRow = document.createElement("tr");
+  subtotalRow.className = "subtotal-row";
+  subtotalRow.innerHTML = `
+    <td colspan="2">${weekKey} 소계</td>
+    <td>${subtotal.breakfast}</td>
+    <td>${subtotal.lunch}</td>
+    <td>${subtotal.dinner}</td>
+  `;
+  tbody.appendChild(subtotalRow);
+}
 
     // ✅ 총계
     const totalRow = document.createElement("tr");
@@ -436,8 +445,12 @@ function renderDeptStats(data) {
 
   // ✅ 출력 및 누적 함수
   const renderRows = (rows, label) => {
-    rows.sort(sortByDept).forEach(row => {
-      const tr = document.createElement("tr");
+   rows.sort(sortByDept).forEach(row => {
+  if (row.breakfast === 0 && row.lunch === 0 && row.dinner === 0) {
+    return;  // ✅ 신청 내역 전혀 없으면 건너뛴다
+  }
+
+  const tr = document.createElement("tr");
       const total = row.breakfast + row.lunch + row.dinner;
       tr.innerHTML = `
         <td>${row.dept}</td>
@@ -691,8 +704,23 @@ function renderWeeklyDeptStats(data, holidays, range) {
   function processRows(rows) {
     const sums = range.map(() => ({ b: 0, l: 0, d: 0 }));
 
-    rows.sort((a, b) => a.dept.localeCompare(b.dept)).forEach(row => {
-      const tr = document.createElement("tr");
+  function hasAnyMeal(row) {
+    return range.some(date => {
+      const dayData = row.days[date];
+      if (!dayData) return false;
+      return (
+        (dayData.b && dayData.b.length > 0) ||
+        (dayData.l && dayData.l.length > 0) ||
+        (dayData.d && dayData.d.length > 0)
+      );
+    });
+  }
+
+     rows.sort((a, b) => a.dept.localeCompare(b.dept)).forEach(row => {
+    const isTripDept = (row.display_dept || row.dept).includes("(출장)");
+    if (isTripDept && !hasAnyMeal(row)) return;  // ✅ 출장자만 생략 조건
+  
+  const tr = document.createElement("tr");
 
       tr.innerHTML = `
         <td class="weekly-dept-cell">${row.display_dept || row.dept}</td>
