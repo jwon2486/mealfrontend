@@ -8,7 +8,7 @@ body {
 }
 
 .table-container {
-  width: 90%;
+  width: 85%;
   margin: auto;
   overflow-x: auto;
   max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
@@ -38,6 +38,7 @@ th {
     font-size: 16px;
     border: 1px solid #ddd;
 }
+
 
 th[colspan] {
   background-color: #007bff !important; 
@@ -88,6 +89,13 @@ tr:nth-child(even) {
 tr:hover {
     background-color: #d6e4ff;
     transition: 0.3s;
+}
+
+/* 부서칸 좌우폭*/
+.input-dept {
+  min-width: 50px;   /* 최소 120px */
+  max-width: 170px;   /* 최대 300px */
+  width: 100%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
 }
 
 /* 이름칸 좌우폭*/
@@ -347,7 +355,7 @@ button:hover {
     font-size: 19px;
     font-weight: bold;
   }
-
+  .input-dept,
   .input-name,
   .input-empid {
     font-size: 18px;

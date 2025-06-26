@@ -11,7 +11,7 @@ function formatDateWithDay(dateStr) {
 
 // ✅ 서버에서 식수 신청 내역 조회 (관리자용)
 function loadEditData(selectedWeek) {
-    editMode = "apply";  // ✅ 신청자 모드 설정
+    editMode = "all";  // ✅ 신청자 모드 설정
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
 
@@ -185,10 +185,10 @@ function generateTableBody(dates, data) {
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
                 }
                 else if (isDeadlinePassed(date, type)) {
-                    btn.style.backgroundColor = "#ccc";
-                    btn.style.color = "#666";
-                    btn.title = "신청 마감됨";
-                    btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
+                btn.classList.add("meal-deadline");      // ✅ 클래스 추가
+                btn.innerText= "❌마감";                // ✅ 텍스트 변경
+                btn.title = "신청 마감됨";
+                btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
                 }
                 else {
                     btn.onclick = () => toggleMeal(btn);
@@ -338,18 +338,62 @@ function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
 
-    let deadline = new Date(mealDate);
-    if (mealType === "조식") {
-        deadline.setDate(mealDate.getDate() - 1);
-        deadline.setHours(20, 0, 0, 0);
-    } else if (mealType === "중식") {
-        deadline.setHours(12, 0, 0, 0);
-    } else if (mealType === "석식") {
-        deadline.setHours(17, 0, 0, 0);
+    // ✅ 2주 뒤 월요일부터는 마감 제한 없음
+    const day = now.getDay(); // 0(일) ~ 6(토)
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    let thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() + diffToMonday);
+    thisMonday.setHours(0, 0, 0, 0);
+
+    const twoWeeksLaterMonday = new Date(thisMonday);
+    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
+
+    if (mealDate >= twoWeeksLaterMonday) {
+        return false; // ✅ 마감 없음
     }
 
-    return now > deadline;
+    // ✅ 이번 주 마감 규칙
+    if (isThisWeek(dateStr)) {
+        let deadline = new Date(mealDate);
+        if (mealType === "조식") {
+            deadline.setDate(mealDate.getDate() - 1);
+            deadline.setHours(15, 0, 0, 0); // 전날 오후 3시
+        } else if (mealType === "중식") {
+            deadline.setHours(10, 0, 0, 0); // 당일 오전 10시
+        } else if (mealType === "석식") {
+            deadline.setHours(15, 0, 0, 0); // 당일 오후 3시
+        }
+        return now > deadline;
+    }
+
+    // ✅ 다음 주는 이번 주 수요일 오후 4시까지만 신청 가능
+    thisMonday = new Date(now);
+    const diff = thisMonday.getDay() === 0 ? -6 : 1 - thisMonday.getDay();
+    thisMonday.setDate(thisMonday.getDate() + diff); // 이번 주 월요일
+    thisMonday.setHours(0, 0, 0, 0);
+
+    const wednesdayDeadline = new Date(thisMonday);
+    wednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
+    wednesdayDeadline.setHours(16, 0, 0, 0); // 16시
+
+    return now > wednesdayDeadline;
 }
+
+function isThisWeek(dateStr) {
+    const target = new Date(dateStr);
+    const now = getKSTDate();
+
+    const monday = new Date(now);
+    const day = now.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    monday.setDate(now.getDate() + diff);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    return target >= monday && target <= sunday;
+}
+
 
 // ✅ 이번 주 날짜 범위
 function getCurrentWeekRange() {
@@ -377,18 +421,27 @@ function updateSummary(data, dates) {
 // ✅ 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
     const picker = document.getElementById("editWeekPicker");
-    const { start } = getCurrentWeekRange();
-    picker.value = start;
-    
-    const year = new Date().getFullYear();
+
+    // ✅ 다음 주 월요일 계산
+    const today = getKSTDate();
+    const day = today.getDay(); // 0(일)~6(토)
+    const diffToNextMonday = day === 0 ? 1 : 8 - day;
+
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + diffToNextMonday);
+
+    const nextMondayStr = nextMonday.toISOString().split("T")[0];
+    picker.value = nextMondayStr;
+
+    const year = nextMonday.getFullYear();
     const holidayApiUrl = `/holidays?year=${year}`;
 
     fetchHolidayList(holidayApiUrl, (holidays) => {
-        holidayList = holidays;
-        loadEditData(start);  // 공휴일 불러온 후 실행
+    holidayList = holidays;
+    editMode = "all";  // 명확히 전체 조회 모드 지정
+    loadAllEmployeesForEdit(nextMondayStr);  // ✅ 전체 인원 기준 초기 로딩
     });
-
-});
+    });
 
 // ✅ 주 선택 변경 시 자동 조회
 document.getElementById("editWeekPicker").addEventListener("change", function () {

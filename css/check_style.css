@@ -8,7 +8,7 @@ body {
 }
 
 .table-container {
-  width: 90%;
+  width: 100%;
   margin: auto;
   overflow-x: auto;
   max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
@@ -161,9 +161,9 @@ tr:hover {
 
 /* 버튼 스타일 */
 button {
-    padding: 10px 20px;
-    margin-top: 0px;
-    font-size: 14px;
+    padding: 20px 20px;
+    margin-bottom: 5px;
+    font-size: 20px;
     border: none;
     border-radius: 5px;
     max-width: 140px;
@@ -182,8 +182,9 @@ button {
 }
 
 .dashboard-btn {
-  min-width: 150px;
-  padding: 10px 20px;
+  min-width: 140px;
+  padding: 10px 10px;
+  font-size: 14px;
   white-space: nowrap; /* ← 필수 */
 }
 
@@ -195,8 +196,9 @@ button:hover {
   display: flex;
   align-items: center;     /* 버튼과 주 선택 input 높이 맞춤 */
   justify-content: center; /* 가운데 정렬 */
+  font-size: medium;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 /* 버튼 개별 크기 조정 */
@@ -305,7 +307,7 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 5px;
-    margin-top: 15px;
+    margin-top: 10px;
     width: auto; /* ✅ 100% 대신 내용 크기에 맞춤 */
     white-space: nowrap; /* ✅ 줄바꿈 방지 */
   }
@@ -373,7 +375,7 @@ button:hover {
 /* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
 #edit-table thead tr:nth-child(2) th {
   position: sticky;
-  top: 38px;  /* 첫 줄 높이에 맞게 조정 (필요 시 32~48px로 조정) */
+  top: 38px auto;  /* 첫 줄 높이에 맞게 조정 (필요 시 32~48px로 조정) */
   z-index: 2;
   background-color: #007bff;
   color: white;
