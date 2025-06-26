@@ -343,7 +343,7 @@ function loadWeeklyVisitData() {
 
     // const selectedDate = document.getElementById("visit-week-date").value;
     const { start, end } = getWeekStartAndEnd(selectedDate);
-    const params = `start=${start}&end=${end}&id=${applicantId}`;
+    const params = `start=${start}&end=${end}`; // id 제외 → 전체 조회
   
     getData(`${API_BASE_URL}/visitors/weekly?${params}`,
       (result) => {
@@ -396,15 +396,15 @@ function loadWeeklyVisitData() {
 
           tr.setAttribute("data-id", row.id); // ✅ 행 식별용
           tr.innerHTML = `
-              <td class="date-cell">${row.date}</td>
-              <td>${getWeekdayName(row.date)}</td>
-              <td class="b-cell ${isDeadlinePassed(row.date, 'breakfast', row.breakfast) ? 'expired-cell' : ''}">${row.breakfast}</td>
-              <td class="l-cell ${isDeadlinePassed(row.date, 'lunch', row.lunch) ? 'expired-cell' : ''}">${row.lunch}</td>
-              <td class="d-cell ${isDeadlinePassed(row.date, 'dinner', row.dinner) ? 'expired-cell' : ''}">${row.dinner}</td>
-              ${userType === "협력사" ? "" : `<td class="r-cell">${row.reason}</td>`}
-              <td><button class="edit-btn" onclick="editVisit('${row.id}')">✏️</button></td>
-              <td><button onclick="deleteVisit('${row.id}')">🗑</button></td>
-          `;
+          <td class="date-cell">${row.date}</td>
+          <td>${getWeekdayName(row.date)}</td>
+          <td class="b-cell ${bExpired ? 'expired-cell' : ''}">${row.breakfast}</td>
+          <td class="l-cell ${lExpired ? 'expired-cell' : ''}">${row.lunch}</td>
+          <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
+          ${userType === "협력사" ? "" : `<td class="r-cell">${row.reason}</td>`}
+          <td>${isOwner ? `<button class="edit-btn" onclick="editVisit('${row.id}')">✏️</button>` : ""}</td>
+          <td>${isOwner ? `<button onclick="deleteVisit('${row.id}')">🗑</button>` : ""}</td>
+        `;
           tbody.appendChild(tr);
         });
       },
