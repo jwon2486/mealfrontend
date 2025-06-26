@@ -167,11 +167,6 @@ th, td {
     white-space: nowrap;
 }
 
-/* 하단 삭제 칼럼 폭 줄이기2 */
-.visitor-summary-table th:nth-child(9), td:nth-child(9) {
-    width: 40px;  /* 필요시 130px~170px 조정 가능 */
-    white-space: nowrap;
-}
 
 td select, td textarea {
 text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
