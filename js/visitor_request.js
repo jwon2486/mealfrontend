@@ -332,7 +332,7 @@ function clearInput() {
 // 👉 주간 신청 내역 불러오기
 function loadWeeklyVisitData() {
     const userType = sessionStorage.getItem("type") || "방문자"; // ✅ 추가
-    const applicantId = getLoginInfo().id;
+    //const applicantId = getLoginInfo().id; 6월26일 테스트용 임시주석처리
 
     const dateInput = document.getElementById("visit-week-date");
     if (!dateInput || !dateInput.value) {
@@ -340,11 +340,13 @@ function loadWeeklyVisitData() {
       return;
     }
     const selectedDate = dateInput.value;
-
+    
+    //방문자 신청 정보 불러오는 함수라인
     // const selectedDate = document.getElementById("visit-week-date").value;
     //const { start, end } = getWeekStartAndEnd(selectedDate);
-    //const params = `start=${start}&end=${end}`; // id 제외 → 전체 조회
-    const params = `start=${start}&end=${end}&mode=apply`;
+    const { start, end } = getWeekStartAndEnd(selectedDate);
+    const params = `start=${start}&end=${end}`; // id 제외 → 전체 조회
+    //const params = `start=${start}&end=${end}&mode=apply`;
   
     getData(`${API_BASE_URL}/visitors/weekly?${params}`,
       (result) => {
