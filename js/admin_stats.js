@@ -870,14 +870,15 @@ function downloadWeeklyDeptExcel() {
   window.location.href = `${API_BASE_URL}/admin/stats/weekly_dept/excel?start=${start}&end=${end}`;
 }
 
-function downloadWeeklyIndividualExcel() {
-  const base = document.getElementById("weeklyBaseDate").value;
-  if (!base) return alert("기준 날짜를 선택해주세요.");
+function downloadPivotStyleExcel() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
 
-  const range = getWeeklyDateRange(base);
-  const start = range[0];
-  const end = range[range.length - 1];
+  if (!start || !end) {
+    alert("날짜를 선택해주세요.");
+    return;
+  }
 
-  showToast("📥 개인별 신청내역 엑셀 준비 중...");
-  window.location.href = `${API_BASE_URL}/admin/stats/weekly_individual/excel?start=${start}&end=${end}`;
+  showToast("📥 피벗형 엑셀 다운로드 중...");
+  window.location.href = `${API_BASE_URL}/admin/stats/pivot_excel?start=${start}&end=${end}`;
 }
