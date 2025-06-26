@@ -244,6 +244,26 @@ function getWeekRange(dateStr) {
     };
 }
 
+function getNextWeekRange() {
+    const today = getKSTDate();
+    const day = today.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+
+    const thisMonday = new Date(today);
+    thisMonday.setDate(today.getDate() + diffToMonday);
+
+    const nextMonday = new Date(thisMonday);
+    nextMonday.setDate(thisMonday.getDate() + 7);
+
+    const nextFriday = new Date(nextMonday);
+    nextFriday.setDate(nextMonday.getDate() + 4);
+
+    return {
+        start: nextMonday.toISOString().split("T")[0],
+        end: nextFriday.toISOString().split("T")[0]
+    };
+}
+
 function getCurrentWeekRange() {
     return getWeekRange(getKSTDate().toISOString().split("T")[0]);
 }
@@ -261,18 +281,55 @@ function getDateArray(start, end) {
 function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
-    let deadline = new Date(mealDate);
 
-    if (mealType === "조식") {
-        deadline.setDate(mealDate.getDate() - 1);
-        deadline.setHours(20, 0, 0, 0);
-    } else if (mealType === "중식") {
-        deadline.setHours(12, 0, 0, 0);
-    } else if (mealType === "석식") {
-        deadline.setHours(17, 0, 0, 0);
+    // ✅ 2주(14일) 이후 날짜는 마감 없이 항상 신청 가능
+    const twoWeeksLater = new Date(now);
+    twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
+    if (mealDate >= twoWeeksLater) {
+        return false; // 무조건 신청 가능
     }
 
-    return now > deadline;
+    // ✅ 이번 주 마감 규칙
+    if (isThisWeek(dateStr)) {
+        let deadline = new Date(mealDate);
+        if (mealType === "조식") {
+            deadline.setDate(mealDate.getDate() - 1);
+            deadline.setHours(15, 0, 0, 0); // 전날 오후 3시
+        } else if (mealType === "중식") {
+            deadline.setHours(10, 0, 0, 0); // 당일 오전 10시
+        } else if (mealType === "석식") {
+            deadline.setHours(15, 0, 0, 0); // 당일 오후 3시
+        }
+        return now > deadline;
+    }
+
+    // ✅ 다음 주는 이번 주 수요일 오후 4시까지만 신청 가능
+    const thisMonday = new Date(now);
+    const diff = thisMonday.getDay() === 0 ? -6 : 1 - thisMonday.getDay();
+    thisMonday.setDate(thisMonday.getDate() + diff); // 이번 주 월요일
+    thisMonday.setHours(0, 0, 0, 0);
+
+    const wednesdayDeadline = new Date(thisMonday);
+    wednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
+    wednesdayDeadline.setHours(16, 0, 0, 0); // 16시
+
+    return now > wednesdayDeadline;
+}
+
+
+function isThisWeek(dateStr) {
+    const target = new Date(dateStr);
+    const now = getKSTDate();
+
+    const monday = new Date(now);
+    const day = now.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    monday.setDate(now.getDate() + diff);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    return target >= monday && target <= sunday;
 }
 
 function updateSummary(data, dates) {
@@ -293,8 +350,17 @@ function updateSummary(data, dates) {
 }
 
 function onSearch() {
-    const selected = document.getElementById("editWeekPicker").value;
-    loadEditData(selected);
+    const picker = document.getElementById("editWeekPicker");
+    
+    // ✅ 값이 비어 있으면 다음 주로 자동 설정
+    if (!picker.value) {
+        const { start } = getNextWeekRange();
+        picker.value = start;
+    }
+
+    // ✅ 사용자가 직접 선택한 값 또는 다음 주
+    const selected = picker.value;
+    loadEditData(selected); // 테이블 렌더링
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -308,13 +374,13 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ 현재 로그인한 사용자 정보:", window.currentUser);
 
     const picker = document.getElementById("editWeekPicker");
-    const { start } = getCurrentWeekRange();
+    const { start } = getNextWeekRange();  // ✅ 다음 주 월요일로 변경됨
     picker.value = start;
 
     const year = new Date().getFullYear();
     fetchHolidayList(`/holidays?year=${year}`, (holidays) => {
         holidayList = holidays;
-        //loadEditData(start);
+        loadEditData(start); // ✅ 부서원 테이블 다음 주 기준으로 자동 표시
     });
 
     ["searchName", "searchEmpId"].forEach(id => {
