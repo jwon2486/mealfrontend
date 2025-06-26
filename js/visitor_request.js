@@ -342,8 +342,9 @@ function loadWeeklyVisitData() {
     const selectedDate = dateInput.value;
 
     // const selectedDate = document.getElementById("visit-week-date").value;
-    const { start, end } = getWeekStartAndEnd(selectedDate);
-    const params = `start=${start}&end=${end}`; // id 제외 → 전체 조회
+    //const { start, end } = getWeekStartAndEnd(selectedDate);
+    //const params = `start=${start}&end=${end}`; // id 제외 → 전체 조회
+    const params = `start=${start}&end=${end}&mode=apply`;
   
     getData(`${API_BASE_URL}/visitors/weekly?${params}`,
       (result) => {
