@@ -364,6 +364,8 @@ function loadWeeklyVisitData() {
         (result || []).forEach(row => {
           // result.forEach 안에 추가
           const tr = document.createElement("tr");
+          const isOwner = row.applicant_id === userId;
+
           // const now = new Date();
           // const mealDate = new Date(row.date);
           // let isClosed = false;
