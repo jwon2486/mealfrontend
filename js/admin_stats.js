@@ -869,3 +869,15 @@ function downloadWeeklyDeptExcel() {
   showToast("📥 엑셀 다운로드 준비 중...");
   window.location.href = `${API_BASE_URL}/admin/stats/weekly_dept/excel?start=${start}&end=${end}`;
 }
+
+function downloadWeeklyIndividualExcel() {
+  const base = document.getElementById("weeklyBaseDate").value;
+  if (!base) return alert("기준 날짜를 선택해주세요.");
+
+  const range = getWeeklyDateRange(base);
+  const start = range[0];
+  const end = range[range.length - 1];
+
+  showToast("📥 개인별 신청내역 엑셀 준비 중...");
+  window.location.href = `${API_BASE_URL}/admin/stats/weekly_individual/excel?start=${start}&end=${end}`;
+}
