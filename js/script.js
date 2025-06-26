@@ -388,40 +388,72 @@ function updateMealSummary() {
 //         });
 // }
 
-// ✅ 오늘 기준으로 이번 주 월요일 날짜 반환
+function isThisWeek(dateStr) {
+    const target = new Date(dateStr);
+    const now = getKSTDate();
+
+    const monday = new Date(now);
+    const day = now.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    monday.setDate(now.getDate() + diff);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    return target >= monday && target <= sunday;
+}
+
+
+// ✅ 오늘 기준으로 다음 주 월요일 날짜 반환
 function setDefaultWeek() {
     const today = new getKSTDate();
     const monday = new Date(today);
     const day = today.getDay();
 
-    // 일요일(0)은 월요일(-6), 월요일(1)은 그대로
     const diff = day === 0 ? -6 : 1 - day;
-    monday.setDate(today.getDate() + diff);
+    monday.setDate(today.getDate() + diff + 7);  // 🔄 다음 주 월요일로 이동
 
     document.getElementById("weekPicker").value = monday.toISOString().split("T")[0];
 }
 
-// ✅ 특정 식사 버튼이 마감되었는지 여부 반환
+// ✅ 마감시간 규칙
 function isDeadlinePassed(dateStr, mealType) {
-    const now = getKSTDate(); // 현재 시간
+    const now = getKSTDate();
     const mealDate = new Date(dateStr);
 
-    // 마감 기준 시간 계산
-    let deadline = new Date(mealDate);
-    if (mealType === "조식") {
-        // 전날 오후 3시
-        deadline.setDate(mealDate.getDate() - 1);
-        deadline.setHours(15, 0, 0, 0);
-    } else if (mealType === "중식") {
-        // 당일 오전 10시
-        deadline.setHours(10, 0, 0, 0);
-    } else if (mealType === "석식") {
-        // 당일 오후 3시
-        deadline.setHours(15, 0, 0, 0);
-    }
+    if (isThisWeek(dateStr)) {
+        // ✅ 이번 주 식사는 기존 마감 규칙 사용
+        let deadline = new Date(mealDate);
+        if (mealType === "조식") {
+            deadline.setDate(mealDate.getDate() - 1);
+            deadline.setHours(15, 0, 0, 0);
+        } else if (mealType === "중식") {
+            deadline.setHours(10, 0, 0, 0);
+        } else if (mealType === "석식") {
+            deadline.setHours(15, 0, 0, 0);
+        }
+        return now > deadline;
+    } else {
+        // ✅ 다음 주 식사는 이번 주 수요일 16:00까지만 신청 가능
 
-    return now > deadline;
+        // 이번 주 월요일 계산
+        const thisMonday = new Date(now);
+        const day = thisMonday.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        thisMonday.setDate(now.getDate() + diff);
+        thisMonday.setHours(0, 0, 0, 0);
+
+        // 이번 주 수요일 16시 마감 시각 계산
+        const thisWednesdayDeadline = new Date(thisMonday);
+        thisWednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
+        thisWednesdayDeadline.setHours(16, 0, 0, 0);
+
+        return now > thisWednesdayDeadline;
+    }
 }
+
+
+
 
 // ✅ 자동 로그인 및 주차 변경 이벤트
 document.addEventListener("DOMContentLoaded", function () {
