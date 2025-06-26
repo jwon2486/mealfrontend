@@ -12,7 +12,8 @@ body {
   
   /* 테이블 영역 */
   .table-container {
-    width: 80%;
+    width: 100%;
+    max-width: 1000px;
     margin: 0 auto 20px auto;
     overflow-x: auto;
   }
@@ -162,6 +163,12 @@ th, td {
 
 /* 하단 삭제 칼럼 폭 줄이기 */
 .visitor-summary-table th:nth-child(8), td:nth-child(8) {
+    width: 40px;  /* 필요시 130px~170px 조정 가능 */
+    white-space: nowrap;
+}
+
+/* 하단 삭제 칼럼 폭 줄이기2 */
+.visitor-summary-table th:nth-child(9), td:nth-child(9) {
     width: 40px;  /* 필요시 130px~170px 조정 가능 */
     white-space: nowrap;
 }
