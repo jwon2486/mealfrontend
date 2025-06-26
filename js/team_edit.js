@@ -282,11 +282,18 @@ function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
 
-    // ✅ 2주(14일) 이후 날짜는 마감 없이 항상 신청 가능
-    const twoWeeksLater = new Date(now);
-    twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
-    if (mealDate >= twoWeeksLater) {
-        return false; // 무조건 신청 가능
+     // ✅ 2주 뒤 월요일부터는 마감 제한 없음
+    const day = now.getDay(); // 0(일) ~ 6(토)
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    let thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() + diffToMonday);
+    thisMonday.setHours(0, 0, 0, 0);
+
+    const twoWeeksLaterMonday = new Date(thisMonday);
+    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
+
+    if (mealDate >= twoWeeksLaterMonday) {
+        return false; // ✅ 마감 없음
     }
 
     // ✅ 이번 주 마감 규칙
@@ -304,7 +311,7 @@ function isDeadlinePassed(dateStr, mealType) {
     }
 
     // ✅ 다음 주는 이번 주 수요일 오후 4시까지만 신청 가능
-    const thisMonday = new Date(now);
+    thisMonday = new Date(now);
     const diff = thisMonday.getDay() === 0 ? -6 : 1 - thisMonday.getDay();
     thisMonday.setDate(thisMonday.getDate() + diff); // 이번 주 월요일
     thisMonday.setHours(0, 0, 0, 0);

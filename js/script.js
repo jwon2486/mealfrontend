@@ -421,6 +421,23 @@ function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
 
+    // ✅ 기준: 2주 뒤 월요일 이후면 마감 제한 없음
+    const twoWeeksLaterMonday = new Date(now);
+    const day = now.getDay(); // 0(일)~6(토)
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    
+    // 이번 주 월요일 기준점
+    const thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() + diffToMonday);
+
+    // 2주 뒤 월요일 계산
+    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
+    twoWeeksLaterMonday.setHours(0, 0, 0, 0);
+
+    if (mealDate >= twoWeeksLaterMonday) {
+        return false;  // ✅ 마감 없음
+    }
+
     if (isThisWeek(dateStr)) {
         // ✅ 이번 주 식사는 기존 마감 규칙 사용
         let deadline = new Date(mealDate);
