@@ -5,31 +5,34 @@ body {
     background-color: #f8f9fa;
     margin: 0;
     padding: 20px;
+    
 }
 
 /* 테이블 스타일 */
 table {
-    width: 60%;
+    width: 100%;
     margin: 20px auto;
     border-collapse: collapse;
+    max-width: 700px ;
     background: white;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     overflow: hidden;
+    font-weight: bold;
 }
 
 /* 테이블 헤더 스타일 */
 th {
     background-color: #007bff;
     color: white;
-    padding: 12px;
+    padding: 10px;
     font-size: 16px;
-    border-bottom: 2px solid #0056b3;
+    border-bottom: 1px solid #0056b3;
 }
 
 /* 테이블 행 스타일 */
 td {
-    padding: 12px;
+    padding: 10px;
     border-bottom: 1px solid #ddd;
     text-align: center;
 }
@@ -65,14 +68,14 @@ tr:hover {
 }
 
 .login-field label {
-    font-size: 18px;          /* ⭐ label 글자 크기 확대 */
+    font-size: 20px;          /* ⭐ label 글자 크기 확대 */
     font-weight: bold;
     width: 80px;              /* ⭐ label 고정 폭 주면 정렬 깔끔해짐 */
     text-align: center;        /* ⭐ 오른쪽 정렬로 label 깔끔하게 붙임 */
 }
 
 .login-field input[type="text"] {
-    font-size: 16px;
+    font-size: 20px;
     padding: 8px 12px;
     max-width: 300px;   /* ⭐ 최대 너비 제한 */
     width: 100%;        /* 가로 꽉 채움 (flex-grow로 자연스럽게) */
@@ -83,7 +86,7 @@ tr:hover {
 
 /* 신청/미신청 버튼 스타일 */
 .meal-btn {
-    padding: 8px 15px;
+    padding: 8px 10px;
     border: none;
     cursor: pointer;
     font-size: 14px;
@@ -143,8 +146,9 @@ button:hover {
   }
 
   table {
-    font-size: 12px;
+    font-size: 16px;
     width: 100%;
+    font-weight: bold;
   }
 
   th, td {
@@ -165,8 +169,19 @@ button:hover {
   input[type="date"],
   select,
   button {
-    width: 100%;
-    font-size: 14px;
+    width: 90%;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  /* 신청/미신청 버튼 스타일 */
+.meal-btn {
+    padding: 10px 1px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
   }
 
    /* 👉 .action-btn 만 따로 오버라이드 */
