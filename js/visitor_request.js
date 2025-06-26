@@ -407,6 +407,7 @@ function loadWeeklyVisitData() {
           <td class="l-cell ${lExpired ? 'expired-cell' : ''}">${row.lunch}</td>
           <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
           ${userType === "협력사" ? "" : `<td class="r-cell">${row.reason}</td>`}
+          <td>${row.applicant_name || "-"}</td>
           <td>${isOwner ? `<button class="edit-btn" onclick="editVisit('${row.id}')">✏️</button>` : ""}</td>
           <td>${isOwner ? `<button onclick="deleteVisit('${row.id}')">🗑</button>` : ""}</td>
         `;
