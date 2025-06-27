@@ -8,12 +8,13 @@ body {
     background-color: #f9f9f9;
     color: #333;
     text-align: center;
+    font-size: 20px;
   }
   
   /* 테이블 영역 */
   .table-container {
     width: 100%;
-    max-width: 1000px;
+    max-width: 1500px;
     margin: 0 auto 20px auto;
     overflow-x: auto;
   }
@@ -30,12 +31,12 @@ body {
     padding: 10px;
     border: 1px solid #ccc;
     text-align: center;
+    font-size: 18px;
   }
   
   th {
     background-color: #007bff;
     color: #fff;
-    font-size: 14px;
   }
   
   /* ✅ 테이블 안의 input 요소 정렬 및 크기 조정 */
@@ -43,7 +44,7 @@ body {
   td input[type="text"],
   td select {
   height: 40px;
-  font-size: clamp(11px, 3.2vw, 15px);  /* ✅ 반응형 폰트 크기 */
+  font-size: clamp(12px, 3.2vw, 20px);  /* ✅ 반응형 폰트 크기 */
   padding: 0;
   box-sizing: border-box;
   width: 100%;
@@ -77,94 +78,39 @@ th, td {
   text-align: center;
 }
 /* 테이블들  칼럼 조정 속성  */
-/* 상단 날짜 칼럼 폭 줄이기 */
-.visitor-form-table th:nth-child(1), td:nth-child(1) {
-    width: 30px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
+/* 상단 테이블 열 폭 */
+th.col-adate, td.col-adate { width: 100px; }
+th.col-aday, td.col-aday { width: 60px; }
+th.col-abreakfast, td.col-abreakfast,
+th.col-alunch, td.col-alunch,
+th.col-adinner, td.col-adinner { width: 30px; }
+th.col-areason, td.col-areason { width: 250px; }
+th.col-asave, td.col-asave { width: 40px; }
+
+/* 하단 테이블 열 폭 */
+th.col-summary-date, td.col-summary-date { width: 90px; }
+th.col-summary-day, td.col-summary-day { width: 60px; }
+th.col-summary-breakfast, td.col-summary-breakfast,
+th.col-summary-lunch, td.col-summary-lunch,
+th.col-summary-dinner, td.col-summary-dinner { width: 30px; }
+th.col-summary-reason, td.col-summary-reason { width: 250px; }
+th.col-summary-requester, td.col-summary-requester { width: 60px; }
+th.col-summary-edit, td.col-summary-edit,
+th.col-summary-delete, td.col-summary-delete { width: 40px; }
+
+/* 공통 td 높이 지정 */
+.visitor-form-table td,
+.visitor-summary-table td {
+  height: 48px;
+  vertical-align: middle;
 }
 
-/* 상단 요일 칼럼 폭 줄이기 */
-.visitor-form-table th:nth-child(2), td:nth-child(2) {
-    width: 20px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 상단 조식 칼럼 폭 줄이기 */
-.visitor-form-table th:nth-child(3), td:nth-child(3) {
-    width: 40px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 상단 중식 칼럼 폭 줄이기 */
-.visitor-form-table th:nth-child(4), td:nth-child(4) {
-    width: 40px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 상단 석식 칼럼 폭 줄이기 */
-.visitor-form-table th:nth-child(5), td:nth-child(5) {
-    width: 40px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 상단 사유 칼럼 폭 줄이기 */
-.visitor-form-table th:nth-child(6), td:nth-child(6) {
-    width: 180px;  /* 필요시 130px~170px 조정 가능 */
-    white-space: nowrap;
-}
-
-/* 상단 저장 칼럼 폭 줄이기 */
-.visitor-form-table th:nth-child(7), td:nth-child(7) {
-    width: 50px;  /* 필요시 130px~170px 조정 가능 */
-    white-space: nowrap;
-}
-
-/* 하단 날짜 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(1), td:nth-child(1) {
-    width: 80px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 하단 요일 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(2), td:nth-child(2) {
-    width: 40px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 하단 조식 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(3), td:nth-child(3) {
-    width: 30px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 하단 중식 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(4), td:nth-child(4) {
-    width: 30px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 하단 석식 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(5), td:nth-child(5) {
-    width: 30px;
-    white-space: nowrap;  /* 줄바꿈 방지 */
-}
-
-/* 하단 사유 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(6), td:nth-child(6) {
-    width: 200px;  /* 필요시 130px~170px 조정 가능 */
-    white-space: nowrap;
-}
-
-/* 하단 수정 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(7), td:nth-child(7) {
-    width: 50px;  /* 필요시 130px~170px 조정 가능 */
-    white-space: nowrap;
-}
-
-/* 하단 삭제 칼럼 폭 줄이기 */
-.visitor-summary-table th:nth-child(8), td:nth-child(8) {
-    width: 40px;  /* 필요시 130px~170px 조정 가능 */
-    white-space: nowrap;
+/* input과 button 높이 */
+.visitor-form-table td input,
+.visitor-form-table td button,
+.visitor-summary-table td button {
+  height: 38  px;
+  font-size: 14px;
 }
 
 
@@ -181,6 +127,7 @@ text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
     cursor: pointer;
     display: inline-block;
     text-align: center;
+    height: 40px;
   }
   
   button:hover {
@@ -289,7 +236,7 @@ text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
   }
 
   .date-input {
-    font-size: clamp(10px, 2.5vw, 13px);
+    font-size: clamp(12px, 2.5vw, 18px);
     height: 3.5em;
     line-height: 1.2;
     width: 90px;

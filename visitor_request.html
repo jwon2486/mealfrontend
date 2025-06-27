@@ -18,27 +18,26 @@
   <!-- ✅ 상단 신청 입력 영역 -->
   <div class="table-container">
     <table class="visitor-form-table"> <!-- 상단: 식수 신청 테이블 -->
-    <table>
       <thead>
         <tr>
-          <th>날짜</th>
-          <th>요일</th>
-          <th>조식</th>
-          <th>중식</th>
-          <th>석식</th>
-          <th id="reason-th">사유</th>
-          <th>저장</th>
+        <th class="col-adate">날짜</th>
+        <th class="col-aday">요일</th>
+        <th class="col-abreakfast">조식</th>
+        <th class="col-alunch">중식</th>
+        <th class="col-adinner">석식</th>
+        <th class="col-areason">사유</th>
+        <th class="col-asave">저장</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><input type="date" class="date-input" id="visit-date" /></td>
-          <td id="visit-day">-</td>
-          <td><input type="number" id="b-count" min="0" max="50" value="0" /></td>
-          <td><input type="number" id="l-count" min="0" max="50" value="0" /></td>
-          <td><input type="number" id="d-count" min="0" max="50" value="0" /></td>
-          <td><input type="text" id="visit-reason" class="reason-input" placeholder="신청 사유" /></td>
-          <td><button id="visit-data-save-btn" onclick="submitVisit()">💾 저장</button></td>
+        <td class="col-adate"><input type="date" class="date-input" id="visit-date" /></td>
+        <td class="col-aday" id="visit-day">-</td>
+        <td class="col-abreakfast"><input type="number" id="b-count" min="0" max="50" value="0" /></td>
+        <td class="col-alunch"><input type="number" id="l-count" min="0" max="50" value="0" /></td>
+        <td class="col-adinner"><input type="number" id="d-count" min="0" max="50" value="0" /></td>
+        <td class="col-areason"><input type="text" id="visit-reason" class="reason-input" placeholder="신청 사유" /></td>
+        <td class="col-asave"><button id="visit-data-save-btn" onclick="submitVisit()">💾 저장</button></td>
         </tr>
       </tbody>
     </table>
@@ -49,18 +48,17 @@
     <h3>신청 내역 (해당 주)</h3>
     <input type="date" id="visit-week-date"> <button id="load-visit-data-btn">조회</button>
     <table class="visitor-summary-table"> <!-- 하단: 신청 내역 테이블 -->
-    <table>
       <thead>
         <tr>
-          <th>날짜</th>
-          <th>요일</th>
-          <th>조식</th>
-          <th>중식</th>
-          <th>석식</th>
-          <th id="weekly-reason-th" class="reason-col">사유</th>
-          <th>신청자</th> <!-- ✅ 여기 추가 -->
-          <th>수정</th>
-          <th>삭제</th>
+        <th class="col-summary-date">날짜</th>
+        <th class="col-summary-day">요일</th>
+        <th class="col-summary-breakfast">조식</th>
+        <th class="col-summary-lunch">중식</th>
+        <th class="col-summary-dinner">석식</th>
+        <th class="col-summary-reason">사유</th>
+        <th class="col-summary-requester">신청자</th>
+        <th class="col-summary-edit">수정</th>
+        <th class="col-summary-delete">삭제</th>
         </tr>
       </thead>
       <tbody id="visit-summary-body">
