@@ -175,7 +175,7 @@ function showEmployeeSelectPopup(matches) {
     const html = `
       <html>
       <head>
-        <link rel="stylesheet" href="css/visitor_style.css">
+        <link rel="stylesheet" href="css/admin_visitor_style.css">
       </head>
       <body>
         <h3>📌 이름이 동일한 사원이 여러 명입니다</h3>

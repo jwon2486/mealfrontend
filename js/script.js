@@ -97,6 +97,39 @@ if (window.currentUser.level === 2 && teamEditBtn) {
         
 }
 
+let isAllSelected = false;  // 현재 상태 기억
+
+function toggleSelectAll() {
+    const btnList = document.querySelectorAll(".meal-btn");
+    let changed = false;
+
+    btnList.forEach(btn => {
+        const date = btn.dataset.date;
+        const type = btn.dataset.type;
+
+        if (isDeadlinePassed(date, type)) return; // 마감된 건 무시
+
+        const shouldSelect = !isAllSelected;
+
+        // 상태 전환 필요할 때만 toggle
+        const selected = btn.classList.contains("selected");
+        if (shouldSelect && !selected) {
+            toggleMeal(btn);
+            changed = true;
+        } else if (!shouldSelect && selected) {
+            toggleMeal(btn);
+            changed = true;
+        }
+    });
+
+    // 상태 반전
+    if (changed) {
+        isAllSelected = !isAllSelected;
+        const toggleBtn = document.getElementById("toggleSelectBtn");
+        toggleBtn.innerText = isAllSelected ? "전체 선택 해제" : "전체 선택";
+    }
+}
+
 function logout() {
     localStorage.removeItem("currentUser");
     localStorage.removeItem("flag_type");

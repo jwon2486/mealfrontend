@@ -1,0 +1,300 @@
+/* admin_visitor_style.css */
+
+/* 기본 설정 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: 20px;
+    margin: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* 테이블 영역 */
+  .table-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 20px auto;
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+  }
+  
+  th {
+    background-color: #007bff;
+    color: #fff;
+    font-size: 14px;
+  }
+  
+  /* ✅ 테이블 안의 input 요소 정렬 및 크기 조정 */
+  td input[type="number"],
+  td input[type="text"],
+  td select {
+  height: 40px;
+  font-size: clamp(11px, 3.2vw, 15px);  /* ✅ 반응형 폰트 크기 */
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: normal;
+  appearance: textfield; /* Safari 등에서 기본 화살표 제거 */
+}
+
+
+/* 스핀버튼 사이즈 조절 */
+td input[type="number"]::-webkit-inner-spin-button {
+    -webkit-transform: scale(1.4);  /* 원하는 배율 적용 */
+    transform: scale(1.4);
+}
+
+
+/* ✅ 내부 텍스트가 완전 중앙 정렬되도록 input wrapper도 정렬 */
+td {
+  vertical-align: middle;
+  text-align: center;
+  padding: 4px;
+}
+
+/* ✅ 테이블 셀 안 요소의 정렬 */
+th, td {
+  vertical-align: middle;
+  text-align: center;
+}
+/* 테이블들  칼럼 조정 속성  */
+/* 상단 날짜 칼럼 폭 줄이기 */
+.visitor-form-table th:nth-child(1), td:nth-child(1) {
+    width: 30px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 상단 요일 칼럼 폭 줄이기 */
+.visitor-form-table th:nth-child(2), td:nth-child(2) {
+    width: 20px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 상단 조식 칼럼 폭 줄이기 */
+.visitor-form-table th:nth-child(3), td:nth-child(3) {
+    width: 40px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 상단 중식 칼럼 폭 줄이기 */
+.visitor-form-table th:nth-child(4), td:nth-child(4) {
+    width: 40px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 상단 석식 칼럼 폭 줄이기 */
+.visitor-form-table th:nth-child(5), td:nth-child(5) {
+    width: 40px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 상단 사유 칼럼 폭 줄이기 */
+.visitor-form-table th:nth-child(6), td:nth-child(6) {
+    width: 180px;  /* 필요시 130px~170px 조정 가능 */
+    white-space: nowrap;
+}
+
+/* 상단 저장 칼럼 폭 줄이기 */
+.visitor-form-table th:nth-child(7), td:nth-child(7) {
+    width: 50px;  /* 필요시 130px~170px 조정 가능 */
+    white-space: nowrap;
+}
+
+/* 하단 날짜 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(1), td:nth-child(1) {
+    width: 80px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 하단 요일 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(2), td:nth-child(2) {
+    width: 40px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 하단 조식 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(3), td:nth-child(3) {
+    width: 30px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 하단 중식 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(4), td:nth-child(4) {
+    width: 30px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 하단 석식 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(5), td:nth-child(5) {
+    width: 30px;
+    white-space: nowrap;  /* 줄바꿈 방지 */
+}
+
+/* 하단 사유 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(6), td:nth-child(6) {
+    width: 200px;  /* 필요시 130px~170px 조정 가능 */
+    white-space: nowrap;
+}
+
+/* 하단 수정 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(7), td:nth-child(7) {
+    width: 50px;  /* 필요시 130px~170px 조정 가능 */
+    white-space: nowrap;
+}
+
+/* 하단 삭제 칼럼 폭 줄이기 */
+.visitor-summary-table th:nth-child(8), td:nth-child(8) {
+    width: 40px;  /* 필요시 130px~170px 조정 가능 */
+    white-space: nowrap;
+}
+
+
+td select, td textarea {
+text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
+}
+  
+  button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* 데이터 없음 표시 */
+  td[colspan="8"] {
+    color: gray;
+    font-style: italic;
+  }
+
+  /* 기본 테이블 중앙 정렬 */
+.visitor-table th,
+.visitor-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* 저장 테이블 영역 */
+.visitor-form-table input,
+.visitor-form-table select {
+    text-align: center;
+}
+
+.expired-cell {
+    background-color: #ffe6e6 !important;
+}
+
+.expired-input {
+    background-color: #ffe6e6 !important;
+  }
+
+.expired-row {
+    background-color: #ffdddd !important;
+  }
+
+.expired-cell {
+    background-color: #ffe5e5;
+}
+  
+.row-expired td {
+    background-color: #ffcccc !important;
+}
+
+/* 저장 버튼 */
+.save-btn {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 📌 사유 입력 필드를 넓게 설정 */
+.reason-input {
+  width: 100%;
+  min-width: 30px;
+  text-align: left;
+}
+
+/* 📌 사유 입력 필드를 넓게 설정 */
+.date-input {
+  width: 120px;
+  min-width: 80px;
+  max-width: 140px;
+  padding: 3px;
+  font-size: 14px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+  
+  /* ✅ 모바일 반응형 */
+  @media (max-width: 768px) {
+  td input[type="number"],
+  td input[type="text"],
+  td select {
+    font-size: clamp(6px, 3.5vw, 13px);
+    padding: 2px;
+    height: 28px;
+  }
+
+  /*크롬에서 스핀 버튼 제거*/
+  td input[type="number"]::-webkit-inner-spin-button,
+  td input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+
+  table, th, td {
+    font-size: clamp(10px, 3vw, 13px);
+    padding: 1px;
+  }
+
+  button {
+    font-size: clamp(11px, 3vw, 14px);
+    padding: 4px 6px;
+  }
+
+  .reason-input {
+    font-size: clamp(10px, 3vw, 13px);
+    padding: 20px;
+    width: 100%;
+  }
+
+  .date-input {
+    font-size: clamp(10px, 2.5vw, 13px);
+    height: 3.5em;
+    line-height: 1.2;
+    width: 90px;
+    padding: 2px;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
