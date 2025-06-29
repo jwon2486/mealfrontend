@@ -277,7 +277,7 @@ function goToPage(pageUrl) {
 
 //5분간 입력이 없을시 강제 로그아웃 처리하는 함수
 (function setupInactivityTimeout() {
-    const TIMEOUT = 5 * 60 * 1000; // 5분 (원하는 시간으로 바꿀 수 있음)
+    const TIMEOUT = 3 * 60 * 1000; // 3분 (원하는 시간으로 바꿀 수 있음)
     let timer;
 
     function resetTimer() {
