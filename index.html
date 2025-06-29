@@ -90,7 +90,7 @@
 }
 
     document.addEventListener("DOMContentLoaded", function () {
-    const savedUser = localStorage.getItem("currentUser");
+    const savedUser = sessionStorage.getItem("currentUser");
     if (savedUser) {
         const currentUser = JSON.parse(savedUser);
         const adminBtn = document.getElementById("adminBtn");
