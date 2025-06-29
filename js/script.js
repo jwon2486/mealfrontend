@@ -508,7 +508,7 @@ function isDeadlinePassed(dateStr, mealType) {
 // ✅ 자동 로그인 및 주차 변경 이벤트
 document.addEventListener("DOMContentLoaded", function () {
     setDefaultWeek(); // ✅ 이번 주 자동 설정
-    const savedUser = localStorage.getItem("currentUser");
+    const savedUser = sessionStorage.getItem("currentUser");
     const year = new Date().getFullYear();
 
 
