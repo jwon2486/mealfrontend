@@ -155,7 +155,7 @@ document.getElementById("load-visit-data-btn").addEventListener("click", () => {
 
 
 function loadLoginInfo() {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const user = JSON.parse(sessionStorage.getItem("currentUser"));
   if (user && user.userName) {
     document.getElementById("login-user").innerText = `👤 ${user.userName} (${user.dept})`;
     sessionStorage.setItem("id", user.userId);
