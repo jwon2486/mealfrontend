@@ -5,7 +5,7 @@
   <title>통계 대시보드</title>
   <link rel="stylesheet" href="css/stats.css" />
   <script>
-  const savedUser = localStorage.getItem("currentUser");
+  const savedUser = sessionStorage.getItem("currentUser");
   if (!savedUser) {
     location.href = "index.html";  // 로그인 안 되어 있음
   } else {

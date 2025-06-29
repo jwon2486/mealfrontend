@@ -5,7 +5,7 @@
   <title>관리자 방문자 식수 신청</title>
   <link rel="stylesheet" href="css/visitor_style.css" />
   <script>
-  const savedUser = localStorage.getItem("currentUser");
+  const savedUser = sessionStorage.getItem("currentUser");
   if (!savedUser) {
     location.href = "index.html";  // 로그인 안 되어 있음
   } else {
