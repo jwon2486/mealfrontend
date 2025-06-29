@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // admin 페이지에 해당될 경우만 검사
   if (adminPages.includes(currentPage)) {
-    const savedUser = localStorage.getItem("currentUser");
+    const savedUser = sessionStorage.getItem("currentUser");
 
     if (!savedUser) {
       alert("로그인이 필요합니다.");

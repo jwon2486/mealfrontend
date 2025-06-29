@@ -46,12 +46,12 @@ function login(event) {
         // alert(data.type);
         
         
-        localStorage.setItem("flagType", data.type);
+        sessionStorage.setItem("flagType", data.type);
         flag_type = localStorage.getItem("flagType");
         //alert(flag_type + 'flag');
 
 
-        localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
+        sessionStorage.setItem("currentUser", JSON.stringify(window.currentUser));
 
         // ✅ 버튼 초기화 및 표시 처리
 const adminBtn = document.getElementById("adminBtn");
@@ -148,7 +148,7 @@ function logout() {
 
 // ✅ 로그아웃 처리
 function logout() {
-    localStorage.removeItem("currentUser");
+    sessionStorage.clear();
     window.currentUser = null;
 
     // 모든 화면 초기화
@@ -324,7 +324,7 @@ function loadWeekData() {
 // ✅ 저장 요청 (선택된 버튼 → 서버로 전송)
 function saveMeals() {
     if (!window.currentUser) {
-        const savedUser = localStorage.getItem("currentUser");
+        const savedUser = sessionStorage.getItem("currentUser");
         if (savedUser) {
             window.currentUser = JSON.parse(savedUser);  // 복원 시도
         } else {
@@ -514,7 +514,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (savedUser) {
         window.currentUser = JSON.parse(savedUser);
-        flag_type = window.currentUser.type;
+        flag_type = sessionStorage.getItem("flagType");
 
         // ✅ 관리자 버튼 노출 여부 처리
         const adminBtn = document.getElementById("adminButton");
