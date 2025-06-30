@@ -274,3 +274,27 @@ function getKSTDate() {
 function goToPage(pageUrl) {
     window.location.href = pageUrl;
 }
+
+//5분간 입력이 없을시 강제 로그아웃 처리하는 함수
+(function setupInactivityTimeout() {
+    const TIMEOUT = 3 * 60 * 1000; // 3분 (원하는 시간으로 바꿀 수 있음)
+    let timer;
+
+    function resetTimer() {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            // 세션 스토리지 삭제
+            sessionStorage.clear();
+            // 로그아웃 처리: 로그인 페이지로 이동
+            location.href = "index.html";
+        }, TIMEOUT);
+    }
+
+    // 이벤트에 타이머 리셋 연결
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+    document.onclick = resetTimer;
+    document.onscroll = resetTimer;
+})();
+

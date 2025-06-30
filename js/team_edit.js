@@ -14,7 +14,7 @@ function loadEditData(selectedWeek) {
     editMode = "all";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
     const myDept = currentUser?.department || currentUser?.dept;
 
     if (!range) {
@@ -371,7 +371,7 @@ function onSearch() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
     if (!currentUser || currentUser.level !== 2) {
         alert("중간관리자만 접근할 수 있습니다.");
         location.href = "index.html";

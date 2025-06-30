@@ -5,7 +5,7 @@ let flag = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
     
-    const storedDate = localStorage.getItem("lastVisitDate");
+    const storedDate = sessionStorage.getItem("lastVisitDate");
     if (storedDate) {
 
       const todayStr = getKSTDate().toISOString().split("T")[0];
@@ -155,16 +155,16 @@ document.getElementById("load-visit-data-btn").addEventListener("click", () => {
 
 
 function loadLoginInfo() {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const user = JSON.parse(sessionStorage.getItem("currentUser"));
   if (user && user.userName) {
     document.getElementById("login-user").innerText = `👤 ${user.userName} (${user.dept})`;
     sessionStorage.setItem("id", user.userId);
     sessionStorage.setItem("name", user.userName);
     sessionStorage.setItem("type", user.type);
 
-    localStorage.setItem("userId", user.userId);    // ✅ 추가
-    localStorage.setItem("userName", user.userName);
-    localStorage.setItem("userType", user.type);
+    sessionStorage.setItem("userId", user.userId);    // ✅ 추가
+    sessionStorage.setItem("userName", user.userName);
+    sessionStorage.setItem("userType", user.type);
   }
 }
   
@@ -203,6 +203,11 @@ function submitVisit() {
     const userType = sessionStorage.getItem("type") || "방문자";
     let actualType = "방문자";
     
+    // ✅ 다음 주 마감 검사
+    if (isNextWeekDeadlinePassed(date)) {
+      alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 신청할 수 없습니다.");
+      return;
+    }
   
     const reason = (userType === "협력사") ? "협력사 신청" : reasonInput.value.trim();
   
@@ -298,6 +303,65 @@ function submitVisit() {
     });
 }
 
+
+
+//이번주 수요일 자정(목요일 0시)인지 판별하는 함수:
+function isNextWeekDeadlinePassed(selectedDate) {
+  const now = getKSTDate();
+  const mealDate = new Date(selectedDate);
+
+  // 이번주 월요일
+  const nowDay = now.getDay() === 0 ? 7 : now.getDay(); // Sunday=7
+  const thisWeekMonday = new Date(now);
+  thisWeekMonday.setDate(now.getDate() - nowDay + 1);
+  thisWeekMonday.setHours(0,0,0,0);
+
+  // 이번주 수요일 16시
+  const wednesday16 = new Date(thisWeekMonday);
+  wednesday16.setDate(thisWeekMonday.getDate() + 2);
+  wednesday16.setHours(16,0,0,0);
+
+  // 이번주 일요일 23:59:59
+  const sundayEnd = new Date(thisWeekMonday);
+  sundayEnd.setDate(thisWeekMonday.getDate() + 6);
+  sundayEnd.setHours(23,59,59,999);
+
+  // 다음주 월요일~일요일 범위
+  const nextWeekMonday = new Date(thisWeekMonday);
+  nextWeekMonday.setDate(thisWeekMonday.getDate() + 7);
+
+  const nextWeekSunday = new Date(nextWeekMonday);
+  nextWeekSunday.setDate(nextWeekMonday.getDate() + 6);
+
+  // 🌿 디버그 로그
+  console.log("🌿 현재시각:", now.toISOString());
+  console.log("🌿 이번주 수요일16:", wednesday16.toISOString());
+  console.log("🌿 이번주 일요일:", sundayEnd.toISOString());
+  console.log("🌿 다음주 시작:", nextWeekMonday.toISOString());
+  console.log("🌿 다음주 끝:", nextWeekSunday.toISOString());
+  console.log("🌿 식사일:", mealDate.toISOString());
+
+  // 다음주 식사인지?
+  if (mealDate >= nextWeekMonday && mealDate <= nextWeekSunday) {
+    // 이번주 수요일16 ~ 일요일 기간인지?
+    if (now >= wednesday16 && now <= sundayEnd) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+//주차 계산 함수
+function getWeekNumber(d) {
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dayNum = date.getDay() || 7;
+  date.setDate(date.getDate() + 4 - dayNum);
+  const yearStart = new Date(date.getFullYear(),0,1);
+  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+}
+
+//방문자 저장 관련 함수
 function saveVisit(data) {
     // const selectedDate = document.getElementById("visit-date").value;  // ✅ 현재 선택 날짜 백업
 
@@ -394,9 +458,12 @@ function loadWeeklyVisitData() {
           const bExpired = isDeadlinePassed(row.date, "breakfast", row.breakfast);
           const lExpired = isDeadlinePassed(row.date, "lunch", row.lunch);
           const dExpired = isDeadlinePassed(row.date, "dinner", row.dinner);
-
           const rowExpired = bExpired && lExpired && dExpired;
-          if (rowExpired) tr.style.backgroundColor = "#ffe5e5"; // 전체 행 붉은색
+          const isPastDate = new Date(row.date) < getKSTDate();  // ✅ 과거 날짜 여부
+          const isRowClosed = isNextWeekDeadlinePassed(row.date) || rowExpired || isPastDate;
+          
+
+          if (isRowClosed) tr.style.backgroundColor = "#ffe5e5"; // 전체 행 붉은색
 
 
           tr.setAttribute("data-id", row.id); // ✅ 행 식별용
@@ -408,8 +475,16 @@ function loadWeeklyVisitData() {
           <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
           ${userType === "협력사" ? "" : `<td class="r-cell">${row.reason}</td>`}
           <td>${row.applicant_name || "-"}</td>
-          <td>${isOwner ? `<button class="edit-btn" onclick="editVisit('${row.id}')">✏️</button>` : ""}</td>
-          <td>${isOwner ? `<button onclick="deleteVisit('${row.id}')">🗑</button>` : ""}</td>
+          <td>
+          ${isRowClosed
+            ? `<span style="color:gray;">🔒 마감됨</span>`
+            : (isOwner ? `<button class="edit-btn" onclick="editVisit('${row.id}')">✏️</button>` : "")}
+          </td>
+          <td>
+          ${isRowClosed
+          ? `<span style="color:gray;">🔒 마감됨</span>`
+          : (isOwner ? `<button onclick="deleteVisit('${row.id}')">🗑</button>` : "")}
+          </td>
         `;
           tbody.appendChild(tr);
         });
@@ -421,7 +496,8 @@ function loadWeeklyVisitData() {
       }
     );
 }
-  
+
+//방문객 삭제 관련 함수
 function deleteVisit(id) {
     const tr = document.querySelector(`tr[data-id="${id}"]`);
     if (!tr) return;
@@ -432,6 +508,12 @@ function deleteVisit(id) {
     const d = +tr.querySelector(".d-cell").innerText;
 
     const expiredList = getExpiredMeals(date, { breakfast: b, lunch: l, dinner: d });
+    // ✅ 다음 주 마감 검사
+    if (isNextWeekDeadlinePassed(date)) {
+      alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
+      loadWeeklyVisitData();  // 원래 상태 복원
+      return;
+    }
 
     // ✅ 삭제 제한 조건
     if (expiredList.length > 0) {
@@ -456,7 +538,7 @@ function deleteVisit(id) {
 function getExpiredMeals(date, mealData) {
   const now = getKSTDate();
   const mealDate = new Date(date);
-
+  mealDate.setHours(0, 0, 0, 0);  // 🔧 이 줄 추가!
   const expired = [];
 
   const bLimit = new Date(mealDate);
@@ -488,6 +570,7 @@ function getExpiredMeals(date, mealData) {
 function checkTimeLimit(date, breakfast, lunch, dinner) {
     const now = getKSTDate();
     const mealDate = new Date(date);
+    mealDate.setHours(0, 0, 0, 0);  // ← 여기 추가!!
     const errors = [];
 
 
@@ -519,6 +602,7 @@ function isDeadlinePassed(date, mealType, quantity) {
   //if (quantity === 0) return false;
   const now = getKSTDate();
   const mealDate = new Date(date);
+  mealDate.setHours(0, 0, 0, 0);  // ← 여기 추가!!
 
   if (mealType === "breakfast") {
     mealDate.setDate(mealDate.getDate() - 1);
@@ -540,15 +624,10 @@ function updateDeadlineColors() {
   const lunchInput = document.getElementById("l-count");
   const dinnerInput = document.getElementById("d-count");
 
-  // 초기화
-  [breakfastInput, lunchInput, dinnerInput].forEach(input => {
-    input.classList.remove("expired-input");
-  });
-
   const now = getKSTDate();
   const mealDate = new Date(date);
 
-    // 초기화
+  // 초기화
   [breakfastInput, lunchInput, dinnerInput].forEach(input => {
     input.classList.remove("expired-input");
     input.readOnly = false;
@@ -556,37 +635,47 @@ function updateDeadlineColors() {
     input.title = "";
   });
 
-  // 조식: 전일 15시 이전
+  // 🟢 1) 식사별 마감 처리
   const bLimit = new Date(mealDate);
-  bLimit.setDate(bLimit.getDate() - 1);
-  bLimit.setHours(15, 0, 0, 0);
-  if (now > bLimit){
+  bLimit.setDate(mealDate.getDate() - 1);
+  bLimit.setHours(15,0,0,0);
+  if (now > bLimit) {
     breakfastInput.classList.add("expired-input");
     breakfastInput.readOnly = true;
-    breakfastInput.style.backgroundColor = "#eee";
+    breakfastInput.style.backgroundColor = "#ffe5e5";
     breakfastInput.title = "⛔ 조식은 신청 마감되었습니다.";
-  } 
+  }
 
-  // 중식: 당일 10시 이전
   const lLimit = new Date(mealDate);
-  lLimit.setHours(10, 0, 0, 0);
+  lLimit.setHours(10,0,0,0);
   if (now > lLimit) {
     lunchInput.classList.add("expired-input");
     lunchInput.readOnly = true;
-    lunchInput.style.backgroundColor = "#eee";
+    lunchInput.style.backgroundColor = "#ffe5e5";
     lunchInput.title = "⛔ 중식은 신청 마감되었습니다.";
   }
 
-  // 석식: 당일 15시 이전
   const dLimit = new Date(mealDate);
-  dLimit.setHours(15, 0, 0, 0);
+  dLimit.setHours(15,0,0,0);
   if (now > dLimit) {
     dinnerInput.classList.add("expired-input");
     dinnerInput.readOnly = true;
-    dinnerInput.style.backgroundColor = "#eee";
+    dinnerInput.style.backgroundColor = "#ffe5e5";
     dinnerInput.title = "⛔ 석식은 신청 마감되었습니다.";
   }
+
+  
+
+  // 🟢 2) 최종: 다음주 마감 처리
+  if (isNextWeekDeadlinePassed(date)) {
+    [breakfastInput, lunchInput, dinnerInput].forEach(input => {
+      input.readOnly = true;
+      input.style.backgroundColor = "#ffe5e5";
+      input.title = "⛔ 다음 주 식사는 이번 주 수요일 이후에는 신청할 수 없습니다.";
+    });
+  }
 }
+
   
 // ✅ 1. 수정 버튼 클릭 시 해당 행을 수정 모드로 전환
 function editVisit(id) {
@@ -632,9 +721,17 @@ function editVisit(id) {
 function saveVisitEdit(id) {
   const tr = document.querySelector(`tr[data-id="${id}"]`);
   if (!tr) return;
+const date = tr.querySelector("td.date-cell").innerText;
+
+  // ✅ 다음 주 마감 검사
+if (isNextWeekDeadlinePassed(date)) {
+  alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
+  loadWeeklyVisitData();  // 원래 상태 복원
+  return;
+}
 
   
-  const date = tr.querySelector("td.date-cell").innerText;
+  
 
   // ✅ 마감 여부 체크
   const isBExpired = isDeadlinePassed(date, "breakfast");
