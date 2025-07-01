@@ -292,6 +292,11 @@ function isDeadlinePassed(dateStr, mealType) {
     const twoWeeksLaterMonday = new Date(thisMonday);
     twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
 
+    // ✅ 이미 지난 날짜면 무조건 마감
+    if (mealDate < new Date(now.toDateString())) {
+        return true;
+    }
+
     if (mealDate >= twoWeeksLaterMonday) {
         return false; // ✅ 마감 없음
     }
@@ -301,11 +306,11 @@ function isDeadlinePassed(dateStr, mealType) {
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
             deadline.setDate(mealDate.getDate() - 1);
-            deadline.setHours(15, 0, 0, 0); // 전날 오후 3시
+            deadline.setHours(9, 0, 0, 0); // 전날 오후 3시
         } else if (mealType === "중식") {
-            deadline.setHours(10, 0, 0, 0); // 당일 오전 10시
+            deadline.setHours(10, 30, 0, 0); // 당일 오전 10시
         } else if (mealType === "석식") {
-            deadline.setHours(15, 0, 0, 0); // 당일 오후 3시
+            deadline.setHours(14, 30, 0, 0); // 당일 오후 3시
         }
         return now > deadline;
     }

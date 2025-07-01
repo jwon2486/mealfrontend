@@ -80,11 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
         pageTitle.innerText = "식수 신청 시스템";
         pageButton.innerText = "🔙 로그아웃"
       }
-      const reasonTh = document.getElementById("reason-th");
-      const reasonTd = document.getElementById("visit-reason")?.closest("td");
+      //const reasonTh = document.getElementById("reason-th");
+      //const reasonTd = document.getElementById("visit-reason")?.closest("td");
 
-      if (reasonTh) reasonTh.style.display = "none";
-      if (reasonTd) reasonTd.style.display = "none";
+      //if (reasonTh) reasonTh.style.display = "none";
+      //if (reasonTd) reasonTd.style.display = "none";
 
       
       // ✅ 추가: 주간 테이블 헤드도 숨기기
@@ -170,18 +170,24 @@ function loadLoginInfo() {
   
   // 오늘 날짜 기본 설정
 function setTodayDefault() {
+  const today = getKSTDate(); // 현재 날짜 (KST)
+  const currentDay = today.getDay(); // 요일 (0=일, 1=월,...6=토)
 
-  const today = getKSTDate();
-  const adjusted = getNearestWeekday(today); // ✅ 주말 보정된 날짜
+  // 다음주 월요일 계산
+  const daysUntilNextMonday = (8 - currentDay) % 7 || 7;
+  const nextMonday = new Date(today);
+  nextMonday.setDate(today.getDate() + daysUntilNextMonday);
+  nextMonday.setHours(9, 0, 0, 0); // 시/분/초 초기화
+
+  const dateStr = nextMonday.toISOString().split("T")[0];
 
   const dateField = document.getElementById("visit-date");
   const weekField = document.getElementById("visit-week-date");
-  
 
-  if (!dateField.value) dateField.value = adjusted.toISOString().split("T")[0];
-  if (!weekField.value) weekField.value = adjusted.toISOString().split("T")[0];
+  if (!dateField.value) dateField.value = dateStr;
+  if (!weekField.value) weekField.value = dateStr;
 
-  updateWeekday();
+  updateWeekday(); // 요일 표시 갱신
 }
   
 // 요일 자동 표기
@@ -473,7 +479,7 @@ function loadWeeklyVisitData() {
           <td class="b-cell ${bExpired ? 'expired-cell' : ''}">${row.breakfast}</td>
           <td class="l-cell ${lExpired ? 'expired-cell' : ''}">${row.lunch}</td>
           <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
-          ${userType === "협력사" ? "" : `<td class="r-cell">${row.reason}</td>`}
+          <td class="r-cell ${isRowClosed ? 'expired-cell' : ''}">${row.reason}</td>
           <td>${row.applicant_name || "-"}</td>
           <td>
           ${isRowClosed
