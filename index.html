@@ -44,9 +44,9 @@
         #ccc; background: #f9f9f9; font-size: 18px;">
         <strong>📌 마감 안내</strong><br />
         <strong><u>금주 식수</u> 마감 시간:</strong><br />
-        &nbsp;&nbsp;- <strong>조식: 전날 오후 3시</strong>까지<br />
-        &nbsp;&nbsp;- <strong>중식: 당일 오전 10시</strong>까지<br />
-        &nbsp;&nbsp;- <strong>석식: 당일 오후 3시</strong>까지<br /><br />
+        &nbsp;&nbsp;- <strong>조식: 전날 오전 9시</strong>까지<br />
+        &nbsp;&nbsp;- <strong>중식: 당일 오전 10시 30분</strong>까지<br />
+        &nbsp;&nbsp;- <strong>석식: 당일 오후 2시 30분</strong>까지<br /><br />
         <strong><u>차주 식수</u> 마감 시간:</strong><br />
         &nbsp;&nbsp;- <strong>금주 수요일 오후 4시</strong>까지 신청/변경 가능<br />
         &nbsp;&nbsp; <strong>※수요일</strong>이 지나면 </strong><strong>신청이 마감되고 차주에 변경가능</strong>합니다.
@@ -90,7 +90,7 @@
 }
 
     document.addEventListener("DOMContentLoaded", function () {
-    const savedUser = localStorage.getItem("currentUser");
+    const savedUser = sessionStorage.getItem("currentUser");
     if (savedUser) {
         const currentUser = JSON.parse(savedUser);
         const adminBtn = document.getElementById("adminBtn");

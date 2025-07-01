@@ -475,13 +475,17 @@ function isDeadlinePassed(dateStr, mealType) {
         // ✅ 이번 주 식사는 기존 마감 규칙 사용
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
-            deadline.setDate(mealDate.getDate() - 1);
-            deadline.setHours(15, 0, 0, 0);
-        } else if (mealType === "중식") {
-            deadline.setHours(10, 0, 0, 0);
-        } else if (mealType === "석식") {
-            deadline.setHours(15, 0, 0, 0);
-        }
+        // 전날 오전 9시
+        deadline.setDate(mealDate.getDate() - 1);
+        deadline.setHours(9, 0, 0, 0);
+    } else if (mealType === "중식") {
+        // 당일 오전 10시 30분
+        deadline.setHours(10, 30, 0, 0);
+    } else if (mealType === "석식") {
+        // 당일 오후 2시 30분
+        deadline.setHours(14, 30, 0, 0);
+    }
+
         return now > deadline;
     } else {
         // ✅ 다음 주 식사는 이번 주 수요일 16:00까지만 신청 가능
