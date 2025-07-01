@@ -14,7 +14,7 @@ function loadEditData(selectedWeek) {
     editMode = "all";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
-    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     const myDept = currentUser?.department || currentUser?.dept;
 
     if (!range) {
@@ -301,11 +301,11 @@ function isDeadlinePassed(dateStr, mealType) {
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
             deadline.setDate(mealDate.getDate() - 1);
-            deadline.setHours(9, 0, 0, 0); // 전날 오전 9시
+            deadline.setHours(15, 0, 0, 0); // 전날 오후 3시
         } else if (mealType === "중식") {
-            deadline.setHours(10, 30, 0, 0); // 당일 오전 10시 30분
+            deadline.setHours(10, 0, 0, 0); // 당일 오전 10시
         } else if (mealType === "석식") {
-            deadline.setHours(14, 30, 0, 0); // 당일 오후 2시 30분
+            deadline.setHours(15, 0, 0, 0); // 당일 오후 3시
         }
         return now > deadline;
     }
@@ -371,7 +371,7 @@ function onSearch() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     if (!currentUser || currentUser.level !== 2) {
         alert("중간관리자만 접근할 수 있습니다.");
         location.href = "index.html";
