@@ -47,7 +47,7 @@ function login(event) {
         
         
         sessionStorage.setItem("flagType", data.type);
-        flag_type = localStorage.getItem("flagType");
+        flag_type = sessionStorage.getItem("flagType");
         //alert(flag_type + 'flag');
 
 
@@ -131,8 +131,8 @@ function toggleSelectAll() {
 }
 
 function logout() {
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("flag_type");
+    sessionStorage.removeItem("currentUser");
+    sessionStorage.removeItem("flag_type");
     window.location.reload();
 
     // 모든 화면 초기화

@@ -5,7 +5,7 @@ let flag = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
     
-    const storedDate = localStorage.getItem("lastVisitDate");
+    const storedDate = sessionStorage.getItem("lastVisitDate");
     if (storedDate) {
 
       const todayStr = getKSTDate().toISOString().split("T")[0];
@@ -162,9 +162,9 @@ function loadLoginInfo() {
     sessionStorage.setItem("name", user.userName);
     sessionStorage.setItem("type", user.type);
 
-    localStorage.setItem("userId", user.userId);    // ✅ 추가
-    localStorage.setItem("userName", user.userName);
-    localStorage.setItem("userType", user.type);
+    sessionStorage.setItem("userId", user.userId);    // ✅ 추가
+    sessionStorage.setItem("userName", user.userName);
+    sessionStorage.setItem("userType", user.type);
   }
 }
   

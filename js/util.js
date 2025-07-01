@@ -250,9 +250,9 @@ function getWeekStartAndEnd(dateStr) {
 }
 
 function getLoginInfo() {
-    const id = localStorage.getItem("userId") || sessionStorage.getItem("id");      // ✅ 보완
-    const name = localStorage.getItem("userName") || sessionStorage.getItem("name");
-    const type = localStorage.getItem("userType") || sessionStorage.getItem("type");
+    const id = sessionStorage.getItem("userId") || sessionStorage.getItem("id");      // ✅ 보완
+    const name = sessionStorage.getItem("userName") || sessionStorage.getItem("name");
+    const type = sessionStorage.getItem("userType") || sessionStorage.getItem("type");
     return { id, name, type };
 }
 

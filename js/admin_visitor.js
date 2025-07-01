@@ -71,7 +71,7 @@ let flag = 1;
 // });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const storedDate = localStorage.getItem("lastVisitDate");
+    const storedDate = sessionStorage.getItem("lastVisitDate");
     if (storedDate) {
 
       const todayStr = getKSTDate().toISOString().split("T")[0];
@@ -136,7 +136,7 @@ function updateWeekday() {
   
 // ✅ 로그인 정보 표시 (관리자 전용)
 function loadLoginInfo() {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
+    const user = JSON.parse(sessionStorage.getItem("currentUser"));
     if (user && user.userName) {
       document.getElementById("login-user").innerText = `👑 관리자 모드`;
     }
