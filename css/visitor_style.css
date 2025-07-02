@@ -14,7 +14,7 @@ body {
   /* 테이블 영역 */
   .table-container {
     width: 100%;
-    max-width: 1500px;
+    max-width: 1400px;
     margin: 0 auto 20px auto;
     overflow-x: auto;
   }
@@ -28,10 +28,10 @@ body {
   }
   
   th, td {
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #ccc;
     text-align: center;
-    font-size: 18px;
+    font-size: 20px;
   }
   
   th {
@@ -84,7 +84,7 @@ th.col-aday, td.col-aday { width: 60px; }
 th.col-abreakfast, td.col-abreakfast,
 th.col-alunch, td.col-alunch,
 th.col-adinner, td.col-adinner { width: 30px; }
-th.col-areason, td.col-areason { width: 250px; }
+th.col-areason, td.col-areason { width: 200px; }
 th.col-asave, td.col-asave { width: 40px; }
 
 /* 하단 테이블 열 폭 */
@@ -94,6 +94,7 @@ th.col-summary-breakfast, td.col-summary-breakfast,
 th.col-summary-lunch, td.col-summary-lunch,
 th.col-summary-dinner, td.col-summary-dinner { width: 30px; }
 th.col-summary-reason, td.col-summary-reason { width: 250px; }
+th.col-summary-dept, td.col-summary-dept { width: 120px; }
 th.col-summary-requester, td.col-summary-requester { width: 60px; }
 th.col-summary-edit, td.col-summary-edit,
 th.col-summary-delete, td.col-summary-delete { width: 40px; }

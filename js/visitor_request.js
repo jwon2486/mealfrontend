@@ -217,7 +217,12 @@ function submitVisit() {
       return;
     }
   
-    const reason = (userType === "협력사") ? "협력사 신청" : reasonInput.value.trim();
+    const currentDept = sessionStorage.getItem("dept");
+    const isException = currentDept === "신명전력";
+
+    const reason = (userType === "협력사" && !isException)
+                  ? "협력사 신청"
+                  : reasonInput.value.trim();
   
     // ✅ 사유는 직영일 때만 필수로 검사
     if (!date || (breakfast + lunch + dinner === 0) || 
@@ -494,6 +499,7 @@ function loadWeeklyVisitData() {
           <td class="l-cell ${lExpired ? 'expired-cell' : ''}">${row.lunch}</td>
           <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
           <td class="r-cell ${isRowClosed ? 'expired-cell' : ''}">${row.reason}</td>
+          <td>${row.dept || "-"}</td>
           <td>${row.applicant_name || "-"}</td>
           <td>
           ${isRowClosed
