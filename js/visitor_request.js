@@ -72,6 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     const userType = sessionStorage.getItem("type"); // "직영" / "협력사"
+    const currentUserId = sessionStorage.getItem("id");
+    const currentDept = sessionStorage.getItem("dept");
     const pageTitle = document.getElementById("page-title"); // ✅ 화면 타이틀 분기 처리
     const pageButton = document.getElementById("page-button"); // ✅ 화면 타이틀 분기 처리
 
@@ -161,7 +163,7 @@ function loadLoginInfo() {
     sessionStorage.setItem("id", user.userId);
     sessionStorage.setItem("name", user.userName);
     sessionStorage.setItem("type", user.type);
-
+    sessionStorage.setItem("dept", user.dept);  // ✅ 부서 저장 추가
     sessionStorage.setItem("userId", user.userId);    // ✅ 추가
     sessionStorage.setItem("userName", user.userName);
     sessionStorage.setItem("userType", user.type);
@@ -432,9 +434,21 @@ function loadWeeklyVisitData() {
         }
 
         (result || []).forEach(row => {
+          const userType = sessionStorage.getItem("type") || "방문자";
+          const currentDept = sessionStorage.getItem("dept");  // ✅ 여기 추가
           // result.forEach 안에 추가
+          // 협력사: 같은 협력사 소속 신청만 표시 (부서 기준)
+          if (userType === "협력사") {
+            if (row.type !== "협력사" || row.dept !== currentDept) return;
+          }
+
+          // 직영: 직영 사용자들 신청만 표시
+          if (userType === "직영") {
+            if (row.type !== "방문자") return;
+          }
           const tr = document.createElement("tr");
           const isOwner = row.applicant_id === sessionStorage.getItem("id");
+
 
           // const now = new Date();
           // const mealDate = new Date(row.date);
