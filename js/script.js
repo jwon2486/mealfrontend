@@ -525,6 +525,22 @@ document.addEventListener("DOMContentLoaded", function () {
     const savedUser = sessionStorage.getItem("currentUser");
     const year = new Date().getFullYear();
 
+    // ✅ localStorage에 저장된 로그인 정보 불러오기
+    const savedId = localStorage.getItem("savedUserId");
+    const savedName = localStorage.getItem("savedUserName");
+
+    if (savedId && savedName) {
+        const userIdInput = document.getElementById("userId");
+        const userNameInput = document.getElementById("userName");
+        const rememberCheckbox = document.getElementById("rememberMe");
+
+        if (userIdInput && userNameInput && rememberCheckbox) {
+            userIdInput.value = savedId;
+            userNameInput.value = savedName;
+            rememberCheckbox.checked = true;
+        }
+    }
+
 
     if (savedUser) {
         window.currentUser = JSON.parse(savedUser);
