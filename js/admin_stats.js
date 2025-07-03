@@ -871,13 +871,15 @@ function downloadWeeklyDeptExcel() {
 }
 
 function downloadPivotStyleExcel() {
-  const start = document.getElementById("startDate").value;
-  const end = document.getElementById("endDate").value;
-
-  if (!start || !end) {
-    alert("날짜를 선택해주세요.");
+  const base = document.getElementById("weeklyBaseDate").value;
+  if (!base) {
+    alert("기준 날짜를 선택해주세요.");
     return;
   }
+
+  const range = getWeeklyDateRange(base);  // 월~금 날짜 배열 반환
+  const start = range[0];
+  const end = range[range.length - 1];
 
   showToast("📥 피벗형 엑셀 다운로드 중...");
   window.location.href = `${API_BASE_URL}/admin/stats/pivot_excel?start=${start}&end=${end}`;
