@@ -53,6 +53,15 @@ function login(event) {
 
         sessionStorage.setItem("currentUser", JSON.stringify(window.currentUser));
 
+        // 로그인 성공 후
+        if (document.getElementById("rememberMe").checked) {
+            localStorage.setItem("savedUserId", userId);
+            localStorage.setItem("savedUserName", userName);
+        } else {
+            localStorage.removeItem("savedUserId");
+            localStorage.removeItem("savedUserName");
+        }
+
         // ✅ 버튼 초기화 및 표시 처리
 const adminBtn = document.getElementById("adminBtn");
 const teamEditBtn = document.getElementById("teamEditButton");
