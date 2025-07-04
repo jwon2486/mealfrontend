@@ -39,7 +39,7 @@ async function loadHolidays(year) {
 
 async function fetchPublicHolidays(year) {
   try {
-    const response = await fetch(`/api/public-holidays?year=${year}`);
+    const response = await fetch(`https://mealbackend-cmub.onrender.com/api/public-holidays?year=${year}`);
     if (!response.ok) {
       throw new Error(`HTTP 오류! 상태: ${response.status}`);
     }
