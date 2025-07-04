@@ -51,12 +51,114 @@ async function fetchPublicHolidays(year) {
   }
 }
 
+//달력 그리기 함수
 function renderCalendar(year) {
-  // 캘린더 렌더링 함수
-  console.log("📅 캘린더 렌더링 시작: ", year);
+  console.log("📅 달력 호출됨:", year);
+  const wrapper = document.getElementById("calendar-wrapper");
+  wrapper.innerHTML = "";
+
+  for (let month = 0; month < 12; month++) {
+    const table = document.createElement("table");
+    table.className = "month-calendar";
+
+    const caption = document.createElement("caption");
+    caption.innerText = `${month + 1}월`;
+    table.appendChild(caption);
+
+    const thead = document.createElement("thead");
+    const days = ["S", "M", "T", "W", "T", "F", "S"];
+    const headRow = document.createElement("tr");
+    days.forEach(d => {
+      const th = document.createElement("th");
+      th.innerText = d;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+
+    let row = document.createElement("tr");
+
+    for (let i = 0; i < firstDay; i++) {
+      row.appendChild(document.createElement("td"));
+    }
+
+    for (let date = 1; date <= lastDate; date++) {
+      const td = document.createElement("td");
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
+      td.innerText = date;
+
+      const dayOfWeek = new Date(year, month, date).getDay();
+      if (dayOfWeek === 0) td.classList.add("sunday");
+
+      if (currentHolidays.includes(dateStr)) {
+        td.classList.add("holiday");
+
+        const h = currentHolidayDetail.find(h => h.date === dateStr);
+        if (h) td.title = h.description;
+      }
+
+      row.appendChild(td);
+
+      if ((firstDay + date) % 7 === 0 || date === lastDate) {
+        tbody.appendChild(row);
+        row = document.createElement("tr");
+      }
+    }
+
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+  }
 }
 
+
 function renderHolidayList(holidayList) {
-  // 공휴일 리스트 출력
-  console.log("📌 공휴일 리스트:", holidayList);
+  console.log("📋 공휴일 정보 호출됨:", holidayList.length, "건");
+  const container = document.getElementById("holiday-list");
+  container.innerHTML = ""; // 초기화
+
+  if (!Array.isArray(holidayList) || holidayList.length === 0) {
+    container.innerHTML = "<p>📭 표시할 공휴일이 없습니다.</p>";
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "holiday-list-table";
+
+  const thead = document.createElement("thead");
+  thead.innerHTML = `
+    <tr>
+      <th>날짜</th>
+      <th>설명</th>
+      <th>구분</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  holidayList.forEach(h => {
+    const tr = document.createElement("tr");
+
+    const tdDate = document.createElement("td");
+    tdDate.innerText = h.date;
+
+    const tdDesc = document.createElement("td");
+    tdDesc.innerText = h.description;
+
+    const tdSource = document.createElement("td");
+    tdSource.innerText = h.source === "custom" ? "수동" : "공공";
+
+    tr.appendChild(tdDate);
+    tr.appendChild(tdDesc);
+    tr.appendChild(tdSource);
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
 }
+
