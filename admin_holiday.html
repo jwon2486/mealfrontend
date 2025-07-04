@@ -57,7 +57,10 @@
         <label>연도 선택: 
             <select id="yearSelector" onchange="updateCalendar()"></select>
         </label>
-        <label>공휴일 추가: <input type="date" id="holidayPicker"></label>
+        <label>공휴일 추가: 
+        <input type="date" id="holidayPicker">
+        <input type="text" id="holidayDescription" placeholder="공휴일 설명 (예: 창립기념일)">
+        </label>
         <button onclick="addHoliday()">추가</button>
         <button onclick="window.location.href='admin_dashboard.html'">← 관리자 대시보드</button>
     </div>
