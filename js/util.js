@@ -1,8 +1,5 @@
 
 
-// util.js 가장 위에 추가
-const API_BASE_URL = "https://mealbackend-cmub.onrender.com";
-
 // ✅ 공통 fetch POST 함수
 function postData(path, data, onSuccess, onError) {
 
