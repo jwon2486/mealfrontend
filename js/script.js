@@ -467,27 +467,27 @@ function setDefaultWeek() {
 function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
+    mealDate.setHours(0, 0, 0, 0); // ✅ 추가: 날짜 비교 오류 방지
 
-    // ✅ 기준: 2주 뒤 월요일 이후면 마감 제한 없음
-    const twoWeeksLaterMonday = new Date(now);
+    // 기준: 2주 뒤 월요일 이후면 마감 없음
     const day = now.getDay(); // 0(일)~6(토)
     const diffToMonday = day === 0 ? -6 : 1 - day;
-    
-    // 이번 주 월요일 기준점
+
     const thisMonday = new Date(now);
     thisMonday.setDate(now.getDate() + diffToMonday);
+    thisMonday.setHours(0, 0, 0, 0);  // 명시적으로 정규화
 
-    // 2주 뒤 월요일 계산
+    const twoWeeksLaterMonday = new Date(thisMonday);
     twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
-    twoWeeksLaterMonday.setHours(0, 0, 0, 0);
 
-     // ✅ 이미 지난 날짜면 무조건 마감
+    // ✅ 1. 과거 날짜면 무조건 마감
     if (mealDate < new Date(now.toDateString())) {
         return true;
     }
 
+    // ✅ 2. 2주 후 월요일 이후면 마감 없음
     if (mealDate >= twoWeeksLaterMonday) {
-        return false;  // ✅ 마감 없음
+        return false;
     }
 
     if (isThisWeek(dateStr)) {
