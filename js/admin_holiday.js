@@ -51,7 +51,7 @@ async function loadHolidays(year) {
 
 async function fetchPublicHolidays(year) {
   try {
-    const res = await fetch(`/api/public-holidays?year=${year}`);
+    const res = await fetch(`${API_BASE_URL}/api/public-holidays?year=${year}`);
     const data = await res.json();
 
     // 응답이 배열인지 확인 (보통: [{date: "2025-08-15", description: "광복절"}, ...])
