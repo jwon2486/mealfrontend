@@ -4,6 +4,8 @@ let apiHolidayList = [];
 let customHolidayList = [];
 let currentHolidayDetail = [];
 let currentHolidays = [];
+// admin_holiday.js 상단에 추가
+const HOLIDAY_API_BASE_URL = "https://mealbackend-cmub.onrender.com";
 
 // 초기 실행
 window.addEventListener("DOMContentLoaded", () => {
@@ -51,7 +53,7 @@ async function loadHolidays(year) {
 
 async function fetchPublicHolidays(year) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/public-holidays?year=${year}`);
+    const res = await fetch(`${HOLIDAY_API_BASE_URL}/api/public-holidays?year=${year}`);
     const data = await res.json();
 
     // 응답이 배열인지 확인 (보통: [{date: "2025-08-15", description: "광복절"}, ...])
