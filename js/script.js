@@ -61,6 +61,8 @@ function login(event) {
             localStorage.removeItem("savedUserId");
             localStorage.removeItem("savedUserName");
         }
+        
+        document.getElementById("deadline-info").style.display = "block";
 
         // ✅ 버튼 초기화 및 표시 처리
 const adminBtn = document.getElementById("adminBtn");
@@ -85,6 +87,7 @@ if (window.currentUser.level === 2 && teamEditBtn) {
 
         document.getElementById("login-container").style.display = "none";
         document.getElementById("mainArea").style.display = "block";
+        document.getElementById("deadline-info").style.display = "block";  // 추가
         
         // ✅ 내부 요소들도 명시적으로 보이게 설정
         document.getElementById("date-picker-container").style.display = "block";
@@ -151,6 +154,7 @@ function logout() {
     document.getElementById("welcome").innerText = "";
     document.getElementById("weekRangeText").innerText = "";
     document.getElementById("mealSummary").innerText = "";
+    
 
     
 }
@@ -168,6 +172,7 @@ function logout() {
     document.getElementById("welcome").innerText = "";
     document.getElementById("weekRangeText").innerText = "";
     document.getElementById("mealSummary").innerText = ""; 
+    document.getElementById("deadline-info").style.display = "none";
 }
 
 // ✅ 선택된 주간 날짜 배열 반환

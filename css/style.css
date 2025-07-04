@@ -84,6 +84,30 @@ tr:hover {
     box-sizing: border-box; /* ⭐ 패딩 포함 너비 계산 */
 }
 
+/*로그인 정보 저장 css*/
+.remember-me {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 8px;
+  font-size: 20px;
+  width: 100%;
+}
+
+.remember-me input[type="checkbox"] {
+  transform: scale(1.8); /* 체크박스 크기 키움 */
+  accent-color: #007bff; /* 파란 체크 색상 */
+  cursor: pointer;
+}
+
+.remember-me label {
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  color: #333;
+}
+
 /* 신청/미신청 버튼 스타일 */
 .meal-btn {
     padding: 8px 10px;
