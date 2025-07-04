@@ -134,6 +134,7 @@ function renderHolidayList(holidayList) {
       <th>날짜</th>
       <th>설명</th>
       <th>구분</th>
+      <th>조작</th>
     </tr>
   `;
   table.appendChild(thead);
@@ -151,9 +152,20 @@ function renderHolidayList(holidayList) {
     const tdSource = document.createElement("td");
     tdSource.innerText = h.source === "custom" ? "수동" : "공공";
 
+    const tdAction = document.createElement("td");
+    if (h.source === "custom") {
+      const btn = document.createElement("button");
+      btn.innerText = "삭제";
+      btn.onclick = () => deleteHoliday(h.date);
+      tdAction.appendChild(btn);
+    } else {
+      tdAction.innerText = "-";
+    }
+
     tr.appendChild(tdDate);
     tr.appendChild(tdDesc);
     tr.appendChild(tdSource);
+    tr.appendChild(tdAction);
 
     tbody.appendChild(tr);
   });
@@ -161,4 +173,5 @@ function renderHolidayList(holidayList) {
   table.appendChild(tbody);
   container.appendChild(table);
 }
+
 

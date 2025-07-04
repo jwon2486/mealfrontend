@@ -81,6 +81,26 @@ td.holiday {
   align-items: center;
 }
 
+.holiday-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.holiday-list-table th,
+.holiday-list-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.holiday-list-table th {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+
 @media (max-width: 768px) {
   body {
     padding: 10px;
