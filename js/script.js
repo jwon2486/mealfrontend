@@ -605,6 +605,14 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("weekPicker").addEventListener("change", loadWeekData);
 });
 
+document.getElementById("rememberMe").addEventListener("change", function () {
+    if (!this.checked) {
+        // 체크 해제되면 input 초기화
+        document.getElementById("userId").value = "";
+        document.getElementById("userName").value = "";
+    }
+});
+
 
 function goToVisitor() {
     location.href = "visitor_request.html";
