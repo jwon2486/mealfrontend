@@ -583,7 +583,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    fetchHolidayList(`/holidays?year=${year}`, (holidays) => {
+    fetchHolidayList(`/api/public-holidays?year=${year}`, (holidays) => {
         //window.holidayList = holidays;
         holidayList = holidays;
 
