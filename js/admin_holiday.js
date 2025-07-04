@@ -1,67 +1,62 @@
-function renderCalendar(year) {
-  const wrapper = document.getElementById("calendar-wrapper");
-  wrapper.innerHTML = "";
+document.addEventListener("DOMContentLoaded", () => {
+  const year = new Date().getFullYear();
+  loadHolidays(year);
+});
 
-  for (let month = 0; month < 12; month++) {
-    const table = document.createElement("table");
-    table.className = "month-calendar";
+let currentHolidayDetail = [];
+let currentHolidays = [];
 
-    // 📅 캡션: "1월", "2월" 등
-    const caption = document.createElement("caption");
-    caption.innerText = `${month + 1}월`;
-    table.appendChild(caption);
-
-    // 🗓️ 요일 헤더
-    const thead = document.createElement("thead");
-    const days = ["S", "M", "T", "W", "T", "F", "S"];
-    const headRow = document.createElement("tr");
-    days.forEach(d => {
-      const th = document.createElement("th");
-      th.innerText = d;
-      headRow.appendChild(th);
+async function loadHolidays(year) {
+  try {
+    const apiList = await fetchPublicHolidays(year);
+    const customList = await new Promise((resolve, reject) => {
+      getData(`/holidays?year=${year}`, resolve, reject);
     });
-    thead.appendChild(headRow);
-    table.appendChild(thead);
 
-    // 📆 날짜 본문
-    const tbody = document.createElement("tbody");
-    const firstDay = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month + 1, 0).getDate();
+    const apiHolidayList = Array.isArray(apiList)
+      ? apiList.map(h => ({ ...h, source: 'api' }))
+      : [];
 
-    let row = document.createElement("tr");
+    const customHolidayList = Array.isArray(customList)
+      ? customList.map(h => ({ ...h, source: 'custom' }))
+      : [];
 
-    // 앞쪽 빈 셀
-    for (let i = 0; i < firstDay; i++) {
-      row.appendChild(document.createElement("td"));
-    }
+    const apiDates = new Set(apiHolidayList.map(h => h.date));
+    const filteredCustom = customHolidayList.filter(h => !apiDates.has(h.date));
 
-    for (let date = 1; date <= lastDate; date++) {
-      const td = document.createElement("td");
-      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
-      td.innerText = date;
+    const merged = [...apiHolidayList, ...filteredCustom];
 
-      // 일요일 강조
-      const dayOfWeek = new Date(year, month, date).getDay();
-      if (dayOfWeek === 0) td.classList.add("sunday");
+    currentHolidayDetail = merged;
+    currentHolidays = merged.map(h => h.date);
 
-      // 공휴일 강조
-      if (window.currentHolidays && window.currentHolidays.includes(dateStr)) {
-        td.classList.add("holiday");
+    renderCalendar(year);
+    renderHolidayList(merged);
 
-        const holiday = window.currentHolidayDetail.find(h => h.date === dateStr);
-        if (holiday) td.title = holiday.description;  // 툴팁
-      }
-
-      row.appendChild(td);
-
-      // 줄바꿈
-      if ((firstDay + date) % 7 === 0 || date === lastDate) {
-        tbody.appendChild(row);
-        row = document.createElement("tr");
-      }
-    }
-
-    table.appendChild(tbody);
-    wrapper.appendChild(table);
+  } catch (error) {
+    console.error("🚨 loadHolidays 에러:", error);
   }
+}
+
+async function fetchPublicHolidays(year) {
+  try {
+    const response = await fetch(`https://mealbackend-cmub.onrender.com/api/public-holidays?year=${year}`);
+    if (!response.ok) {
+      throw new Error(`HTTP 오류! 상태: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error(`❗ 공공 공휴일 호출 실패 (${year})`, err);
+    return [];
+  }
+}
+
+function renderCalendar(year) {
+  // 캘린더 렌더링 함수
+  console.log("📅 캘린더 렌더링 시작: ", year);
+}
+
+function renderHolidayList(holidayList) {
+  // 공휴일 리스트 출력
+  console.log("📌 공휴일 리스트:", holidayList);
 }
