@@ -108,6 +108,48 @@ tr:hover {
   color: #333;
 }
 
+/*식사신청, 자가확인 테이블 영역*/
+.meal-flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.meal-table-area {
+  flex: 1;
+  min-width: 720px;
+}
+
+.self-check-box {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 150px;
+  max-height: fit-content;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+
+.self-check-box h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #007bff;
+}
+
+#self-check-list div {
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.self-check-box input[type="checkbox"] {
+  transform: scale(1.5);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
 /* 신청/미신청 버튼 스타일 */
 .meal-btn {
     padding: 8px 10px;

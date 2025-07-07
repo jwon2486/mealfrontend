@@ -55,30 +55,40 @@
         &nbsp;&nbsp; <strong>※수요일</strong>이 지나면 </strong><strong>신청이 마감되고 차주에 변경가능</strong>합니다.
         </div>
 
-        <div class="table-wrapper" id="meal-container">
+        <div id="meal-container" class="meal-flex-container">
+
+        <!-- 왼쪽: 식사 신청 테이블 -->
+        <div class="meal-table-area">
             <h2>식수 신청 내역</h2>
             <table id="meal-table">
-              <thead>
-                    <tr>
-                        <th>날짜</th>
-                        <th>요일</th>
-                        <th>조식</th>
-                        <th>중식</th>
-                        <th>석식</th>
-                    </tr>
-                </thead>
-                <tbody id="meal-body"></tbody>
+            <thead>
+                <tr>
+                <th>날짜</th>
+                <th>요일</th>
+                <th>조식</th>
+                <th>중식</th>
+                <th>석식</th>
+                </tr>
+            </thead>
+            <tbody id="meal-body"></tbody>
             </table>
             <div class="button-row">
-                <button class="action-btn save-btn" onclick="saveMeals()">저장</button>
-                <button class="action-btn logout-btn" onclick="logout()">로그아웃</button>
-                <button class="action-btn visitor-btn" onclick="goToVisitor()">방문자 신청</button>
-                <button id="adminBtn" class="action-btn admin-btn" onclick="goToAdminDashboard()" style="display: none;">관리자 페이지</button>
-                <button id="teamEditButton" class="action-btn team-btn" onclick="goToTeamEdit()" style="display: none;">팀 관리</button>
-                <button id="toggleSelectBtn" class="action-btn" onclick="toggleSelectAll()">전체 선택</button>
+            <button class="action-btn save-btn" onclick="saveMeals()">저장</button>
+            <button class="action-btn logout-btn" onclick="logout()">로그아웃</button>
+            <button class="action-btn visitor-btn" onclick="goToVisitor()">방문자 신청</button>
+            <button id="adminBtn" class="action-btn admin-btn" onclick="goToAdminDashboard()" style="display: none;">관리자 페이지</button>
+            <button id="teamEditButton" class="action-btn team-btn" onclick="goToTeamEdit()" style="display: none;">팀 관리</button>
+            <button id="toggleSelectBtn" class="action-btn" onclick="toggleSelectAll()">전체 선택</button>
+            </div>
         </div>
+
+        <!-- 오른쪽: 자가 확인 체크박스 
+        <div class="self-check-box">
+            <h3 style="margin-bottom: 10px;">자가 확인</h3>
+            <div id="self-check-list"></div>
+        </div>-->
         </div>
-    </div>
+
     <div id="toast" class="toast"></div>
     <!-- ✅ 공통 유틸 먼저 불러오기 -->
     <script src="js/config.js"></script>

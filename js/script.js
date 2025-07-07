@@ -331,9 +331,13 @@ function loadWeekData() {
         });
 
         // ✅ 합계 다시 계산
-        updateMealSummary();
+        updateMealSummary(); 
+        // ✅ 자가 확인 체크박스 렌더링 (이 줄 추가!)
+       // renderSelfCheckBoxes(dates);
     });
 }
+
+
 
 // ✅ 저장 요청 (선택된 버튼 → 서버로 전송)
 function saveMeals() {
@@ -435,20 +439,27 @@ function updateMealSummary() {
 //         });
 // }
 
+//이번주 날짜 함수
 function isThisWeek(dateStr) {
+    const selected = document.getElementById("weekPicker").value;
+
+    // 선택된 주차의 월요일 기준 계산
+    const selectedDate = new Date(selected);
+    const selectedDay = selectedDate.getDay();
+    const diffToMonday = selectedDay === 0 ? -6 : 1 - selectedDay;
+
+    const selectedMonday = new Date(selectedDate);
+    selectedMonday.setDate(selectedDate.getDate() + diffToMonday);
+    selectedMonday.setHours(0, 0, 0, 0);
+
+    const selectedSunday = new Date(selectedMonday);
+    selectedSunday.setDate(selectedMonday.getDate() + 6);
+    selectedSunday.setHours(23, 59, 59, 999);
+
     const target = new Date(dateStr);
-    const now = getKSTDate();
-
-    const monday = new Date(now);
-    const day = now.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    monday.setDate(now.getDate() + diff);
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-
-    return target >= monday && target <= sunday;
+    return target >= selectedMonday && target <= selectedSunday;
 }
+
 
 
 // ✅ 오늘 기준으로 다음 주 월요일 날짜 반환
@@ -521,6 +532,52 @@ function isDeadlinePassed(dateStr, mealType) {
     }
 }
 
+/*자가확인 체크박스 함수
+function renderSelfCheckBoxes(dates) {
+    const container = document.getElementById("self-check-list");
+    container.innerHTML = "";
+
+    const weekdays = ["월", "화", "수", "목", "금"];
+
+    dates.forEach((date, i) => {
+        const wrapper = document.createElement("div");
+
+        const label = document.createElement("label");
+        label.innerText = weekdays[i];
+        label.setAttribute("for", `selfcheck-${date}`);
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `selfcheck-${date}`;
+        checkbox.dataset.date = date;
+        checkbox.dataset.weekday = weekdays[i];
+
+        // 서버에서 확인 여부 불러오기
+        fetch(`/selfcheck?user_id=${window.currentUser.userId}&date=${date}`)
+            .then(res => res.json())
+            .then(data => {
+                checkbox.checked = data?.checked === 1;
+            });
+
+        checkbox.addEventListener("change", () => {
+            const checked = checkbox.checked ? 1 : 0;
+            fetch("/selfcheck", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: window.currentUser.userId,
+                    date,
+                    weekday: weekdays[i],
+                    checked
+                })
+            });
+        });
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(checkbox);
+        container.appendChild(wrapper);
+    });
+}*/
 
 
 
