@@ -485,7 +485,10 @@ function loadWeeklyVisitData() {
           const dExpired = isDeadlinePassed(row.date, "dinner", row.dinner);
           const rowExpired = bExpired && lExpired && dExpired;
           const isPastDate = new Date(row.date) < getKSTDate();  // ✅ 과거 날짜 여부
-          const isRowClosed = isNextWeekDeadlinePassed(row.date) || rowExpired || isPastDate;
+          const todayStr = getKSTDate().toISOString().split("T")[0];
+          const isTodayOrLater = row.date >= todayStr;
+
+          const isRowClosed = isNextWeekDeadlinePassed(row.date) || rowExpired || !isTodayOrLater;
           
 
           if (isRowClosed) tr.style.backgroundColor = "#ffe5e5"; // 전체 행 붉은색
@@ -502,15 +505,16 @@ function loadWeeklyVisitData() {
           <td>${row.dept || "-"}</td>
           <td>${row.applicant_name || "-"}</td>
           <td>
-          ${isRowClosed
-            ? `<span style="color:gray;">🔒 마감됨</span>`
-            : (isOwner ? `<button class="edit-btn" onclick="editVisit('${row.id}')">✏️</button>` : "")}
+          ${(isOwner && !(bExpired && lExpired && dExpired))
+            ? `<button class="edit-btn" onclick="editVisit('${row.id}')">✏️</button>`
+            : `<span style="color:gray;">🔒마감</span>`}
           </td>
           <td>
-          ${isRowClosed
-          ? `<span style="color:gray;">🔒 마감됨</span>`
-          : (isOwner ? `<button onclick="deleteVisit('${row.id}')">🗑</button>` : "")}
+          ${(isOwner && !bExpired && !lExpired && !dExpired)
+            ? `<button onclick="deleteVisit('${row.id}')">🗑</button>`
+            : `<span style="color:gray;">🔒마감</span>`}
           </td>
+
         `;
           tbody.appendChild(tr);
         });
@@ -708,40 +712,38 @@ function editVisit(id) {
   const tr = document.querySelector(`tr[data-id="${id}"]`);
   if (!tr) return;
 
-  // 현재 값 가져오기
   const date = tr.querySelector("td.date-cell").innerText;
   const b = tr.querySelector(".b-cell").innerText;
   const l = tr.querySelector(".l-cell").innerText;
   const d = tr.querySelector(".d-cell").innerText;
   const r = tr.querySelector(".r-cell")?.innerText || "";
 
-  // ✅ 마감 여부 판별
-  const bExpired = isDeadlinePassed(date, "breakfast", b);
-  const lExpired = isDeadlinePassed(date, "lunch", l);
-  const dExpired = isDeadlinePassed(date, "dinner", d);
+  const isBExpired = isDeadlinePassed(date, "breakfast", b);
+  const isLExpired = isDeadlinePassed(date, "lunch", l);
+  const isDExpired = isDeadlinePassed(date, "dinner", d);
 
-  // input으로 변환
-  // ✅ 각 셀을 input으로 바꾸되, 마감이면 비활성화
-  tr.querySelector(".b-cell").innerHTML =
-    `<input type="number" min="0" max="50" value="${b}" ${bExpired ? 'readonly style="background:#eee;"' : ''}>`;
+  tr.querySelector(".b-cell").innerHTML = isBExpired
+    ? `${b}<input type="hidden" value="${b}">`
+    : `<input type="number" min="0" max="50" value="${b}">`;
 
-    tr.querySelector(".l-cell").innerHTML =
-    `<input type="number" min="0" max="50" value="${l}" ${lExpired ? 'readonly style="background:#eee;"' : ''}>`;
-  
-  tr.querySelector(".d-cell").innerHTML =
-    `<input type="number" min="0" max="50" value="${d}" ${dExpired ? 'readonly style="background:#eee;"' : ''}>`;
+  tr.querySelector(".l-cell").innerHTML = isLExpired
+    ? `${l}<input type="hidden" value="${l}">`
+    : `<input type="number" min="0" max="50" value="${l}">`;
 
-  
+  tr.querySelector(".d-cell").innerHTML = isDExpired
+    ? `${d}<input type="hidden" value="${d}">`
+    : `<input type="number" min="0" max="50" value="${d}">`;
+
   if (tr.querySelector(".r-cell")) {
     tr.querySelector(".r-cell").innerHTML = `<input type="text" value="${r}">`;
   }
 
-  // 버튼 변경
+  // 수정 버튼을 저장 버튼으로 교체
   const editBtn = tr.querySelector("button.edit-btn");
   editBtn.innerText = "💾";
   editBtn.onclick = () => saveVisitEdit(id);
-
 }
+
 
 // ✅ 2. 저장 버튼 클릭 시 수정 내용 서버로 전송
 function saveVisitEdit(id) {
@@ -776,12 +778,12 @@ if (isNextWeekDeadlinePassed(date)) {
   const reasonInput = tr.querySelector(".r-cell input");
   const reason = reasonInput ? reasonInput.value.trim() : "협력사 신청";
 
-  if ((breakfast + lunch + dinner) === 0 || reason === "") {
-    showToast("❗ 수량 또는 사유 입력이 누락되었습니다.");
-    alert("❗ 수량 또는 사유 입력이 누락되었습니다.");
-    return;
+  //사유 입력은 반 필수
+  if (reason === "") {
+  alert("❗ 사유를 입력해주세요.");
+  return;
+  
   }
-
   // ✅ 마감시간 체크 로직 추가
   if (!checkTimeLimit(date, breakfast, lunch, dinner)) {
     alert("⚠️ 마감 시간이 지나 수정할 수 없습니다.");
