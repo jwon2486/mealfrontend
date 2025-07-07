@@ -184,7 +184,7 @@ function generateTableBody(dates, data) {
                     btn.title = "공휴일에는 신청할 수 없습니다.";
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
                 }
-                else if (isDeadlinePassed(date, type)) {
+                /*else if (isDeadlinePassed(date, type)) {
                 btn.classList.add("meal-deadline");      // ✅ 클래스 추가
                 btn.innerText= "❌마감";                // ✅ 텍스트 변경
                 btn.title = "신청 마감됨";
@@ -192,6 +192,10 @@ function generateTableBody(dates, data) {
                 }
                 else {
                     btn.onclick = () => toggleMeal(btn);
+                }*/
+                else {
+                // ✅ 관리자 페이지에서는 마감 시간과 상관없이 항상 신청 가능
+                btn.onclick = () => toggleMeal(btn);
                 }
 
                 const td = document.createElement("td");
@@ -333,7 +337,7 @@ function getDateArray(start, end) {
     return dates;
 }
 
-// ✅ 마감 여부 판단 함수 (조식/중식/석식)
+/* ✅ 마감 여부 판단 함수 (조식/중식/석식)
 function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
@@ -377,8 +381,9 @@ function isDeadlinePassed(dateStr, mealType) {
     wednesdayDeadline.setHours(16, 0, 0, 0); // 16시
 
     return now > wednesdayDeadline;
-}
+}*/
 
+/*
 function isThisWeek(dateStr) {
     const target = new Date(dateStr);
     const now = getKSTDate();
@@ -393,7 +398,7 @@ function isThisWeek(dateStr) {
 
     return target >= monday && target <= sunday;
 }
-
+*/
 
 // ✅ 이번 주 날짜 범위
 function getCurrentWeekRange() {

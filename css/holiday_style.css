@@ -8,6 +8,7 @@ body {
 /* 연도 선택 */
 .holiday-container {
     margin-bottom: 10px;
+    align-items: center;  
 }
 
 .calendar-grid {
@@ -23,6 +24,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
+  align-items: center;
 }
 
 .month-calendar caption {
@@ -78,13 +80,14 @@ td.holiday {
   font-size: 14px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: left;
 }
 
 .holiday-list-table {
   width: 100%;
+  max-width: 600px;
   border-collapse: collapse;
-  margin-top: 12px;
+  margin-top: 40px;
   font-size: 14px;
 }
 
