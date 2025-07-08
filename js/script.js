@@ -235,7 +235,7 @@ function renderMealTable(dates) {
             btn.className = "meal-btn";
             btn.dataset.date = dateStr;
             btn.dataset.type = type;
-            btn.innerText = "❌ 미신청";
+            btn.innerText = "❌미신청";
 
             const cell = document.createElement("td");
 
@@ -285,12 +285,12 @@ function renderMealTable(dates) {
 function toggleMeal(btn) {
     if (btn.classList.contains("selected")) {
         btn.classList.remove("selected");
-        btn.innerText = "❌ 미신청";
+        btn.innerText = "❌미신청";
         btn.style.backgroundColor = "#e0e0e0";
         btn.style.color = "#000";
     } else {
         btn.classList.add("selected");
-        btn.innerText = "✅ 신청";
+        btn.innerText = "✅신청";
         btn.style.backgroundColor = "#28a745";
         btn.style.color = "#fff";
     }
@@ -310,7 +310,7 @@ function loadWeekData() {
     const end = dates[dates.length - 1];
 
     // 상단 사용자 이름 및 주간 범위 표시
-    document.getElementById("welcome").innerHTML = `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 날짜: ${start} ~ ${end}`;
+    document.getElementById("welcome").innerHTML = `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
   //document.getElementById("weekRangeText").innerText = `선택 날짜: ${start} ~ ${end} `;
 
     renderMealTable(dates); // 버튼 테이블 새로 생성

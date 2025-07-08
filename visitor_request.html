@@ -8,16 +8,16 @@
 </head>
 <body>
   <h2 id="page-title">방문자 식수 신청</h2>
-  <div id="deadline-info" style="width: 100%; max-width: 600px; margin: 12px auto; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; font-size: 15px;">
-  <strong>📌 마감 안내</strong><br />
-  <strong><u>금주 식수</u> 마감 시간:</strong><br />
-  &nbsp;&nbsp;- <strong>조식: 전날 오전 9시</strong>까지<br />
-  &nbsp;&nbsp;- <strong>중식: 당일 오전 10시 30분</strong>까지<br />
-  &nbsp;&nbsp;- <strong>석식: 당일 오후 2시 30분</strong>까지<br /><br />
-  <strong><u>차주 식수</u> 마감 시간:</strong><br />
-  &nbsp;&nbsp;- <strong>금주 수요일 오후 4시</strong>까지 신청/변경 가능<br />
-  &nbsp;&nbsp;<strong>※수요일</strong>이 지나면 <strong>신청이 마감되고 차주에 변경가능</strong>합니다.
-</div>
+  <div id="deadline-info" class="deadline-info">
+        <strong>📌 마감 안내</strong><br />
+        <strong><u>금주 식수</u> 마감 시간:</strong><br />
+        &nbsp;&nbsp;- <strong>조식: 전날 오전 9시</strong>까지<br />
+        &nbsp;&nbsp;- <strong>중식: 당일 오전 10시 30분</strong>까지<br />
+        &nbsp;&nbsp;- <strong>석식: 당일 오후 2시 30분</strong>까지<br />
+        <strong><u>차주 식수</u> 마감 시간:</strong><br />
+        &nbsp;&nbsp;- <strong>금주 수요일 오후 4시</strong>까지 신청/변경 가능<br />
+        &nbsp;&nbsp; <strong>※수요일</strong>이 지나면 </strong><strong>신청이 마감되고 차주에 변경가능</strong>합니다.
+  </div>
 
   <!-- ✅ 로그인 사용자 정보 표시 -->
   <div class="login-container">
@@ -47,7 +47,7 @@
         <td class="col-alunch"><input type="number" id="l-count" min="0" max="50" value="0" /></td>
         <td class="col-adinner"><input type="number" id="d-count" min="0" max="50" value="0" /></td>
         <td class="col-areason"><input type="text" id="visit-reason" class="reason-input" placeholder="신청 사유" /></td>
-        <td class="col-asave"><button id="visit-data-save-btn" onclick="submitVisit()">💾 저장</button></td>
+        <td class="col-asave"><button id="visit-data-save-btn" onclick="submitVisit()">💾</button></td>
         </tr>
       </tbody>
     </table>

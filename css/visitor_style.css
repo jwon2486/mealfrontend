@@ -10,6 +10,20 @@ body {
     text-align: center;
     font-size: 20px;
   }
+
+  .deadline-info {
+  width: 100%;
+  max-width: 530px;
+  margin: 16px auto;
+  padding: 16px;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  font-size: 20px;
+  text-align: left;     /* 또는 center, 필요에 따라 */
+  line-height: 1.6;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
   
   /* 테이블 영역 */
   .table-container {
@@ -79,12 +93,12 @@ th, td {
 }
 /* 테이블들  칼럼 조정 속성  */
 /* 상단 테이블 열 폭 */
-th.col-adate, td.col-adate { width: 100px; }
-th.col-aday, td.col-aday { width: 60px; }
+th.col-adate, td.col-adate { width: 150px;}
+th.col-aday, td.col-aday { width: 40px; }
 th.col-abreakfast, td.col-abreakfast,
 th.col-alunch, td.col-alunch,
-th.col-adinner, td.col-adinner { width: 30px; }
-th.col-areason, td.col-areason { width: 200px; }
+th.col-adinner, td.col-adinner { width: 50px; }
+th.col-areason, td.col-areason { width: 150px; }
 th.col-asave, td.col-asave { width: 40px; }
 
 /* 하단 테이블 열 폭 */
@@ -97,12 +111,12 @@ th.col-summary-reason, td.col-summary-reason { width: 250px; }
 th.col-summary-dept, td.col-summary-dept { width: 120px; }
 th.col-summary-requester, td.col-summary-requester { width: 60px; }
 th.col-summary-edit, td.col-summary-edit,
-th.col-summary-delete, td.col-summary-delete { width: 40px; }
+th.col-summary-delete, td.col-summary-delete { width: 50px; }
 
 /* 공통 td 높이 지정 */
 .visitor-form-table td,
 .visitor-summary-table td {
-  height: 48px;
+  height: 60px;
   vertical-align: middle;
 }
 
@@ -110,8 +124,8 @@ th.col-summary-delete, td.col-summary-delete { width: 40px; }
 .visitor-form-table td input,
 .visitor-form-table td button,
 .visitor-summary-table td button {
-  height: 38  px;
-  font-size: 14px;
+  height: 45px;
+  font-size: 16px;
 }
 
 
@@ -122,13 +136,14 @@ text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
   button {
     background-color: #007bff;
     color: #fff;
-    padding: 8px 14px;
+    padding: 2px 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     display: inline-block;
     text-align: center;
     height: 40px;
+    font-size: 18px;
   }
   
   button:hover {
@@ -204,6 +219,21 @@ text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
   
   /* ✅ 모바일 반응형 */
   @media (max-width: 768px) {
+
+  .deadline-info {
+    max-width: 420px;
+    font-size: 16px;
+    padding: 12px;
+    margin: 12px auto;
+  }
+
+  /* 공통 td 높이 지정 */
+  .visitor-form-table td,
+  .visitor-summary-table td {
+    height: 50px;
+    vertical-align: middle;
+  }
+
   td input[type="number"],
   td input[type="text"],
   td select {
@@ -221,13 +251,14 @@ text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
 
 
   table, th, td {
-    font-size: clamp(10px, 3vw, 13px);
-    padding: 1px;
+    font-size: clamp(14px, 3vw, 14px);
+    padding: 3px;
   }
 
   button {
     font-size: clamp(11px, 3vw, 14px);
-    padding: 4px 6px;
+    vertical-align: middle;
+    padding: 6px 6px;
   }
 
   .reason-input {
@@ -237,10 +268,10 @@ text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
   }
 
   .date-input {
-    font-size: clamp(12px, 2.5vw, 18px);
+    font-size: clamp(12px, 2.5vw, 14px);
     height: 3.5em;
     line-height: 1.2;
-    width: 90px;
+    width: 120px;
     padding: 2px;
     text-align: center;
     white-space: nowrap;
