@@ -254,13 +254,13 @@ button:hover {
   #welcome {
   margin-top: 10px;           /* 필요 시 조정 가능 */
   /*font-weight: bold;*/
-  font-size: 18px;
+  font-size: 15px;
   text-align: center;
   color: #333;                /* 선택 사항 */
   }
   
   #mealSummary {
-  font-size: 20px;        /* 원하는 크기로 설정 (예: 20px) */
+  font-size: 18px;        /* 원하는 크기로 설정 (예: 20px) */
   font-weight: bold;      /* 필요 시 생략 가능 */
   color: #333;            /* 색상 지정 */
   margin-top: 8px;
