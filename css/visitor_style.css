@@ -93,25 +93,25 @@ th, td {
 }
 /* 테이블들  칼럼 조정 속성  */
 /* 상단 테이블 열 폭 */
-th.col-adate, td.col-adate { width: 150px;}
-th.col-aday, td.col-aday { width: 40px; }
+th.col-adate, td.col-adate { width: 40px;}
+th.col-aday, td.col-aday { width: 20px; }
 th.col-abreakfast, td.col-abreakfast,
 th.col-alunch, td.col-alunch,
-th.col-adinner, td.col-adinner { width: 50px; }
-th.col-areason, td.col-areason { width: 150px; }
+th.col-adinner, td.col-adinner { width: 30px; }
+th.col-areason, td.col-areason { width: 500px; }
 th.col-asave, td.col-asave { width: 40px; }
 
 /* 하단 테이블 열 폭 */
-th.col-summary-date, td.col-summary-date { width: 90px; }
-th.col-summary-day, td.col-summary-day { width: 60px; }
+th.col-summary-date, td.col-summary-date { width: 40px; }
+th.col-summary-day, td.col-summary-day { width: 20px; }
 th.col-summary-breakfast, td.col-summary-breakfast,
 th.col-summary-lunch, td.col-summary-lunch,
-th.col-summary-dinner, td.col-summary-dinner { width: 30px; }
+th.col-summary-dinner, td.col-summary-dinner { width: 25px; }
 th.col-summary-reason, td.col-summary-reason { width: 250px; }
-th.col-summary-dept, td.col-summary-dept { width: 120px; }
-th.col-summary-requester, td.col-summary-requester { width: 60px; }
-th.col-summary-edit, td.col-summary-edit,
-th.col-summary-delete, td.col-summary-delete { width: 50px; }
+th.col-summary-dept, td.col-summary-dept { width: 80px; }
+th.col-summary-requester, td.col-summary-requester { width: 40px; }
+th.col-summary-edit, td.col-summary-edit { width: 20px; }
+th.col-summary-delete, td.col-summary-delete { width: 20px; }
 
 /* 공통 td 높이 지정 */
 .visitor-form-table td,
