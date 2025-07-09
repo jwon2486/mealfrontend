@@ -636,11 +636,11 @@ function isDeadlinePassed(date, mealType, quantity) {
 
   if (mealType === "breakfast") {
     mealDate.setDate(mealDate.getDate() - 1);
-    mealDate.setHours(15, 0, 0, 0);
+    mealDate.setHours(9, 0, 0, 0);
   } else if (mealType === "lunch") {
-    mealDate.setHours(10, 0, 0, 0);
+    mealDate.setHours(10, 30, 0, 0);
   } else if (mealType === "dinner") {
-    mealDate.setHours(15, 0, 0, 0);
+    mealDate.setHours(14, 30, 0, 0);
   }
 
   return now > mealDate;
@@ -668,7 +668,7 @@ function updateDeadlineColors() {
   // 🟢 1) 식사별 마감 처리
   const bLimit = new Date(mealDate);
   bLimit.setDate(mealDate.getDate() - 1);
-  bLimit.setHours(15,0,0,0);
+  bLimit.setHours(9,0,0,0);
   if (now > bLimit) {
     breakfastInput.classList.add("expired-input");
     breakfastInput.readOnly = true;
@@ -677,7 +677,7 @@ function updateDeadlineColors() {
   }
 
   const lLimit = new Date(mealDate);
-  lLimit.setHours(10,0,0,0);
+  lLimit.setHours(10,30,0,0);
   if (now > lLimit) {
     lunchInput.classList.add("expired-input");
     lunchInput.readOnly = true;
@@ -686,7 +686,7 @@ function updateDeadlineColors() {
   }
 
   const dLimit = new Date(mealDate);
-  dLimit.setHours(15,0,0,0);
+  dLimit.setHours(14,30,0,0);
   if (now > dLimit) {
     dinnerInput.classList.add("expired-input");
     dinnerInput.readOnly = true;
