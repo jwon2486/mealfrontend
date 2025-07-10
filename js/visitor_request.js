@@ -119,6 +119,7 @@ document.getElementById("visit-date").addEventListener("change", () => {
     const adjusted = getNearestWeekday(picked);
     input.value = adjusted.toISOString().split("T")[0];
   }
+
   
   
   // ✅ 날짜 변경 시 주간 테이블 기준일도 자동 갱신
@@ -168,22 +169,23 @@ function loadLoginInfo() {
     sessionStorage.setItem("userName", user.userName);
     sessionStorage.setItem("userType", user.type);
     sessionStorage.setItem("level", user.level);
+    const logButton = document.getElementById("visit-log-button");
+    const userLevel = sessionStorage.getItem("level");
+
+    if (logButton) {
+      if (userLevel === "2") {
+        logButton.style.display = "inline-block";
+        logButton.addEventListener("click", () => {
+          window.location.href = "visitor_logs.html";
+        });
+      } else {
+        logButton.style.display = "none";
+      }
+    }
+
   }
 }
   
-const logButton = document.getElementById("visit-log-button");
-const userLevel = sessionStorage.getItem("level");
-
-if (logButton) {
-  if (userLevel === "2") {
-    logButton.style.display = "inline-block";  // 표시
-    logButton.addEventListener("click", () => {
-      window.location.href = "visitor_logs.html";
-    });
-  } else {
-    logButton.style.display = "none"; // 숨김
-  }
-}
   // 오늘 날짜 기본 설정
 function setTodayDefault() {
   const today = getKSTDate(); // 현재 날짜 (KST)
@@ -859,13 +861,7 @@ if (isNextWeekDeadlinePassed(date)) {
   // });
 }
 
-//로그조회 페이지 함수
-const logBtn = document.getElementById("visit-log-button");
-  if (logBtn) {
-    logBtn.addEventListener("click", () => {
-      window.location.href = "visitor_logs.html";
-    });
-  }
+
 
 function isRowExpired(row) {
   return (
