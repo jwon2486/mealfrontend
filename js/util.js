@@ -289,6 +289,23 @@ function goToPage(pageUrl) {
             location.href = "index.html";
         }, TIMEOUT);
     }
+/**
+ * 주어진 UTC 기반 날짜 문자열을 한국 시간(KST)으로 변환하여
+ * "YYYY-MM-DD HH:mm:ss" 형식의 문자열로 반환하는 함수**/
+function formatToKoreanTime(datetimeStr) {
+  if (!datetimeStr) return "-";
+  const date = new Date(datetimeStr.replace(" ", "T") + "Z");
+  return date.toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+}
+
 
     // 이벤트에 타이머 리셋 연결
     window.onload = resetTimer;

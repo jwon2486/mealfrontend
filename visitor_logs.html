@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>부서별 방문자 로그</title>
+  <link rel="stylesheet" href="css/check_style.css" />
+  <script>
+    const savedUser = sessionStorage.getItem("currentUser");
+    if (!savedUser) {
+      location.href = "index.html";  // 로그인되지 않음
+    }
+  </script>
+</head>
+<body>
+  <h2>📋 부서 방문자 식수 변경 로그</h2>
+
+  <div class="filter-container">
+    <input type="date" id="logStartDate" />
+    <input type="date" id="logEndDate" />
+    <input type="text" id="logName" placeholder="이름 (선택)" />
+    <button onclick="loadDeptVisitorLogs()">🔍 조회</button>
+  </div>
+
+  <div class="table-container" style="margin-top:20px;">
+    <table>
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>부서</th>
+          <th>신청자</th>
+          <th>이전</th>
+          <th>변경</th>
+          <th>변경시각</th>
+        </tr>
+      </thead>
+      <tbody id="dept-log-body">
+        <tr><td colspan="6" style="text-align:center;">로딩 중...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/visitor_logs.js"></script> <!-- 신규 js -->
+</body>
+</html>
