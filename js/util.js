@@ -306,7 +306,7 @@ function formatToKoreanTime(datetimeStr) {
   });
 }
 
-
+    window.formatToKoreanTime = formatToKoreanTime;
     // 이벤트에 타이머 리셋 연결
     window.onload = resetTimer;
     document.onmousemove = resetTimer;
