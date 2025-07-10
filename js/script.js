@@ -441,23 +441,20 @@ function updateMealSummary() {
 
 //이번주 날짜 함수
 function isThisWeek(dateStr) {
-    const selected = document.getElementById("weekPicker").value;
+    const now = getKSTDate ? getKSTDate() : new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
 
-    // 선택된 주차의 월요일 기준 계산
-    const selectedDate = new Date(selected);
-    const selectedDay = selectedDate.getDay();
-    const diffToMonday = selectedDay === 0 ? -6 : 1 - selectedDay;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMonday);
+    monday.setHours(0, 0, 0, 0);
 
-    const selectedMonday = new Date(selectedDate);
-    selectedMonday.setDate(selectedDate.getDate() + diffToMonday);
-    selectedMonday.setHours(0, 0, 0, 0);
-
-    const selectedSunday = new Date(selectedMonday);
-    selectedSunday.setDate(selectedMonday.getDate() + 6);
-    selectedSunday.setHours(23, 59, 59, 999);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
 
     const target = new Date(dateStr);
-    return target >= selectedMonday && target <= selectedSunday;
+    return target >= monday && target <= sunday;
 }
 
 
