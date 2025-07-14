@@ -738,17 +738,21 @@ function editVisit(id) {
   const isLExpired = isDeadlinePassed(date, "lunch", l);
   const isDExpired = isDeadlinePassed(date, "dinner", d);
 
-  tr.querySelector(".b-cell").innerHTML = isBExpired
-    ? `${b}<input type="hidden" value="${b}">`
-    : `<input type="number" min="0" max="50" value="${b}">`;
+  // ✅ 조식
+tr.querySelector(".b-cell").innerHTML = isBExpired
+  ? `<span>${b}</span><input type="hidden" name="b-backup" value="${b}">`
+  : `<input type="number" min="0" max="50" value="${b}">`;
 
-  tr.querySelector(".l-cell").innerHTML = isLExpired
-    ? `${l}<input type="hidden" value="${l}">`
-    : `<input type="number" min="0" max="50" value="${l}">`;
+// ✅ 중식
+tr.querySelector(".l-cell").innerHTML = isLExpired
+  ? `<span>${l}</span><input type="hidden" name="l-backup" value="${l}">`
+  : `<input type="number" min="0" max="50" value="${l}">`;
 
-  tr.querySelector(".d-cell").innerHTML = isDExpired
-    ? `${d}<input type="hidden" value="${d}">`
-    : `<input type="number" min="0" max="50" value="${d}">`;
+// ✅ 석식
+tr.querySelector(".d-cell").innerHTML = isDExpired
+  ? `<span>${d}</span><input type="hidden" name="d-backup" value="${d}">`
+  : `<input type="number" min="0" max="50" value="${d}">`;
+
 
   if (tr.querySelector(".r-cell")) {
     tr.querySelector(".r-cell").innerHTML = `<input type="text" value="${r}">`;
