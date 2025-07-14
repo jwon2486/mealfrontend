@@ -291,16 +291,18 @@ function submitVisit() {
         const existing = res.record || { breakfast: 0, lunch: 0, dinner: 0 };
 
         const visitData = {
-          applicant_id: sessionStorage.getItem("id"),
-          applicant_name: sessionStorage.getItem("name"),
-          date,
-          breakfast: expiredList.includes("breakfast") ? existing.breakfast : breakfast,
-          lunch:     expiredList.includes("lunch")     ? existing.lunch     : lunch,
-          dinner:    expiredList.includes("dinner")    ? existing.dinner    : dinner,
-          reason,
-          type: actualType || "방문자", 
-          requested_by_admin: false
+        applicant_id: sessionStorage.getItem("id"),
+        applicant_name: sessionStorage.getItem("name"),
+        date,
+        reason,
+        type: actualType,
+        requested_by_admin: false
         };
+
+        // 마감되지 않은 식사만 추가
+        if (!expiredList.includes("breakfast")) visitData.breakfast = breakfast;
+        if (!expiredList.includes("lunch"))     visitData.lunch     = lunch;
+        if (!expiredList.includes("dinner"))    visitData.dinner    = dinner;
 
         saveVisit(visitData);  // ✅ 저장 함수 호출
         
@@ -763,68 +765,62 @@ function editVisit(id) {
 
 // ✅ 2. 저장 버튼 클릭 시 수정 내용 서버로 전송
 function saveVisitEdit(id) {
-  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  const tr   = document.querySelector(`tr[data-id="${id}"]`);
   if (!tr) return;
-const date = tr.querySelector("td.date-cell").innerText;
 
-  // ✅ 다음 주 마감 검사
-if (isNextWeekDeadlinePassed(date)) {
-  alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
-  loadWeeklyVisitData();  // 원래 상태 복원
-  return;
-}
+  const date = tr.querySelector(".date-cell").innerText;
 
-  
-  
+  /* ─ 1) 공통 마감·예외 검사 ───────────────────────────── */
+  if (isNextWeekDeadlinePassed(date)) {
+    alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
+    loadWeeklyVisitData();
+    return;
+  }
 
-  // ✅ 마감 여부 체크
   const isBExpired = isDeadlinePassed(date, "breakfast");
   const isLExpired = isDeadlinePassed(date, "lunch");
   const isDExpired = isDeadlinePassed(date, "dinner");
 
-  // ✅ 기존 값 백업
-  const bPrev = tr.querySelector(".b-cell input").getAttribute("data-prev");
-  const lPrev = tr.querySelector(".l-cell input").getAttribute("data-prev");
-  const dPrev = tr.querySelector(".d-cell input").getAttribute("data-prev");
-  
-  const breakfast = isBExpired ? +bPrev : +tr.querySelector(".b-cell input").value;
-  const lunch     = isLExpired ? +lPrev : +tr.querySelector(".l-cell input").value;
-  const dinner    = isDExpired ? +dPrev : +tr.querySelector(".d-cell input").value;
+  /* ─ 2) 기존 값 & 입력 값 확보 ──────────────────────── */
+  const bPrev = +tr.querySelector(".b-cell input").dataset.prev;
+  const lPrev = +tr.querySelector(".l-cell input").dataset.prev;
+  const dPrev = +tr.querySelector(".d-cell input").dataset.prev;
 
-  const reasonInput = tr.querySelector(".r-cell input");
-  const reason = reasonInput ? reasonInput.value.trim() : "협력사 신청";
+  const bNew  = +tr.querySelector(".b-cell input").value;
+  const lNew  = +tr.querySelector(".l-cell input").value;
+  const dNew  = +tr.querySelector(".d-cell input").value;
 
-  //사유 입력은 반 필수
-  if (reason === "") {
-  alert("❗ 사유를 입력해주세요.");
-  return;
-  
-  }
-  // ✅ 마감시간 체크 로직 추가
+  // **검증용 실제 수량** (마감 시 기존값, 수정 가능 시 입력값)
+  const breakfast = isBExpired ? bPrev : bNew;
+  const lunch     = isLExpired ? lPrev : lNew;
+  const dinner    = isDExpired ? dPrev : dNew;
+
+  /* ─ 3) 사유 확인 & 마감시간 재검증 ─────────────────── */
+  const reason = (tr.querySelector(".r-cell input")?.value || "").trim() || "협력사 신청";
+  if (!reason) { alert("❗ 사유를 입력해주세요."); return; }
+
   if (!checkTimeLimit(date, breakfast, lunch, dinner)) {
     alert("⚠️ 마감 시간이 지나 수정할 수 없습니다.");
-
-    // ✅ 여기 추가: 원래 텍스트 상태로 복원
-    loadWeeklyVisitData();  // 기존 데이터 다시 불러오기
+    loadWeeklyVisitData();
     return;
   }
 
-  const data = {
-    breakfast, lunch, dinner, reason
-  };
+  /* ─ 4) 서버 전송용 payload 만들기 ───────────────────── */
+  const data = { reason };              // 기본 필드
 
-  
+  if (!isBExpired) data.breakfast = breakfast;
+  if (!isLExpired) data.lunch     = lunch;
+  if (!isDExpired) data.dinner    = dinner;
 
-  localStorage.setItem("lastWeeklyVisitDate", date);  // ✅ 날짜를 브라우저에 저장
-  localStorage.setItem("flag", 3);
-  
+  /* ─ 5) 전송 & 후처리 ───────────────────────────────── */
   putData(`${API_BASE_URL}/visitors/${id}`, data, () => {
     showToast("✅ 수정 완료");
-    alert("✅ 수정 완료");
-    
-    //postData("/visitor_logs", logPayload);  // ✅ 로그 저장
     loadWeeklyVisitData();
   });
+
+  localStorage.setItem("lastWeeklyVisitDate", date);
+  localStorage.setItem("flag", 3);
+}
 
 
   // ✅ 기존 값 불러오기
@@ -859,7 +855,7 @@ if (isNextWeekDeadlinePassed(date)) {
   //     loadWeeklyVisitData();
   //   });
   // });
-}
+
 
 
 
