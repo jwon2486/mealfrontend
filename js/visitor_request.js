@@ -739,15 +739,15 @@ function editVisit(id) {
   const isDExpired = isDeadlinePassed(date, "dinner", d);
 
   tr.querySelector(".b-cell").innerHTML = isBExpired
-    ? `${b}<input type="hidden" value="${b}">`
+    ? `${b}<input type="hidden" value="${b}" data-prev="${b}">`
     : `<input type="number" min="0" max="50" value="${b}" data-prev="${b}">`;
 
   tr.querySelector(".l-cell").innerHTML = isLExpired
-    ? `${l}<input type="hidden" value="${l}">`
+    ? `${l}<input type="hidden" value="${l}" data-prev="${l}">`
     : `<input type="number" min="0" max="50" value="${l}" data-prev="${l}">`;
 
   tr.querySelector(".d-cell").innerHTML = isDExpired
-    ? `${d}<input type="hidden" value="${d}">`
+    ? `${d}<input type="hidden" value="${d}" data-prev="${d}">`
     : `<input type="number" min="0" max="50" value="${d}" data-prev="${d}">`;
 
   if (tr.querySelector(".r-cell")) {
@@ -783,9 +783,9 @@ if (isNextWeekDeadlinePassed(date)) {
   const isDExpired = isDeadlinePassed(date, "dinner");
 
   // ✅ 기존 값 백업
-  const bPrev = tr.querySelector(".b-cell").getAttribute("data-prev") || "0";
-  const lPrev = tr.querySelector(".l-cell").getAttribute("data-prev") || "0";
-  const dPrev = tr.querySelector(".d-cell").getAttribute("data-prev") || "0";
+  const bPrev = tr.querySelector(".b-cell input").getAttribute("data-prev");
+  const lPrev = tr.querySelector(".l-cell input").getAttribute("data-prev");
+  const dPrev = tr.querySelector(".d-cell input").getAttribute("data-prev");
   
   const breakfast = isBExpired ? +bPrev : +tr.querySelector(".b-cell input").value;
   const lunch     = isLExpired ? +lPrev : +tr.querySelector(".l-cell input").value;
