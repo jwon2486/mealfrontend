@@ -767,68 +767,70 @@ tr.querySelector(".d-cell").innerHTML = isDExpired
 
 // ✅ 2. 저장 버튼 클릭 시 수정 내용 서버로 전송
 function saveVisitEdit(id) {
-  const tr = document.querySelector(`tr[data-id="${id}"]`);
-  if (!tr) return;
-const date = tr.querySelector("td.date-cell").innerText;
+  const tr   = document.querySelector(`tr[data-id="${id}"]`);
+  const date = tr.querySelector(".date-cell").innerText;
 
-  // ✅ 다음 주 마감 검사
-if (isNextWeekDeadlinePassed(date)) {
-  alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
-  loadWeeklyVisitData();  // 원래 상태 복원
-  return;
+  // 1. 원본 레코드 먼저 받아오기 (안-전)
+  getData(`/visitors/${id}`, (original) => {
+    if (!original) { alert("원본을 불러오지 못했습니다."); return; }
+
+    /* ---------- 2. 셀별 새 값 계산 ---------- */
+    const bEditable = !isDeadlinePassed(date, "breakfast");
+    const lEditable = !isDeadlinePassed(date, "lunch");
+    const dEditable = !isDeadlinePassed(date, "dinner");
+
+    const breakfast = bEditable
+        ? +tr.querySelector(".b-cell input").value
+        : original.breakfast;   // 마감 → 그대로
+
+    const lunch = lEditable
+        ? +tr.querySelector(".l-cell input").value
+        : original.lunch;
+
+    const dinner = dEditable
+        ? +tr.querySelector(".d-cell input").value
+        : original.dinner;
+
+    /* ---------- 3. 변경분만 추려 payload 구성 ---------- */
+    const payload = {};
+    if (bEditable && breakfast !== original.breakfast) payload.breakfast = breakfast;
+    if (lEditable && lunch     !== original.lunch)     payload.lunch     = lunch;
+    if (dEditable && dinner    !== original.dinner)    payload.dinner    = dinner;
+
+    const reasonInput = tr.querySelector(".r-cell input");
+    if (reasonInput && reasonInput.value.trim() !== original.reason) {
+      payload.reason = reasonInput.value.trim();
+    }
+
+    if (Object.keys(payload).length === 0) {
+      alert("변경된 내용이 없습니다.");
+      loadWeeklyVisitData();
+      return;
+    }
+
+    /* ---------- 3-A. 변경 로그 기록 ---------- */
+    const changeText = compareVisitorChanges(original, { breakfast, lunch, dinner });
+    if (changeText) {
+      postData("/visitor_logs", {
+        visitor_id: id,
+        applicant_id: original.applicant_id,
+        applicant_name: original.applicant_name,
+        dept: original.dept,
+        date,
+        before_state: `조(${original.breakfast}), 중(${original.lunch}), 석(${original.dinner})`,
+        after_state:  `조(${breakfast}), 중(${lunch}), 석(${dinner})`,
+        changed_at: new Date().toISOString()
+      });
+    }
+
+    /* ---------- 4. PUT 요청 (변경분만) ---------- */
+    putData(`${API_BASE_URL}/visitors/${id}`, payload, () => {
+      showToast("✅ 수정 완료");
+      loadWeeklyVisitData();
+    });
+  });
 }
 
-  
-  
-
-  // ✅ 마감 여부 체크
-  const isBExpired = isDeadlinePassed(date, "breakfast");
-  const isLExpired = isDeadlinePassed(date, "lunch");
-  const isDExpired = isDeadlinePassed(date, "dinner");
-
-  // ✅ 기존 값 백업
-  const bPrev = tr.querySelector(".b-cell").getAttribute("data-prev") || "0";
-  const lPrev = tr.querySelector(".l-cell").getAttribute("data-prev") || "0";
-  const dPrev = tr.querySelector(".d-cell").getAttribute("data-prev") || "0";
-  
-  const breakfast = isBExpired ? +bPrev : +tr.querySelector(".b-cell input").value;
-  const lunch     = isLExpired ? +lPrev : +tr.querySelector(".l-cell input").value;
-  const dinner    = isDExpired ? +dPrev : +tr.querySelector(".d-cell input").value;
-
-  const reasonInput = tr.querySelector(".r-cell input");
-  const reason = reasonInput ? reasonInput.value.trim() : "협력사 신청";
-
-  //사유 입력은 반 필수
-  if (reason === "") {
-  alert("❗ 사유를 입력해주세요.");
-  return;
-  
-  }
-  // ✅ 마감시간 체크 로직 추가
-  if (!checkTimeLimit(date, breakfast, lunch, dinner)) {
-    alert("⚠️ 마감 시간이 지나 수정할 수 없습니다.");
-
-    // ✅ 여기 추가: 원래 텍스트 상태로 복원
-    loadWeeklyVisitData();  // 기존 데이터 다시 불러오기
-    return;
-  }
-
-  const data = {
-    breakfast, lunch, dinner, reason
-  };
-
-  
-
-  localStorage.setItem("lastWeeklyVisitDate", date);  // ✅ 날짜를 브라우저에 저장
-  localStorage.setItem("flag", 3);
-  
-  putData(`${API_BASE_URL}/visitors/${id}`, data, () => {
-    showToast("✅ 수정 완료");
-    alert("✅ 수정 완료");
-    
-    //postData("/visitor_logs", logPayload);  // ✅ 로그 저장
-    loadWeeklyVisitData();
-  });
 
 
   // ✅ 기존 값 불러오기
@@ -863,7 +865,7 @@ if (isNextWeekDeadlinePassed(date)) {
   //     loadWeeklyVisitData();
   //   });
   // });
-}
+
 
 
 
@@ -883,7 +885,7 @@ function getNearestWeekday(dateObj) {
 }
 
 // ✅ 변경 로그용 비교 함수
-function compareVisitorChanges(prev, current) {
+/**function compareVisitorChanges(prev, current) {
   const changes = [];
 
   if (prev.breakfast !== current.breakfast) {
@@ -898,7 +900,7 @@ function compareVisitorChanges(prev, current) {
 
   return changes.length > 0 ? changes.join(", ") : null;
 }
-
+**/
 // 뒤로 가기
 function goToMain() {
     localStorage.removeItem("lastVisitDate");
