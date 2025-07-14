@@ -905,7 +905,7 @@ function getNearestWeekday(dateObj) {
 }
 
 // ✅ 변경 로그용 비교 함수
-/**function compareVisitorChanges(prev, current) {
+function compareVisitorChanges(prev, current) {
   const changes = [];
 
   if (prev.breakfast !== current.breakfast) {
@@ -920,7 +920,7 @@ function getNearestWeekday(dateObj) {
 
   return changes.length > 0 ? changes.join(", ") : null;
 }
-**/
+
 // 뒤로 가기
 function goToMain() {
     localStorage.removeItem("lastVisitDate");
