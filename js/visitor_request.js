@@ -740,15 +740,15 @@ function editVisit(id) {
 
   tr.querySelector(".b-cell").innerHTML = isBExpired
     ? `${b}<input type="hidden" value="${b}">`
-    : `<input type="number" min="0" max="50" value="${b}">`;
+    : `<input type="number" min="0" max="50" value="${b}" data-prev="${b}">`;
 
   tr.querySelector(".l-cell").innerHTML = isLExpired
     ? `${l}<input type="hidden" value="${l}">`
-    : `<input type="number" min="0" max="50" value="${l}">`;
+    : `<input type="number" min="0" max="50" value="${l}" data-prev="${l}">`;
 
   tr.querySelector(".d-cell").innerHTML = isDExpired
     ? `${d}<input type="hidden" value="${d}">`
-    : `<input type="number" min="0" max="50" value="${d}">`;
+    : `<input type="number" min="0" max="50" value="${d}" data-prev="${d}">`;
 
   if (tr.querySelector(".r-cell")) {
     tr.querySelector(".r-cell").innerHTML = `<input type="text" value="${r}">`;
