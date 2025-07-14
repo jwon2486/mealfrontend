@@ -298,7 +298,6 @@ function submitVisit() {
         type: actualType,
         requested_by_admin: false
         };
-
         // 마감되지 않은 식사만 추가
         if (!expiredList.includes("breakfast")) visitData.breakfast = breakfast;
         if (!expiredList.includes("lunch"))     visitData.lunch     = lunch;
@@ -806,11 +805,20 @@ function saveVisitEdit(id) {
   }
 
   /* ─ 4) 서버 전송용 payload 만들기 ───────────────────── */
-  const data = { reason };              // 기본 필드
+  const data = { reason };  // 기본 필드만 먼저
 
-  if (!isBExpired) data.breakfast = breakfast;
-  if (!isLExpired) data.lunch     = lunch;
-  if (!isDExpired) data.dinner    = dinner;
+  // ① 마감되지 않았고 ② 실제 값이 바뀐 경우에만 추가
+  if (!isBExpired && breakfast !== bPrev) data.breakfast = breakfast;
+  if (!isLExpired && lunch     !== lPrev) data.lunch     = lunch;
+  if (!isDExpired && dinner    !== dPrev) data.dinner    = dinner;
+
+  // ③ 변경된 필드가 하나도 없으면 종료
+  if (Object.keys(data).length === 1) {   // reason 하나뿐
+    alert("변경된 내용이 없습니다.");
+    loadWeeklyVisitData();
+    return;
+  }
+
 
   /* ─ 5) 전송 & 후처리 ───────────────────────────────── */
   putData(`${API_BASE_URL}/visitors/${id}`, data, () => {
