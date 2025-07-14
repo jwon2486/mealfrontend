@@ -776,14 +776,16 @@ function saveVisitEdit(id) {
     return;
   }
 
-  const isBExpired = isDeadlinePassed(date, "breakfast");
-  const isLExpired = isDeadlinePassed(date, "lunch");
-  const isDExpired = isDeadlinePassed(date, "dinner");
-
+  
+  
   /* ─ 2) 기존 값 & 입력 값 확보 ──────────────────────── */
   const bPrev = +tr.querySelector(".b-cell input").dataset.prev;
   const lPrev = +tr.querySelector(".l-cell input").dataset.prev;
   const dPrev = +tr.querySelector(".d-cell input").dataset.prev;
+
+  const isBExpired = isDeadlinePassed(date, "breakfast", bPrev);
+  const isLExpired = isDeadlinePassed(date, "lunch", lPrev);
+  const isDExpired = isDeadlinePassed(date, "dinner", dPrev);
 
   const bNew  = +tr.querySelector(".b-cell input").value;
   const lNew  = +tr.querySelector(".l-cell input").value;
@@ -798,19 +800,31 @@ function saveVisitEdit(id) {
   const reason = (tr.querySelector(".r-cell input")?.value || "").trim() || "협력사 신청";
   if (!reason) { alert("❗ 사유를 입력해주세요."); return; }
 
-  if (!checkTimeLimit(date, breakfast, lunch, dinner)) {
-    alert("⚠️ 마감 시간이 지나 수정할 수 없습니다.");
-    loadWeeklyVisitData();
-    return;
+  // ✅ 마감된 식사는 0 으로 넘겨 검사 통과
+  const chkB = isBExpired ? 0 : breakfast;
+  const chkL = isLExpired ? 0 : lunch;
+  const chkD = isDExpired ? 0 : dinner;
+
+  if (!checkTimeLimit(date, chkB, chkL, chkD)) {
+      alert("⚠️ 마감 시간이 지나 수정할 수 없습니다.");
+      loadWeeklyVisitData();
+      return;
   }
 
   /* ─ 4) 서버 전송용 payload 만들기 ───────────────────── */
   const data = { reason };  // 기본 필드만 먼저
 
   // ① 마감되지 않았고 ② 실제 값이 바뀐 경우에만 추가
-  if (!isBExpired && breakfast !== bPrev) data.breakfast = breakfast;
-  if (!isLExpired && lunch     !== lPrev) data.lunch     = lunch;
-  if (!isDExpired && dinner    !== dPrev) data.dinner    = dinner;
+  // ① 마감되지 않았고 ② 실제 값이 바뀐 경우에만 전송
+  if (!isBExpired && bNew !== bPrev) {
+      data.breakfast = bNew;
+  }
+  if (!isLExpired && lNew !== lPrev) {
+      data.lunch = lNew;
+  }
+  if (!isDExpired && dNew !== dPrev) {
+      data.dinner = dNew;
+  }
 
   // ③ 변경된 필드가 하나도 없으면 종료
   if (Object.keys(data).length === 1) {   // reason 하나뿐
@@ -819,7 +833,7 @@ function saveVisitEdit(id) {
     return;
   }
 
-
+  console.log("🔎 전송 payload:", data);   // ← 추가
   /* ─ 5) 전송 & 후처리 ───────────────────────────────── */
   putData(`${API_BASE_URL}/visitors/${id}`, data, () => {
     showToast("✅ 수정 완료");
