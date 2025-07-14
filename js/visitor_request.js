@@ -807,6 +807,49 @@ function saveVisitEdit(id) {
   });
 }
 
+// ✅ 행을 편집 모드로 전환
+function editVisit(id) {
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (!tr) return;
+
+  const date = tr.querySelector(".date-cell").innerText;
+  const b = tr.querySelector(".b-cell").innerText;
+  const l = tr.querySelector(".l-cell").innerText;
+  const d = tr.querySelector(".d-cell").innerText;
+  const r = tr.querySelector(".r-cell")?.innerText || "";
+
+  const isBExpired = isDeadlinePassed(date, "breakfast");
+  const isLExpired = isDeadlinePassed(date, "lunch");
+  const isDExpired = isDeadlinePassed(date, "dinner");
+
+  // 조식
+  tr.querySelector(".b-cell").innerHTML = isBExpired
+    ? `<span>${b}</span><input type="hidden" value="${b}">`
+    : `<input type="number" min="0" max="50" value="${b}">`;
+
+  // 중식
+  tr.querySelector(".l-cell").innerHTML = isLExpired
+    ? `<span>${l}</span><input type="hidden" value="${l}">`
+    : `<input type="number" min="0" max="50" value="${l}">`;
+
+  // 석식
+  tr.querySelector(".d-cell").innerHTML = isDExpired
+    ? `<span>${d}</span><input type="hidden" value="${d}">`
+    : `<input type="number" min="0" max="50" value="${d}">`;
+
+  // 사유
+  if (tr.querySelector(".r-cell")) {
+    tr.querySelector(".r-cell").innerHTML = `<input type="text" value="${r}">`;
+  }
+
+  // ✏️ → 💾  버튼 교체
+  const editBtn = tr.querySelector(".edit-btn");
+  if (editBtn) {
+    editBtn.innerText = "💾";
+    editBtn.onclick = () => saveVisitEdit(id);
+  }
+}
+
 
 
 
