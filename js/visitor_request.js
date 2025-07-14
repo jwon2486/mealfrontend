@@ -724,112 +724,89 @@ function updateDeadlineColors() {
 
   
 // ✅ 1. 수정 버튼 클릭 시 해당 행을 수정 모드로 전환
-function editVisit(id) {
+function saveVisitEdit(id) {
   const tr = document.querySelector(`tr[data-id="${id}"]`);
   if (!tr) return;
 
-  const date = tr.querySelector("td.date-cell").innerText;
-  const b = tr.querySelector(".b-cell").innerText;
-  const l = tr.querySelector(".l-cell").innerText;
-  const d = tr.querySelector(".d-cell").innerText;
-  const r = tr.querySelector(".r-cell")?.innerText || "";
-
-  const isBExpired = isDeadlinePassed(date, "breakfast", b);
-  const isLExpired = isDeadlinePassed(date, "lunch", l);
-  const isDExpired = isDeadlinePassed(date, "dinner", d);
-
-  // ✅ 조식
-tr.querySelector(".b-cell").innerHTML = isBExpired
-  ? `<span>${b}</span><input type="hidden" name="b-backup" value="${b}">`
-  : `<input type="number" min="0" max="50" value="${b}">`;
-
-// ✅ 중식
-tr.querySelector(".l-cell").innerHTML = isLExpired
-  ? `<span>${l}</span><input type="hidden" name="l-backup" value="${l}">`
-  : `<input type="number" min="0" max="50" value="${l}">`;
-
-// ✅ 석식
-tr.querySelector(".d-cell").innerHTML = isDExpired
-  ? `<span>${d}</span><input type="hidden" name="d-backup" value="${d}">`
-  : `<input type="number" min="0" max="50" value="${d}">`;
-
-
-  if (tr.querySelector(".r-cell")) {
-    tr.querySelector(".r-cell").innerHTML = `<input type="text" value="${r}">`;
-  }
-
-  // 수정 버튼을 저장 버튼으로 교체
-  const editBtn = tr.querySelector("button.edit-btn");
-  editBtn.innerText = "💾";
-  editBtn.onclick = () => saveVisitEdit(id);
-}
-
-
-// ✅ 2. 저장 버튼 클릭 시 수정 내용 서버로 전송
-function saveVisitEdit(id) {
-  const tr   = document.querySelector(`tr[data-id="${id}"]`);
   const date = tr.querySelector(".date-cell").innerText;
 
-  // 1. 원본 레코드 먼저 받아오기 (안-전)
-  getData(`/visitors/${id}`, (original) => {
-    if (!original) { alert("원본을 불러오지 못했습니다."); return; }
+  // 🔒 다음 주 마감 검사
+  if (isNextWeekDeadlinePassed(date)) {
+    alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
+    loadWeeklyVisitData();
+    return;
+  }
 
-    /* ---------- 2. 셀별 새 값 계산 ---------- */
-    const bEditable = !isDeadlinePassed(date, "breakfast");
-    const lEditable = !isDeadlinePassed(date, "lunch");
-    const dEditable = !isDeadlinePassed(date, "dinner");
+  // ✅ 1. 현재 화면에서 원본 값을 구성
+  const bEditable = !isDeadlinePassed(date, "breakfast");
+  const lEditable = !isDeadlinePassed(date, "lunch");
+  const dEditable = !isDeadlinePassed(date, "dinner");
 
-    const breakfast = bEditable
-        ? +tr.querySelector(".b-cell input").value
-        : original.breakfast;   // 마감 → 그대로
+  // 조/중/석식 원래 값은 span 또는 input[type=hidden]에 있음
+  const original = {
+    breakfast: +tr.querySelector(".b-cell span")?.innerText || +tr.querySelector(".b-cell input")?.value || 0,
+    lunch:     +tr.querySelector(".l-cell span")?.innerText || +tr.querySelector(".l-cell input")?.value || 0,
+    dinner:    +tr.querySelector(".d-cell span")?.innerText || +tr.querySelector(".d-cell input")?.value || 0,
+    reason:    tr.querySelector(".r-cell input")?.defaultValue || tr.querySelector(".r-cell span")?.innerText || ""
+  };
 
-    const lunch = lEditable
-        ? +tr.querySelector(".l-cell input").value
-        : original.lunch;
+  // ✅ 2. 새 입력값 읽기 (수정 가능한 것만)
+  const breakfast = bEditable
+    ? +tr.querySelector(".b-cell input")?.value
+    : original.breakfast;
 
-    const dinner = dEditable
-        ? +tr.querySelector(".d-cell input").value
-        : original.dinner;
+  const lunch = lEditable
+    ? +tr.querySelector(".l-cell input")?.value
+    : original.lunch;
 
-    /* ---------- 3. 변경분만 추려 payload 구성 ---------- */
-    const payload = {};
-    if (bEditable && breakfast !== original.breakfast) payload.breakfast = breakfast;
-    if (lEditable && lunch     !== original.lunch)     payload.lunch     = lunch;
-    if (dEditable && dinner    !== original.dinner)    payload.dinner    = dinner;
+  const dinner = dEditable
+    ? +tr.querySelector(".d-cell input")?.value
+    : original.dinner;
 
-    const reasonInput = tr.querySelector(".r-cell input");
-    if (reasonInput && reasonInput.value.trim() !== original.reason) {
-      payload.reason = reasonInput.value.trim();
-    }
+  const reasonInput = tr.querySelector(".r-cell input");
+  const reason = reasonInput ? reasonInput.value.trim() : original.reason;
 
-    if (Object.keys(payload).length === 0) {
-      alert("변경된 내용이 없습니다.");
-      loadWeeklyVisitData();
-      return;
-    }
+  // ✅ 사유는 필수
+  if (!reason) {
+    alert("❗ 사유를 입력해주세요.");
+    return;
+  }
 
-    /* ---------- 3-A. 변경 로그 기록 ---------- */
-    const changeText = compareVisitorChanges(original, { breakfast, lunch, dinner });
-    if (changeText) {
-      postData("/visitor_logs", {
-        visitor_id: id,
-        applicant_id: original.applicant_id,
-        applicant_name: original.applicant_name,
-        dept: original.dept,
-        date,
-        before_state: `조(${original.breakfast}), 중(${original.lunch}), 석(${original.dinner})`,
-        after_state:  `조(${breakfast}), 중(${lunch}), 석(${dinner})`,
-        changed_at: new Date().toISOString()
-      });
-    }
+  // ✅ 3. payload: 변경된 항목만 포함
+  const payload = {};
+  if (bEditable && breakfast !== original.breakfast) payload.breakfast = breakfast;
+  if (lEditable && lunch     !== original.lunch)     payload.lunch     = lunch;
+  if (dEditable && dinner    !== original.dinner)    payload.dinner    = dinner;
+  if (reason !== original.reason)                    payload.reason    = reason;
 
-    /* ---------- 4. PUT 요청 (변경분만) ---------- */
-    putData(`${API_BASE_URL}/visitors/${id}`, payload, () => {
-      showToast("✅ 수정 완료");
-      loadWeeklyVisitData();
+  if (Object.keys(payload).length === 0) {
+    alert("변경된 내용이 없습니다.");
+    loadWeeklyVisitData();
+    return;
+  }
+
+  // ✅ 4. 변경 로그 작성 (선택)
+  const changeText = compareVisitorChanges(original, { breakfast, lunch, dinner });
+  if (changeText) {
+    postData("/visitor_logs", {
+      visitor_id: id,
+      applicant_id: sessionStorage.getItem("id"),
+      applicant_name: sessionStorage.getItem("name"),
+      dept: sessionStorage.getItem("dept"),
+      date,
+      before_state: `조(${original.breakfast}), 중(${original.lunch}), 석(${original.dinner})`,
+      after_state:  `조(${breakfast}), 중(${lunch}), 석(${dinner})`,
+      changed_at: new Date().toISOString()
     });
+  }
+
+  // ✅ 5. PUT 요청
+  putData(`${API_BASE_URL}/visitors/${id}`, payload, () => {
+    showToast("✅ 수정 완료");
+    loadWeeklyVisitData();
   });
 }
+
 
 
 
