@@ -590,21 +590,21 @@ function getExpiredMeals(date, mealData) {
 
   const bLimit = new Date(mealDate);
   bLimit.setDate(mealDate.getDate() - 1);
-  bLimit.setHours(15, 0, 0, 0);
+  bLimit.setHours(9, 0, 0, 0);
   if (mealData.breakfast > 0 && now > bLimit){
     expired.push("breakfast");
     // alert("breakfast");
   }
 
   const lLimit = new Date(mealDate);
-  lLimit.setHours(10, 0, 0, 0);
+  lLimit.setHours(10, 30, 0, 0);
   if (mealData.lunch > 0 && now > lLimit){
     expired.push("lunch");
     // alert("lunch");
   } 
 
   const dLimit = new Date(mealDate);
-  dLimit.setHours(15, 0, 0, 0);
+  dLimit.setHours(14, 30, 0, 0);
   if (mealData.dinner > 0 && now > dLimit){
     expired.push("dinner");
     // alert("dinner");
@@ -624,15 +624,15 @@ function checkTimeLimit(date, breakfast, lunch, dinner) {
   
     const bLimit = new Date(mealDate);
     bLimit.setDate(bLimit.getDate() - 1);
-    bLimit.setHours(15, 0, 0, 0);
+    bLimit.setHours(9, 0, 0, 0);
     if (breakfast > 0 && now > bLimit) errors.push("조식");
   
     const lLimit = new Date(mealDate);
-    lLimit.setHours(10, 0, 0, 0);
+    lLimit.setHours(10, 30, 0, 0);
     if (lunch > 0 && now > lLimit) errors.push("중식");
   
     const dLimit = new Date(mealDate);
-    dLimit.setHours(15, 0, 0, 0);
+    dLimit.setHours(14, 30, 0, 0);
     if (dinner > 0 && now > dLimit) errors.push("석식");
     
   
