@@ -548,7 +548,7 @@ function isDeadlinePassed(dateStr, mealType) {
     }
 }
 
-//자가확인 체크박스 함수
+/**자가확인 체크박스 함수
 function renderSelfCheckBoxes(dates) {
     const container = document.getElementById("self-check-list");
     container.innerHTML = "";
@@ -581,7 +581,7 @@ function renderSelfCheckBoxes(dates) {
         wrapper.appendChild(checkbox);
         container.appendChild(wrapper);
     });
-}
+}**/
 
 function renderSingleSelfCheckBox(date) {
     const container = document.getElementById("self-check-list");
@@ -593,11 +593,13 @@ function renderSingleSelfCheckBox(date) {
     checkbox.dataset.date = date;  // ✔ 저장할 때 사용할 수 있도록 날짜 포함
 
     // 체크 여부 불러오기 (화면 렌더만)
-    fetch(`/selfcheck?user_id=${window.currentUser.userId}&date=${date}`)
-        .then(res => res.json())
-        .then(data => {
-            checkbox.checked = data?.checked === 1;
-        });
+    getData(`/selfcheck?user_id=${window.currentUser.userId}&date=${date}`)
+    .then(data => {
+        checkbox.checked = data?.checked === 1;
+    })
+    .catch(err => {
+        console.error("❌ 자가 확인 상태 로딩 실패:", err);
+    });
 
     container.appendChild(checkbox);
 }
