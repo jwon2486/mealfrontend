@@ -8,23 +8,43 @@ body {
 
 h1, h2 {
     font-size: 25px;
-    margin-top: 5px;
+    margin-top: 10px;
+    margin-bottom: 1px;
   }
 
 #welcome {
-  margin-top: 10px;           /* 필요 시 조정 가능 */
+  
   font-weight: bold;
   font-size: 20px;
   text-align: center;
   color: #333;                /* 선택 사항 */
 }
 
+/* 자가 확인 체크박스 라인 정렬용 */
+.self-check-container {
+  display: flex;
+  justify-content: flex-end;        /* ✅ 전체 줄을 오른쪽으로 */
+  align-items: center;
+  max-width: 600px;                 /* 테이블과 동일한 최대 폭 */
+  width: 100%;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+#self-check-list input[type="checkbox"] {
+  transform: scale(2);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
 #mealSummary {
   font-size: 24px;        /* 원하는 크기로 설정 (예: 20px) */
   font-weight: bold;      /* 필요 시 생략 가능 */
   color: #333;            /* 색상 지정 */
-  margin-top: 8px;
+  /**margin-top: 8px;**/
 }
+
 
 input[type="date"] {
 font-size: 18px;
@@ -133,7 +153,8 @@ tr:hover {
 .deadline-info {
   width: 100%;
   max-width: 530px;
-  margin: 16px auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
   padding: 16px;
   border: 1px solid #ccc;
   background: #f9f9f9;
@@ -214,7 +235,7 @@ tr:hover {
 }
 
 /* 로그인 및 주 선택 영역 스타일 */
-.login-container, #date-picker-container {
+.login-container{
     display: flex;
     flex-direction: column;
     align-items: center;   /* ⭐ 가운데 정렬 */
@@ -222,6 +243,15 @@ tr:hover {
     font-size: 18px;
     margin-bottom: 10px;
     margin-top: 10px;
+}
+#date-picker-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* ⭐ 가운데 정렬 */
+    gap: 10px;
+    font-size: 18px;
+    /**margin-bottom: 10px;
+    margin-top: 10px;**/
 }
 
 
@@ -244,6 +274,7 @@ button:hover {
 
 
 
+
 /*모바일 대응*/
 @media (max-width: 768px) {
   body {
@@ -251,6 +282,21 @@ button:hover {
     padding-left: 8px;
     padding-right: 8px;
   }
+
+  .self-check-container {
+    max-width: 500px;
+    font-size: 14px;
+    padding: 0 4px;
+    justify-content: flex-end;        /* ✅ 전체 줄을 오른쪽으로 */
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  #self-check-list input[type="checkbox"] {
+    transform: scale(1.3);
+    margin-left: 8px;
+  }
+
 
   #welcome {
   margin-top: 10px;           /* 필요 시 조정 가능 */

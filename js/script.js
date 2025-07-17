@@ -255,7 +255,7 @@ function renderMealTable(dates) {
                 btn.style.backgroundColor = "#ffe6e6";
                 btn.style.color = "#666";
                 btn.title = "신청 마감됨";
-                btn.innerText = "❌ 마감됨";
+                btn.innerText = "❌ 마감";
                 btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
             }
             else{
@@ -296,7 +296,10 @@ function toggleMeal(btn) {
     }
     
     // ✅ 합계 다시 계산
-    updateMealSummary();
+    updateMealSummary(); 
+    const currentWeekDates = getCurrentWeekDates();
+    renderSingleSelfCheckBox(currentWeekDates[0]); // ✅ 주간 시작일 기준으로 체크박스 하나 렌더링
+
 }
 
 // ✅ 주간 신청 내역 서버에서 불러오기 → 버튼에 반영
@@ -384,6 +387,22 @@ function saveMeals() {
     });
 
     console.log("🧪 전송할 meals:", meals);  // 추가
+
+    // ✅ 자가 확인 체크박스 상태 저장
+    const selfCheck = document.querySelector("#self-check-list input[type='checkbox']");
+    if (selfCheck) {
+        const checked = selfCheck.checked ? 1 : 0;
+        const date = selfCheck.dataset.date;
+
+        postData("/selfcheck", {
+            user_id: userId,
+            date,
+            checked
+        },
+        () => console.log("✅ 본인 확인 여부 저장 성공"),
+        (err) => console.error("❌ 본인 확인 여부 저장 실패:", err));
+    }
+
 
     // 서버에 POST 요청
     postData("/meals", { meals },
@@ -529,7 +548,7 @@ function isDeadlinePassed(dateStr, mealType) {
     }
 }
 
-/*자가확인 체크박스 함수
+//자가확인 체크박스 함수
 function renderSelfCheckBoxes(dates) {
     const container = document.getElementById("self-check-list");
     container.innerHTML = "";
@@ -556,25 +575,32 @@ function renderSelfCheckBoxes(dates) {
                 checkbox.checked = data?.checked === 1;
             });
 
-        checkbox.addEventListener("change", () => {
-            const checked = checkbox.checked ? 1 : 0;
-            fetch("/selfcheck", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    user_id: window.currentUser.userId,
-                    date,
-                    weekday: weekdays[i],
-                    checked
-                })
-            });
-        });
+        
 
         wrapper.appendChild(label);
         wrapper.appendChild(checkbox);
         container.appendChild(wrapper);
     });
-}*/
+}
+
+function renderSingleSelfCheckBox(date) {
+    const container = document.getElementById("self-check-list");
+    container.innerHTML = "";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `selfcheck-${date}`;
+    checkbox.dataset.date = date;  // ✔ 저장할 때 사용할 수 있도록 날짜 포함
+
+    // 체크 여부 불러오기 (화면 렌더만)
+    fetch(`/selfcheck?user_id=${window.currentUser.userId}&date=${date}`)
+        .then(res => res.json())
+        .then(data => {
+            checkbox.checked = data?.checked === 1;
+        });
+
+    container.appendChild(checkbox);
+}
 
 
 
