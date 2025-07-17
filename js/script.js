@@ -298,7 +298,7 @@ function toggleMeal(btn) {
     // ✅ 합계 다시 계산
     updateMealSummary(); 
     const currentWeekDates = getCurrentWeekDates();
-    renderSingleSelfCheckBox(currentWeekDates[0]); // ✅ 주간 시작일 기준으로 체크박스 하나 렌더링
+    //renderSingleSelfCheckBox(currentWeekDates[0]); // ✅ 주간 시작일 기준으로 체크박스 하나 렌더링
 
 }
 
@@ -389,7 +389,7 @@ function saveMeals() {
     console.log("🧪 전송할 meals:", meals);  // 추가
 
     // ✅ 자가 확인 체크박스 상태 저장
-    const selfCheck = document.querySelector("#self-check-list input[type='checkbox']");
+    /*const selfCheck = document.querySelector("#self-check-list input[type='checkbox']");
     if (selfCheck) {
         const checked = selfCheck.checked ? 1 : 0;
         const date = selfCheck.dataset.date;
@@ -401,7 +401,7 @@ function saveMeals() {
         },
         () => console.log("✅ 본인 확인 여부 저장 성공"),
         (err) => console.error("❌ 본인 확인 여부 저장 실패:", err));
-    }
+    }*/
 
 
     // 서버에 POST 요청
@@ -583,7 +583,7 @@ function renderSelfCheckBoxes(dates) {
     });
 }**/
 
-function renderSingleSelfCheckBox(date) {
+/*function renderSingleSelfCheckBox(date) {
     const container = document.getElementById("self-check-list");
     container.innerHTML = "";
 
@@ -602,7 +602,7 @@ function renderSingleSelfCheckBox(date) {
     });
 
     container.appendChild(checkbox);
-}
+}*/
 
 
 
