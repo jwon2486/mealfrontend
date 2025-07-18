@@ -298,7 +298,6 @@ function toggleMeal(btn) {
     // ✅ 합계 다시 계산
     updateMealSummary(); 
     const currentWeekDates = getCurrentWeekDates();
-    //renderSingleSelfCheckBox(currentWeekDates[0]); // ✅ 주간 시작일 기준으로 체크박스 하나 렌더링
 
 }
 
@@ -335,15 +334,34 @@ function loadWeekData() {
 
         // ✅ 합계 다시 계산
         updateMealSummary(); 
-        // ✅ 자가 확인 체크박스 렌더링 (이 줄 추가!)
-       // renderSelfCheckBoxes(dates);
+    
     });
+    // ✅ 체크박스 상태도 같이 불러오기
+    loadSelfCheck(userId, start);
 }
 
 
 
 // ✅ 저장 요청 (선택된 버튼 → 서버로 전송)
 function saveMeals() {
+  const checkbox = document.getElementById("selfCheck"); // ✅ 여기에서 먼저 선언
+  const checkedValue = checkbox && checkbox.checked ? 1 : 0;
+
+  // 이후 서버로 전송
+  fetch("/selfcheck", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: window.currentUser.userId,
+      date: window.currentWeekStartDate,
+      checked: checkedValue
+    })
+  })
+  .then(res => res.json())
+  .then(() => console.log("✅ selfcheck 저장 성공"))
+  .catch(err => console.error("❌ selfcheck 저장 실패:", err));
     if (!window.currentUser) {
         const savedUser = sessionStorage.getItem("currentUser");
         if (savedUser) {
@@ -388,20 +406,7 @@ function saveMeals() {
 
     console.log("🧪 전송할 meals:", meals);  // 추가
 
-    // ✅ 자가 확인 체크박스 상태 저장
-    /*const selfCheck = document.querySelector("#self-check-list input[type='checkbox']");
-    if (selfCheck) {
-        const checked = selfCheck.checked ? 1 : 0;
-        const date = selfCheck.dataset.date;
-
-        postData("/selfcheck", {
-            user_id: userId,
-            date,
-            checked
-        },
-        () => console.log("✅ 본인 확인 여부 저장 성공"),
-        (err) => console.error("❌ 본인 확인 여부 저장 실패:", err));
-    }*/
+    
 
 
     // 서버에 POST 요청
@@ -548,63 +553,6 @@ function isDeadlinePassed(dateStr, mealType) {
     }
 }
 
-/**자가확인 체크박스 함수
-function renderSelfCheckBoxes(dates) {
-    const container = document.getElementById("self-check-list");
-    container.innerHTML = "";
-
-    const weekdays = ["월", "화", "수", "목", "금"];
-
-    dates.forEach((date, i) => {
-        const wrapper = document.createElement("div");
-
-        const label = document.createElement("label");
-        label.innerText = weekdays[i];
-        label.setAttribute("for", `selfcheck-${date}`);
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.id = `selfcheck-${date}`;
-        checkbox.dataset.date = date;
-        checkbox.dataset.weekday = weekdays[i];
-
-        // 서버에서 확인 여부 불러오기
-        fetch(`/selfcheck?user_id=${window.currentUser.userId}&date=${date}`)
-            .then(res => res.json())
-            .then(data => {
-                checkbox.checked = data?.checked === 1;
-            });
-
-        
-
-        wrapper.appendChild(label);
-        wrapper.appendChild(checkbox);
-        container.appendChild(wrapper);
-    });
-}**/
-
-/*function renderSingleSelfCheckBox(date) {
-    const container = document.getElementById("self-check-list");
-    container.innerHTML = "";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = `selfcheck-${date}`;
-    checkbox.dataset.date = date;  // ✔ 저장할 때 사용할 수 있도록 날짜 포함
-
-    // 체크 여부 불러오기 (화면 렌더만)
-    getData(`/selfcheck?user_id=${window.currentUser.userId}&date=${date}`)
-    .then(data => {
-        checkbox.checked = data?.checked === 1;
-    })
-    .catch(err => {
-        console.error("❌ 자가 확인 상태 로딩 실패:", err);
-    });
-
-    container.appendChild(checkbox);
-}*/
-
-
 
 // ✅ 자동 로그인 및 주차 변경 이벤트
 document.addEventListener("DOMContentLoaded", function () {
@@ -706,6 +654,21 @@ function goToAdminDashboard() {
 
 function goToTeamEdit() {
     location.href = "team_edit.html";
+}
+
+//체크박스 상태 불렁는 함수
+function loadSelfCheck(userId, date) {
+  const checkbox = document.getElementById("selfCheck");
+  if (!checkbox) return;
+
+  fetch(`/selfcheck?user_id=${userId}&date=${date}`)
+    .then(response => response.json())
+    .then(data => {
+      checkbox.checked = data.checked === 1;
+    })
+    .catch(error => {
+      console.error("❌ selfcheck 불러오기 실패:", error);
+    });
 }
 
 // ✅ 전역 함수 등록
