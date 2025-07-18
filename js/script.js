@@ -314,6 +314,10 @@ function loadWeekData() {
     window.currentWeekStartDate = start;
     window.currentWeekEndDate = end;
 
+     // ✅ 이 시점에 정확히 값을 전달
+    loadSelfCheck(userId, start);
+    
+
     // 상단 사용자 이름 및 주간 범위 표시
     document.getElementById("welcome").innerHTML = `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
   //document.getElementById("weekRangeText").innerText = `선택 날짜: ${start} ~ ${end} `;
