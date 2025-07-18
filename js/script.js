@@ -311,6 +311,9 @@ function loadWeekData() {
     const start = dates[0];
     const end = dates[dates.length - 1];
 
+    window.currentWeekStartDate = start;
+    window.currentWeekEndDate = end;
+
     // 상단 사용자 이름 및 주간 범위 표시
     document.getElementById("welcome").innerHTML = `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
   //document.getElementById("weekRangeText").innerText = `선택 날짜: ${start} ~ ${end} `;
