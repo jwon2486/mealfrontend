@@ -344,24 +344,17 @@ function loadWeekData() {
 
 // ✅ 저장 요청 (선택된 버튼 → 서버로 전송)
 function saveMeals() {
-  const checkbox = document.getElementById("selfCheck"); // ✅ 여기에서 먼저 선언
-  const checkedValue = checkbox && checkbox.checked ? 1 : 0;
+  const checkbox = document.getElementById("selfCheck");
+const checkedValue = checkbox && checkbox.checked ? 1 : 0;
 
-  // 이후 서버로 전송
-  fetch("/selfcheck", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user_id: window.currentUser.userId,
-      date: window.currentWeekStartDate,
-      checked: checkedValue
-    })
-  })
-  .then(res => res.json())
-  .then(() => console.log("✅ selfcheck 저장 성공"))
-  .catch(err => console.error("❌ selfcheck 저장 실패:", err));
+postData("/selfcheck", {
+  user_id: window.currentUser.userId,
+  date: window.currentWeekStartDate,
+  checked: checkedValue
+},
+() => console.log("✅ selfcheck 저장 성공"),
+(err) => console.error("❌ selfcheck 저장 실패:", err));
+
     if (!window.currentUser) {
         const savedUser = sessionStorage.getItem("currentUser");
         if (savedUser) {
@@ -656,19 +649,19 @@ function goToTeamEdit() {
     location.href = "team_edit.html";
 }
 
-//체크박스 상태 불렁는 함수
+//체크박스 상태 불러오는 함수
 function loadSelfCheck(userId, date) {
   const checkbox = document.getElementById("selfCheck");
   if (!checkbox) return;
 
-  fetch(`/selfcheck?user_id=${userId}&date=${date}`)
-    .then(response => response.json())
-    .then(data => {
+  getData(`/selfcheck?user_id=${userId}&date=${date}`,
+    (data) => {
       checkbox.checked = data.checked === 1;
-    })
-    .catch(error => {
+    },
+    (error) => {
       console.error("❌ selfcheck 불러오기 실패:", error);
-    });
+    }
+  );
 }
 
 // ✅ 전역 함수 등록
