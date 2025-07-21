@@ -11,7 +11,7 @@ function formatDateWithDay(dateStr) {
 
 // ✅ 서버에서 식수 신청 내역 조회 (관리자용)
 function loadEditData(selectedWeek) {
-    editMode = "all";  // ✅ 신청자 모드 설정
+    editMode = "apply";  // ✅ 신청자 모드 설정
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
 
@@ -51,6 +51,15 @@ function loadEditData(selectedWeek) {
                 if (!entry.user_id || !entry.name || !entry.dept || !entry.date) {
                     console.warn("⚠️ 누락된 필드:", entry);
                     return;
+                }
+                
+                // 모든 식사 신청이 없으면 포함시키지 않음
+                if (
+                entry.breakfast !== 1 &&
+                entry.lunch !== 1 &&
+                entry.dinner !== 1
+                ) {
+                return; // 신청 없는 사람은 무시
                 }
 
                 const uid = entry.user_id;
@@ -303,6 +312,7 @@ function saveEditChanges() {
         () => {
             alert("✅ 저장되었습니다.");
             const selectedDate = document.getElementById("editWeekPicker").value;
+            loadEditData(selectedDate);  // ✅ 선택된 날짜를 인자로 명시적으로 전달
             setTimeout(() => {
                 loadEditData(selectedDate);
             }, 700);

@@ -37,8 +37,8 @@
   </div>
   </div>
   <div class="filter-row">
-    <button class="btn-search" onclick="loadEditData()">🔍신청자 조회</button> 
-    <button class="btn-all" onclick="loadAllEmployeesForEdit()">🔄 전체조회</button>
+    <button class="btn-search" onclick="loadEditData(document.getElementById('editWeekPicker').value)">🔍신청자 조회</button>
+    <button class="btn-all" onclick="loadAllEmployeesForEdit(document.getElementById('editWeekPicker').value)">🔄 전체조회</button>
     <label>주 선택: <input type="date" id="editWeekPicker"></label>
   </div>
 </div>
