@@ -323,7 +323,7 @@ button:hover {
 /* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
 #edit-table thead tr:nth-child(2) th {
   position: sticky;
-  top: 38px;  /* 첫 줄 높이에 맞게 조정 (필요 시 32~48px로 조정) */
+  
   z-index: 2;
   background-color: #007bff;
   color: white;

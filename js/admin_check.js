@@ -133,6 +133,8 @@ function updateSummary(data, dates) {
 function loadCheckData() {
   const start = document.getElementById("startDate").value;
   const end = document.getElementById("endDate").value;
+  console.log("✅ loadCheckData 실행됨");
+  console.log("📅 선택된 날짜:", start, end);
 
   if (!start || !end) {
     alert("📅 조회할 기간을 선택하세요.");
@@ -237,6 +239,9 @@ document.addEventListener("DOMContentLoaded", () => {
     holidayList = holidays;
     loadCheckData();  // 공휴일 받아온 후 조회
   });
+  // ✅ 날짜 변경 시 자동 조회
+  document.getElementById("startDate").addEventListener("change", loadCheckData);
+  document.getElementById("endDate").addEventListener("change", loadCheckData);
 });
 
 /*

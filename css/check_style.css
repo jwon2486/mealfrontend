@@ -18,7 +18,6 @@ body {
 /* 테이블 헤더 고정 (선택적으로 사용할 경우) */
 .table-container thead th {
   position: sticky;
-  top: 0;
   z-index: 1;
 }
 
@@ -375,7 +374,6 @@ button:hover {
 /* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
 #edit-table thead tr:nth-child(2) th {
   position: sticky;
-  top: 38px auto;  /* 첫 줄 높이에 맞게 조정 (필요 시 32~48px로 조정) */
   z-index: 2;
   background-color: #007bff;
   color: white;
@@ -383,7 +381,6 @@ button:hover {
 #edit-table thead tr:nth-child(2) th::after {
   content: "";
   position: absolute;
-  top: -2px; /* ← 위로 2px 올라가도록 설정 */
   left: 0;
   width: 100%;
   height: 2px; /* ← 덮을 높이 */

@@ -82,6 +82,7 @@ function loadEditData(selectedWeek) {
             });
 
             generateTableHeader(dates);
+            applyStickyHeaderOffsets();  // 👈 추가
             generateTableBody(dates, groupedValues);
             updateSummary(groupedValues, dates);
 
@@ -497,6 +498,7 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
         
         
         generateTableHeader(dates);
+        applyStickyHeaderOffsets(); // ✅ 이 줄을 꼭 추가하세요!
         generateTableBody(dates, groupedValues);
         updateSummary(groupedValues, dates);
 
@@ -507,4 +509,26 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
         console.error("❌ 전체보기 실패:", err);
         alert("❌ 전체 데이터를 불러오지 못했습니다.");
     });
+}
+function applyStickyHeaderOffsets() {
+        const thead = document.querySelector('#edit-table thead');
+        const headerRows = thead.querySelectorAll('tr');
+
+        if (headerRows.length >= 2) {
+            const firstRowHeight = headerRows[0].offsetHeight;
+
+            // 첫 번째 줄: top 0
+            headerRows[0].querySelectorAll('th').forEach(th => {
+                th.style.top = '0px';
+                th.style.zIndex = '10'; // 헤더 기본 z-index
+                th.style.position = 'sticky';
+            });
+
+            // 두 번째 줄: top은 첫 줄 높이만큼
+            headerRows[1].querySelectorAll('th').forEach(th => {
+                th.style.top = `${firstRowHeight}px`;
+                th.style.zIndex = '9'; // 아래에 위치
+                th.style.position = 'sticky';
+            });
+        }
 }

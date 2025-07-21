@@ -62,6 +62,7 @@ function loadEditData(selectedWeek) {
         const dates = getDateArray(start, end);
         const groupedValues = Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
         generateTableHeader(dates);
+        applyStickyHeaderOffsets();  // th 고정용 코드
         generateTableBody(dates, groupedValues);
         updateSummary(groupedValues, dates);
         filterEditData();
@@ -408,6 +409,30 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("editWeekPicker").addEventListener("change", function () {
     loadEditData(this.value);
 });
+
+function applyStickyHeaderOffsets() {
+    const thead = document.querySelector('#edit-table thead');
+    const headerRows = thead.querySelectorAll('tr');
+
+    if (headerRows.length >= 2) {
+        const firstRowHeight = headerRows[0].offsetHeight;
+
+        // 상단 첫 줄 (날짜 행)
+        headerRows[0].querySelectorAll('th').forEach(th => {
+            th.style.position = 'sticky';
+            th.style.top = '0px';
+            th.style.zIndex = '10';
+        });
+
+        // 두 번째 줄 (조/중/석)
+        headerRows[1].querySelectorAll('th').forEach(th => {
+            th.style.position = 'sticky';
+            th.style.top = `${firstRowHeight}px`;
+            th.style.zIndex = '9';
+        });
+    }
+}
+
 
 // ✅ 전역 등록 (HTML 버튼에서 호출 가능하게 하기)
 window.loadEditData = loadEditData;
