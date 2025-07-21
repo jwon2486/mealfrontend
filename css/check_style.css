@@ -31,6 +31,7 @@ table {
 
 /* 테이블 헤더 스타일 */
 th {
+    border: 1px solid white !important;
     background-color: #007bff;
     color: white;
     padding: 12px;
@@ -383,7 +384,6 @@ button:hover {
   position: absolute;
   left: 0;
   width: 100%;
-  height: 2px; /* ← 덮을 높이 */
   background-color: white; /* ← 배경색과 동일하게 맞춤 */
   z-index: 3;
 }
