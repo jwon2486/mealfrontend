@@ -78,6 +78,7 @@ function generateTableHeader(dates) {
 
   thead.appendChild(topRow);
   thead.appendChild(subRow);
+  applyDynamicStickyTop();
 }
 
 // ✅ 본문 테이블 생성
@@ -211,6 +212,20 @@ function filterCheckData() {
       (!name || rowName.includes(name));
 
     row.style.display = visible ? "" : "none";
+  });
+}
+
+//th고정용 코드
+function applyDynamicStickyTop() {
+  const topRow = document.querySelector("#check-table thead tr:nth-child(1)");
+  const secondRowThs = document.querySelectorAll("#check-table thead tr:nth-child(2) th");
+
+  if (!topRow || secondRowThs.length === 0) return;
+
+  const topHeight = topRow.offsetHeight;
+
+  secondRowThs.forEach(th => {
+    th.style.top = `${topHeight}px`;
   });
 }
 
