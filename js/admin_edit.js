@@ -202,18 +202,26 @@ function filterEditData() {
     const dept = document.getElementById("searchDept").value.trim().toLowerCase();
     const id = document.getElementById("searchEmpId").value.trim().toLowerCase();
     const name = document.getElementById("searchName").value.trim().toLowerCase();
+    const selfcheckFilter = document.getElementById("selfcheckFilter")?.value;
 
     const rows = document.querySelectorAll("#edit-body tr");
     rows.forEach(row => {
         const deptVal = row.children[0].innerText.toLowerCase();
         const idVal = row.children[1].innerText.toLowerCase();
         const nameVal = row.children[2].innerText.toLowerCase();
+        const selfcheckVal = row.children[3].innerText.trim(); // ✅ or ❌
 
-        const show = (!dept || deptVal.includes(dept)) &&
-                     (!id || idVal.includes(id)) &&
-                     (!name || nameVal.includes(name));
+        const matchesTextFilter =
+            (!dept || deptVal.includes(dept)) &&
+            (!id || idVal.includes(id)) &&
+            (!name || nameVal.includes(name));
 
-        row.style.display = show ? "" : "none";
+        const matchesSelfcheck =
+            selfcheckFilter === "all" ||
+            (selfcheckFilter === "checked" && selfcheckVal === "✅") ||
+            (selfcheckFilter === "unchecked" && selfcheckVal === "❌");
+
+        row.style.display = matchesTextFilter && matchesSelfcheck ? "" : "none";
     });
 }
 
