@@ -283,6 +283,11 @@ button:hover {
     padding: 6px;
   }
 
+  th {
+  white-space: nowrap; /* 줄바꿈 방지 */
+  }
+  
+
   .filter-container,
   .search-container,
   .action-buttons {

@@ -2,6 +2,7 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
+    align-items: center;
     background-color: #f8f9fa;
     margin: 0;
     padding: 20px;
@@ -9,6 +10,7 @@ body {
 
 .table-container {
   width: 100%;
+
   margin: auto;
   overflow-x: auto;
   max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
@@ -21,9 +23,29 @@ body {
   z-index: 1;
 }
 
+/* ✅ 첫 번째 헤더 행 고정 */
+#check-table thead tr:nth-child(1) th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: #007bff;
+  color: white;
+}
+
+/* ✅ 두 번째 헤더 행: top은 JS에서 동적으로 설정 */
+#check-table thead tr:nth-child(2) th {
+  position: sticky;
+  z-index: 2;
+  background-color: #007bff;
+  color: white;
+}
+
+
 table {
     width: 100%;
+    max-width: 1600px;
     border-collapse: collapse;
+    align-items: center;
     background: white;
     border-radius: 10px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -265,6 +287,11 @@ button:hover {
     padding: 6px;
   }
 
+  th {
+  white-space: nowrap; /* 줄바꿈 방지 */
+  }
+  
+
   .filter-container,
   .search-container,
   .action-buttons {
@@ -363,16 +390,16 @@ button:hover {
   visibility: visible;
   opacity: 1;
 }
-/* 첫 번째 헤더 줄 (날짜 줄) 고정 */
+/* 첫 번째 헤더 줄 (날짜 줄) 고정 
 #edit-table thead tr:nth-child(1) th {
   position: sticky;
   top: 0;
   z-index: 3;
   background-color: #007bff;
   color: white;
-}
+}*/
 
-/* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
+/* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 
 #edit-table thead tr:nth-child(2) th {
   position: sticky;
   z-index: 2;
@@ -384,9 +411,10 @@ button:hover {
   position: absolute;
   left: 0;
   width: 100%;
-  background-color: white; /* ← 배경색과 동일하게 맞춤 */
+  background-color: white; /* ← 배경색과 동일하게 맞춤 
   z-index: 3;
-}
+}*/
+
 /*테이블과  div라인 간격조정정*/
 .filter-container {
   margin-bottom: 20px; /* ✅ 버튼 아래 공간 확보 */
@@ -401,7 +429,7 @@ button:hover {
   }
 
   .filter-container label {
-    font-size: 19px;
+    font-size: 14px;
     font-weight: bold;
   }
 

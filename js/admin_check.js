@@ -38,13 +38,28 @@ function formatDateWithDay(dateStr) {
   return `${dateStr} (${day})`;
 }
 
+async function fetchSelfcheckMap(startDate) {
+  try {
+    const res = await fetch(`/admin/selfchecks?start=${startDate}`);
+    const data = await res.json();
+    const map = {};
+    data.forEach(entry => {
+      map[entry.user_id] = entry.checked === 1;
+    });
+    return map;
+  } catch (err) {
+    console.error("❌ selfcheck 조회 실패:", err);
+    return {};
+  }
+}
+
 // ✅ 테이블 헤더 생성 (공휴일 강조)
 function generateTableHeader(dates) {
   const thead = document.getElementById("table-head");
   thead.innerHTML = "";
 
   const topRow = document.createElement("tr");
-  topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th>`;
+  topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
 
   dates.forEach(date => {
     const isHoliday = holidayList.includes(normalizeDate(date));
@@ -82,20 +97,22 @@ function generateTableHeader(dates) {
 }
 
 // ✅ 본문 테이블 생성
-function generateTableBody(dates, data) {
+function generateTableBody(dates, data, selfcheckMap) {
   const tbody = document.getElementById("table-body");
   tbody.innerHTML = "";
 
   if (data.length === 0) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="${3 + (dates.length * 3)}" style="text-align:center; color: gray;">신청한 사람이 없습니다.</td>`;
+    tr.innerHTML = `<td colspan="${4 + (dates.length * 3)}" style="text-align:center; color: gray;">신청한 사람이 없습니다.</td>`;
     tbody.appendChild(tr);
     return;
   }
 
   data.forEach(emp => {
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td>`;
+    const checkStatus = selfcheckMap[emp.id] ? "✅" : "❌";
+
+    row.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td><td>${checkStatus}</td>`;
 
     dates.forEach(date => {
       const meal = emp.meals[date] || {};
@@ -144,21 +161,23 @@ function loadCheckData() {
 
   const url = `/admin/meals?start=${start}&end=${end}`;
 
-  getData(url, (flatData) => {
-    const dates = getDateRange(new Date(start), new Date(end)); // 주말 제외
-    generateTableHeader(dates);
+  getData(url, async (flatData) => {
+  const dates = getDateRange(new Date(start), new Date(end));
+  generateTableHeader(dates);
 
-    const grouped = {};
-    flatData.forEach(entry => {
-      const uid = entry.user_id;
-      if (!grouped[uid]) {
-        grouped[uid] = {
-          id: entry.user_id,
-          name: entry.name,
-          dept: entry.dept,
-          meals: {}
-        };
-      }
+  const selfcheckMap = await fetchSelfcheckMap(start);
+
+  const grouped = {};
+  flatData.forEach(entry => {
+    const uid = entry.user_id;
+    if (!grouped[uid]) {
+      grouped[uid] = {
+        id: entry.user_id,
+        name: entry.name,
+        dept: entry.dept,
+        meals: {}
+      };
+    }
       grouped[uid].meals[entry.date] = {
         breakfast: entry.breakfast === 1,
         lunch: entry.lunch === 1,
@@ -175,7 +194,7 @@ function loadCheckData() {
     });
 
 
-    generateTableBody(dates, structured);
+    generateTableBody(dates, structured, selfcheckMap); // ← selfcheckMap 전달
     updateSummary(structured, dates);
   }, (err) => {
     console.error("불러오기 실패:", err);
@@ -258,7 +277,30 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("startDate").addEventListener("change", loadCheckData);
   document.getElementById("endDate").addEventListener("change", loadCheckData);
 });
+function applyStickyHeaderOffsets() {
+  const thead = document.querySelector('#edit-table thead');
+  const headerRows = thead.querySelectorAll('tr');
 
+  if (headerRows.length >= 2) {
+    const isMobile = window.innerWidth <= 768;
+    const firstRowHeight = headerRows[0].offsetHeight;
+
+    // 첫 번째 줄: top 0
+    headerRows[0].querySelectorAll('th').forEach(th => {
+      th.style.top = '0px';
+      th.style.zIndex = '10';
+      th.style.position = 'sticky';
+    });
+
+    // 두 번째 줄: 첫 번째 줄 높이 보정
+    headerRows[1].querySelectorAll('th').forEach(th => {
+      const offset = isMobile ? '36px' : `${firstRowHeight}px`;
+      th.style.top = offset;
+      th.style.zIndex = '9';
+      th.style.position = 'sticky';
+    });
+  }
+}
 /*
 // 예시용 더미 데이터
 const dummyData = [
