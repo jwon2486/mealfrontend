@@ -40,7 +40,7 @@ function formatDateWithDay(dateStr) {
 
 async function fetchSelfcheckMap(startDate) {
   try {
-    const res = await fetch(`/admin/selfchecks?start=${startDate}`);
+    const res = await fetch(`/admin/selfcheck?start=${startDate}`);
     const data = await res.json();
     const map = {};
     data.forEach(entry => {
