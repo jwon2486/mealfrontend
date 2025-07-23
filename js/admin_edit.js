@@ -23,7 +23,7 @@ function loadEditData(selectedWeek) {
     const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;  // ✅ mode=apply 추가!
 
 
-    getData(url, async (flatData) => {
+    getData(url, (flatData) => {
         console.log("✅ 서버에서 받은 data:", flatData);
         console.log("📌 flatData type:", typeof flatData);
         console.log("📌 flatData length:", flatData.length);
@@ -92,8 +92,7 @@ function loadEditData(selectedWeek) {
 
             generateTableHeader(dates);
             applyStickyHeaderOffsets();  // 👈 추가
-            const selfcheckMap = await fetchSelfcheckMap(start); // ✅ 본인확인 여부 불러오기
-            generateTableBody(dates, groupedValues, selfcheckMap); // ✅ 전달
+            generateTableBody(dates, groupedValues);
             updateSummary(groupedValues, dates);
 
             filterEditData();  // ✅ 필터 적용 추가
@@ -123,7 +122,7 @@ function generateTableHeader(dates) {
 
     const topRow = document.createElement("tr");
     
-    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
+    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th>`;
     
     dates.forEach(date => {
         const isHoliday = holidayList.includes(normalizeDate(date));
@@ -153,15 +152,15 @@ function generateTableHeader(dates) {
 }
 
 // ✅ 테이블 본문 생성
-function generateTableBody(dates, data, selfcheckMap) {
-  const tbody = document.getElementById("edit-body");
-  tbody.innerHTML = "";
+function generateTableBody(dates, data) {
+    const tbody = document.getElementById("edit-body");
+    tbody.innerHTML = "";
 
-  data.forEach(emp => {
-    const tr = document.createElement("tr");
-    const checked = selfcheckMap[emp.id] ? "✅" : "❌";
+    data.forEach(emp => {
+        const tr = document.createElement("tr");
 
-    tr.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td><td>${checked}</td>`;
+        // 부서 / 사번 / 이름 셀
+        tr.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td>`;
 
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
@@ -542,19 +541,4 @@ function applyStickyHeaderOffsets() {
                 th.style.position = 'sticky';
             });
         }
-}
-
-async function fetchSelfcheckMap(startDate) {
-  try {
-    const res = await fetch(`/admin/selfcheck?start=${startDate}`);
-    const data = await res.json();
-    const map = {};
-    data.forEach(entry => {
-      map[entry.user_id] = entry.checked === 1;
-    });
-    return map;
-  } catch (err) {
-    console.error("❌ selfcheck 조회 실패:", err);
-    return {};
-  }
 }
