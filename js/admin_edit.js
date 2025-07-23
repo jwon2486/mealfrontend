@@ -462,7 +462,13 @@ async function loadAllEmployeesForEdit(selectedWeek = null) {
             };
         });
 
-        const groupedValues = Object.values(grouped).sort((a, b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
+        const groupedValues = Object.values(grouped).sort((a, b) => {
+        if (a.dept < b.dept) return -1;
+        if (a.dept > b.dept) return 1;
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+        });
         const selfcheckMap = await fetchSelfcheckMap(start, end);
 
         generateTableHeader(dates);
