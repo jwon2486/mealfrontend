@@ -1,6 +1,7 @@
 
 let holidayList = [];  // 서버에서 불러온 공휴일 날짜 배열
-let editMode = "apply"; 
+let editMode = "apply";
+let selfcheckMap = {};
 
 function formatDateWithDay(dateStr) {
     const date = new Date(dateStr);
@@ -9,9 +10,25 @@ function formatDateWithDay(dateStr) {
     return `${dateStr} (${day})`;
 }
 
+// ✅ selfcheck 데이터 조회 함수
+async function fetchSelfcheckMap(startDate, endDate) {
+  return new Promise((resolve) => {
+    getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
+      const map = {};
+      Object.entries(data).forEach(([userId, checked]) => {
+        map[userId] = checked === 1;
+      });
+      resolve(map);
+    }, (err) => {
+      console.error("❌ selfcheck 조회 실패:", err);
+      resolve({});
+    });
+  });
+}
+
 // ✅ 서버에서 식수 신청 내역 조회 (관리자용)
-function loadEditData(selectedWeek) {
-    editMode = "apply";  // ✅ 신청자 모드 설정
+async function loadEditData(selectedWeek) {
+    editMode = "apply";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
 
@@ -20,99 +37,47 @@ function loadEditData(selectedWeek) {
         return;
     }
 
-    const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;  // ✅ mode=apply 추가!
+    const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;
 
+    getData(url, async (flatData) => {
+        document.getElementById("edit-body").innerHTML = "";
+        document.getElementById("table-head").innerHTML = "";
 
-    getData(url, (flatData) => {
-        console.log("✅ 서버에서 받은 data:", flatData);
-        console.log("📌 flatData type:", typeof flatData);
-        console.log("📌 flatData length:", flatData.length);
+        const grouped = {};
+        flatData.forEach(entry => {
+            if (!entry.user_id || !entry.name || !entry.dept || !entry.date) return;
+            if (!entry.breakfast && !entry.lunch && !entry.dinner) return;
 
-        try {
-
-            if (!Array.isArray(flatData)) {
-                // 만약 flatData가 { data: [...] } 형태라면
-                if (Array.isArray(flatData.data)) {
-                    flatData = flatData.data; // 내부 배열로 교체
-                } else {
-                    console.error("❌ 예상하지 못한 응답 형식:", flatData);
-                    alert("❌ 서버 응답 형식이 예상과 다릅니다.");
-                    return;
-                }
+            const uid = entry.user_id;
+            if (!grouped[uid]) {
+                grouped[uid] = {
+                    id: entry.user_id,
+                    name: entry.name,
+                    dept: entry.dept,
+                    meals: {}
+                };
             }
 
-            // ✅ 기존 테이블 초기화 명확히!
-            document.getElementById("edit-body").innerHTML = "";
-            document.getElementById("table-head").innerHTML = "";
-            
-            
-            const grouped = {};
-            flatData.forEach(entry => {
-                if (!entry.user_id || !entry.name || !entry.dept || !entry.date) {
-                    console.warn("⚠️ 누락된 필드:", entry);
-                    return;
-                }
-                
-                // 모든 식사 신청이 없으면 포함시키지 않음
-                if (
-                entry.breakfast !== 1 &&
-                entry.lunch !== 1 &&
-                entry.dinner !== 1
-                ) {
-                return; // 신청 없는 사람은 무시
-                }
+            grouped[uid].meals[entry.date] = {
+                breakfast: entry.breakfast === 1,
+                lunch: entry.lunch === 1,
+                dinner: entry.dinner === 1
+            };
+        });
 
-                const uid = entry.user_id;
-                if (!grouped[uid]) {
-                    grouped[uid] = {
-                        id: entry.user_id,
-                        name: entry.name,
-                        dept: entry.dept,
-                        meals: {}
-                    };
-                }
+        const dates = getDateArray(start, end);
+        const groupedValues = Object.values(grouped).sort((a, b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
+        const selfcheckMap = await fetchSelfcheckMap(start, end);
 
-                grouped[uid].meals[entry.date] = {
-                    breakfast: entry.breakfast === 1,
-                    lunch: entry.lunch === 1,
-                    dinner: entry.dinner === 1
-                };
-
-            });
-
-    
-            const dates = getDateArray(start, end);
-            const groupedValues = Object.values(grouped).sort((a, b) => {
-                if (a.dept < b.dept) return -1;
-                if (a.dept > b.dept) return 1;
-                if (a.name < b.name) return -1;
-                if (a.name > b.name) return 1;
-                return 0;
-            });
-
-            generateTableHeader(dates);
-            applyStickyHeaderOffsets();  // 👈 추가
-            generateTableBody(dates, groupedValues);
-            updateSummary(groupedValues, dates);
-
-            filterEditData();  // ✅ 필터 적용 추가
-
-            // if (groupedValues.length > 0) {
-            //     updateSummary(groupedValues, dates);
-            // } else {
-            //     console.warn("📭 불러온 데이터가 없습니다.");
-            // }
-
-        } catch (e) {
-            console.error("📛 데이터 처리 중 오류:", e);
-            alert("❌ 데이터 처리 중 문제가 발생했습니다.");
-        }
+        generateTableHeader(dates);
+        applyStickyHeaderOffsets();
+        generateTableBody(dates, groupedValues, selfcheckMap);
+        updateSummary(groupedValues, dates);
+        filterEditData();
     }, (err) => {
-        // ✅ 메시지를 좀 더 정제
         alert("❌ 서버에서 데이터를 가져오지 못했습니다.");
         console.error("❌ GET 요청 실패:", err);
     });
-
 }
 
 // ✅ 테이블 헤더 생성
@@ -122,7 +87,7 @@ function generateTableHeader(dates) {
 
     const topRow = document.createElement("tr");
     
-    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th>`;
+    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
     
     dates.forEach(date => {
         const isHoliday = holidayList.includes(normalizeDate(date));
@@ -152,15 +117,21 @@ function generateTableHeader(dates) {
 }
 
 // ✅ 테이블 본문 생성
-function generateTableBody(dates, data) {
+function generateTableBody(dates, data, selfcheckMap) {
     const tbody = document.getElementById("edit-body");
     tbody.innerHTML = "";
 
     data.forEach(emp => {
         const tr = document.createElement("tr");
 
-        // 부서 / 사번 / 이름 셀
-        tr.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td>`;
+        const checkStatus = selfcheckMap?.[emp.id] ? "✅" : "❌";
+
+        tr.innerHTML = `
+            <td>${emp.dept}</td>
+            <td>${emp.id}</td>
+            <td>${emp.name}</td>
+            <td>${checkStatus}</td>
+        `;
 
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
@@ -168,7 +139,6 @@ function generateTableBody(dates, data) {
                 const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
                 const selected = meal[key] === true;
 
-                // ✅ 버튼 생성
                 const btn = document.createElement("button");
                 btn.className = "meal-btn";
                 btn.dataset.id = emp.id;
@@ -184,28 +154,15 @@ function generateTableBody(dates, data) {
                     btn.style.color = "#fff";
                 }
 
-                // ✅ 🔽 여기에 "공휴일/마감시간" 로직 삽입 🔽
                 const isHoliday = holidayList.includes(normalizeDate(date));
-
                 if (isHoliday) {
                     btn.style.backgroundColor = "#ffe6e6";
                     btn.style.color = "#cc0000";
                     btn.disabled = false;
                     btn.title = "공휴일에는 신청할 수 없습니다.";
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
-                }
-                /*else if (isDeadlinePassed(date, type)) {
-                btn.classList.add("meal-deadline");      // ✅ 클래스 추가
-                btn.innerText= "❌마감";                // ✅ 텍스트 변경
-                btn.title = "신청 마감됨";
-                btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
-                }
-                else {
+                } else {
                     btn.onclick = () => toggleMeal(btn);
-                }*/
-                else {
-                // ✅ 관리자 페이지에서는 마감 시간과 상관없이 항상 신청 가능
-                btn.onclick = () => toggleMeal(btn);
                 }
 
                 const td = document.createElement("td");
@@ -217,6 +174,7 @@ function generateTableBody(dates, data) {
         tbody.appendChild(tr);
     });
 }
+
 
 // ✅ 신청 상태 토글
 function toggleMeal(btn) {
@@ -470,14 +428,14 @@ document.getElementById("editWeekPicker").addEventListener("change", function ()
 
 
 // ✅ 전체 등록 인력 + 신청 여부 함께 조회
-function loadAllEmployeesForEdit(selectedWeek = null) {
-    editMode = "all";  // ✅ 전체 모드 설정
+async function loadAllEmployeesForEdit(selectedWeek = null) {
+    editMode = "all";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
 
-    const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;  // ✅ 추가 파라미터 사용
+    const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;
 
-    getData(url, (response) => {
+    getData(url, async (response) => {
         const dates = getDateArray(start, end);
 
         const grouped = {};
@@ -498,28 +456,20 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
             };
         });
 
-        const groupedValues = Object.values(grouped).sort((a, b) => {
-            if (a.dept < b.dept) return -1;
-            if (a.dept > b.dept) return 1;
-            if (a.name < b.name) return -1;
-            if (a.name > b.name) return 1;
-            return 0;
-        });
-        
-        
+        const groupedValues = Object.values(grouped).sort((a, b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
+        const selfcheckMap = await fetchSelfcheckMap(start, end);
+
         generateTableHeader(dates);
-        applyStickyHeaderOffsets(); // ✅ 이 줄을 꼭 추가하세요!
-        generateTableBody(dates, groupedValues);
+        applyStickyHeaderOffsets();
+        generateTableBody(dates, groupedValues, selfcheckMap);
         updateSummary(groupedValues, dates);
-
-        // ✅ 필터 자동 적용
         filterEditData();
-
     }, (err) => {
         console.error("❌ 전체보기 실패:", err);
         alert("❌ 전체 데이터를 불러오지 못했습니다.");
     });
 }
+
 function applyStickyHeaderOffsets() {
         const thead = document.querySelector('#edit-table thead');
         const headerRows = thead.querySelectorAll('tr');
