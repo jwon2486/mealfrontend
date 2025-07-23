@@ -165,7 +165,7 @@ function loadCheckData() {
   const dates = getDateRange(new Date(start), new Date(end));
   generateTableHeader(dates);
 
-  const selfcheckMap = await fetchSelfcheckMap(start);
+  const selfcheckMap = await fetchSelfcheckMap(start, end);
 
   const grouped = {};
   flatData.forEach(entry => {
