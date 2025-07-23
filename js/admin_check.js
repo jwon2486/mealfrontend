@@ -38,19 +38,19 @@ function formatDateWithDay(dateStr) {
   return `${dateStr} (${day})`;
 }
 
-async function fetchSelfcheckMap(startDate) {
-  try {
-    const res = await fetch(`/admin/selfcheck?start=${startDate}`);
-    const data = await res.json();
-    const map = {};
-    data.forEach(entry => {
-      map[entry.user_id] = entry.checked === 1;
+async function fetchSelfcheckMap(startDate, endDate) {
+  return new Promise((resolve) => {
+    getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
+      const map = {};
+      Object.entries(data).forEach(([userId, checked]) => {
+        map[userId] = checked === 1;
+      });
+      resolve(map);
+    }, (err) => {
+      console.error("❌ selfcheck 조회 실패:", err);
+      resolve({});
     });
-    return map;
-  } catch (err) {
-    console.error("❌ selfcheck 조회 실패:", err);
-    return {};
-  }
+  });
 }
 
 // ✅ 테이블 헤더 생성 (공휴일 강조)
