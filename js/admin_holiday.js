@@ -51,6 +51,44 @@ async function fetchPublicHolidays(year) {
   }
 }
 
+async function addHoliday() {
+  const dateInput = document.getElementById("holidayPicker").value;
+  const descInput = document.getElementById("holidayDescription").value;
+
+  if (!dateInput || !descInput) {
+    alert("📌 날짜와 설명을 모두 입력해주세요.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/holidays", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date: dateInput,
+        description: descInput
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("✅ 공휴일이 등록되었습니다.");
+      const year = new Date(dateInput).getFullYear();
+      loadHolidays(year);  // 캘린더/목록 다시 로딩
+    } else if (response.status === 409) {
+      alert("⚠️ 이미 등록된 날짜입니다.");
+    } else {
+      alert("🚨 등록 실패: " + (result.error || "알 수 없는 오류"));
+    }
+
+  } catch (error) {
+    console.error("❌ 공휴일 추가 실패:", error);
+    alert("🚨 네트워크 오류 또는 서버 오류입니다.");
+  }
+}
+
+
 //달력 그리기 함수
 function renderCalendar(year) {
   console.log("📅 달력 호출됨:", year);
