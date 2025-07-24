@@ -51,7 +51,8 @@ async function fetchPublicHolidays(year) {
   }
 }
 
-async function addHoliday() {
+//수동 공휴일 등록 함수
+function addHoliday() {
   const dateInput = document.getElementById("holidayPicker").value;
   const descInput = document.getElementById("holidayDescription").value;
 
@@ -60,32 +61,40 @@ async function addHoliday() {
     return;
   }
 
-  try {
-    const response = await fetch("/holidays", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        date: dateInput,
-        description: descInput
-      })
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
+  postData("/holidays",
+    {
+      date: dateInput,
+      description: descInput
+    },
+    () => {
       alert("✅ 공휴일이 등록되었습니다.");
       const year = new Date(dateInput).getFullYear();
-      loadHolidays(year);  // 캘린더/목록 다시 로딩
-    } else if (response.status === 409) {
-      alert("⚠️ 이미 등록된 날짜입니다.");
-    } else {
-      alert("🚨 등록 실패: " + (result.error || "알 수 없는 오류"));
+      loadHolidays(year);
+    },
+    (err) => {
+      if (err.status === 409) {
+        alert("⚠️ 이미 등록된 날짜입니다.");
+      } else {
+        alert("🚨 등록 실패: " + (err.message || "알 수 없는 오류"));
+      }
     }
+  );
+}
 
-  } catch (error) {
-    console.error("❌ 공휴일 추가 실패:", error);
-    alert("🚨 네트워크 오류 또는 서버 오류입니다.");
-  }
+//수동 공휴일 삭제 함수
+function deleteHoliday(date) {
+  if (!confirm(`정말로 ${date} 날짜의 공휴일을 삭제하시겠습니까?`)) return;
+
+  deleteData(`/holidays?date=${date}`,
+    () => {
+      alert("🗑️ 삭제되었습니다.");
+      const year = new Date(date).getFullYear();
+      loadHolidays(year);
+    },
+    (err) => {
+      alert("❌ 삭제 실패: " + (err.message || "알 수 없는 오류"));
+    }
+  );
 }
 
 
