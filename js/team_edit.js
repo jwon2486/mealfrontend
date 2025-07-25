@@ -10,7 +10,7 @@ function formatDateWithDay(dateStr) {
     return `${dateStr} (${day})`;
 }
 
-function loadEditData(selectedWeek) {
+async function loadEditData(selectedWeek) {
     editMode = "all";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
@@ -23,52 +23,60 @@ function loadEditData(selectedWeek) {
     }
 
     const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;
-    getData(url, (flatData) => {
-        if (!Array.isArray(flatData)) {
-            if (Array.isArray(flatData.data)) {
-                flatData = flatData.data;
-            } else {
-                alert("❌ 서버 응답 형식이 예상과 다릅니다.");
-                return;
-            }
-        }
+
+    try {
+        const flatData = await new Promise((resolve, reject) => {
+            getData(url, resolve, reject);
+        });
 
         const grouped = {};
         flatData.forEach(entry => {
-    if (!entry.user_id || !entry.name || !entry.dept) return;  // ✅ entry.date 조건 제거
-    if (entry.dept !== myDept) return;
+            if (!entry.user_id || !entry.name || !entry.dept) return;
+            if (entry.dept !== myDept) return;
 
-    const uid = entry.user_id;
-    if (!grouped[uid]) {
-        grouped[uid] = {
-            id: entry.user_id,
-            name: entry.name,
-            dept: entry.dept,
-            meals: {}
-        };
-    }
+            const uid = entry.user_id;
+            if (!grouped[uid]) {
+                grouped[uid] = {
+                    id: entry.user_id,
+                    name: entry.name,
+                    dept: entry.dept,
+                    meals: {}
+                };
+            }
 
-    // ✅ entry.date가 있을 때만 meals 추가
-    if (entry.date) {
-        grouped[uid].meals[entry.date] = {
-            breakfast: entry.breakfast === 1,
-            lunch: entry.lunch === 1,
-            dinner: entry.dinner === 1
-        };
-    }
-});
-
+            if (entry.date) {
+                grouped[uid].meals[entry.date] = {
+                    breakfast: entry.breakfast === 1,
+                    lunch: entry.lunch === 1,
+                    dinner: entry.dinner === 1
+                };
+            }
+        });
 
         const dates = getDateArray(start, end);
         const groupedValues = Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
+        const selfcheckMap = await fetchSelfcheckMap(start, end);
+
         generateTableHeader(dates);
-        applyStickyHeaderOffsets();  // th 고정용 코드
-        generateTableBody(dates, groupedValues);
+        applyStickyHeaderOffsets();
+        generateTableBody(dates, groupedValues, selfcheckMap);
         updateSummary(groupedValues, dates);
         filterEditData();
-    }, (err) => {
+    } catch (err) {
         alert("❌ 서버에서 데이터를 가져오지 못했습니다.");
-    });
+    }
+}
+
+
+async function fetchSelfcheckMap(start, end) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/admin/selfcheck?start=${start}&end=${end}`);
+        if (!res.ok) throw new Error("selfcheck_map 응답 실패");
+        return await res.json();  // { [user_id]: true }
+    } catch (err) {
+        console.error("❌ 본인확인 데이터 불러오기 실패:", err);
+        return {};
+    }
 }
 
 function generateTableHeader(dates) {
@@ -76,7 +84,7 @@ function generateTableHeader(dates) {
     thead.innerHTML = "";
 
     const topRow = document.createElement("tr");
-    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th>`;
+    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
 
     dates.forEach(date => {
         const isHoliday = holidayList.includes(normalizeDate(date));
@@ -99,13 +107,15 @@ function generateTableHeader(dates) {
     thead.appendChild(subRow);
 }
 
-function generateTableBody(dates, data) {
+function generateTableBody(dates, data, selfcheckMap) {
     const tbody = document.getElementById("edit-body");
     tbody.innerHTML = "";
 
     data.forEach(emp => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td>`;
+        const checkStatus = selfcheckMap?.[emp.id] ? "✅" : "❌";
+
+        tr.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td><td>${checkStatus}</td>`;
 
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
@@ -136,7 +146,7 @@ function generateTableBody(dates, data) {
                     btn.title = "공휴일에는 신청할 수 없습니다.";
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
                 } else if (isDeadlinePassed(date, type)) {
-                    btn.classList.add("meal-deadline");  // ✅ 마감 클래스 추가
+                    btn.classList.add("meal-deadline");
                     btn.title = "신청 마감됨";
                     btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
                 } else {
