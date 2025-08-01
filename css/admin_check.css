@@ -1,0 +1,444 @@
+/* 전체 페이지 스타일 */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+.table-container {
+  width: 100%;
+  margin: auto;
+  overflow-x: auto;
+  max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
+  overflow-y: auto;    /* ✅ 세로 스크롤 활성화 */
+}
+
+/* 테이블 헤더 고정 (선택적으로 사용할 경우) */
+.table-container thead th {
+  position: sticky;
+  z-index: 1;
+}
+
+/* ✅ 첫 번째 헤더 행 고정 */
+#check-table thead tr:nth-child(1) th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: #007bff;
+  color: white;
+}
+
+/* ✅ 두 번째 헤더 행: top은 JS에서 동적으로 설정 */
+#check-table thead tr:nth-child(2) th {
+  position: sticky;
+  z-index: 2;
+  background-color: #007bff;
+  color: white;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 헤더 스타일 */
+th {
+    border: 1px solid white !important;
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+}
+
+th[colspan] {
+  background-color: #007bff !important; 
+  color: white;
+  font-size: 16px;
+  padding: 8px;
+}
+
+th.holiday-header {
+  background-color: #ffdddd !important;
+  color: red !important;
+}
+
+/* 날짜 표시 스타일 */
+.date-header {
+    background-color: #007bff;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* 테이블 본문 스타일 */
+td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;           /* 두 줄 간격 */
+  margin-bottom: 20px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* 신청 여부 스타일 */
+.meal-yes {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.meal-no {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* 홀수/짝수 행 색상 변경 */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* 마우스를 올리면 강조 효과 */
+tr:hover {
+    background-color: #d6e4ff;
+    transition: 0.3s;
+}
+
+/* 이름칸 좌우폭*/
+.input-name {
+  min-width: 50px;   /* 최소 120px */
+  max-width: 150px;   /* 최대 300px */
+  width: 100%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
+}
+
+/* 사번칸 좌우폭*/
+.input-empid {
+  min-width: 100px;
+  max-width: 150px;
+  width: 100%;
+}
+
+
+/* 마감된 식사 버튼 스타일 */
+.meal-deadline {
+  background-color: #ffe5e5 !important; /* 연한 붉은색 */
+  color: #990000 !important;
+  cursor: not-allowed;
+}
+
+/* 신청/미신청 버튼 스타일 */
+.meal-btn {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: px;
+    transition: background-color 0.3s;
+}
+
+/* 신청 버튼 (선택된 경우) */
+.meal-btn.selected {
+    background-color: #28a745;
+    color: white;
+}
+
+/* 미신청 버튼 (기본 상태) */
+.meal-btn {
+    background-color: #e0e0e0;
+    color: black;
+}
+
+/* 버튼 클릭 시 색상 변경 효과 */
+.meal-btn:hover {
+    background-color: #c0c0c0;
+}
+
+/* 로그인 및 주 선택 영역 스타일 */
+.login-container, #date-picker-container {
+    margin-bottom: 20px;
+}
+
+/* 버튼 스타일 */
+button {
+    padding: 10px 16px;
+    margin-bottom: 5px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    max-width: 140px;
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.action-buttons {
+  margin-top: 20px;  /* ✅ 원하는 만큼 조절 가능 (예: 20~40px) */
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dashboard-btn {
+  min-width: 140px;
+  padding: 10px 10px;
+  font-size: 14px;
+  white-space: nowrap; /* ← 필수 */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.search-button-wrapper {
+  display: flex;
+  align-items: center;     /* 버튼과 주 선택 input 높이 맞춤 */
+  justify-content: center; /* 가운데 정렬 */
+  font-size: medium;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 버튼 개별 크기 조정 */
+.btn-search,
+.btn-all,
+.save-btn,
+.dashboard-btn {
+  width: auto !important; /* ✅ 공통 button 규칙 무시 */
+}
+
+.btn-search {
+  padding: 8px 16px;
+  font-size: 14px;
+  min-width: 90px;
+}
+
+.btn-all {
+  padding: 8px 16px;
+  font-size: 14px;
+  min-width: 110px;
+}
+
+.save-btn {
+  padding: 10px 10px;
+  font-size: 15px;
+  font-weight: bold;
+  min-width: 80px;
+}
+
+.dashboard-btn {
+  padding: 10px 20px;
+  font-size: 15px;
+  white-space: nowrap;
+  min-width: 150px;
+}
+
+.search-button {
+  height: 36px;
+  margin-top: 0px;
+  padding: 0 10;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+#editWeekPicker {
+  height: 20px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 5px;
+  }
+
+  table {
+    font-size: 12px;
+    width: 100%;
+  }
+
+  th, td {
+    padding: 6px;
+  }
+
+  th {
+  white-space: nowrap; /* 줄바꿈 방지 */
+  }
+  
+
+  .filter-container,
+  .search-container,
+  .action-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  
+  select{
+    width: 100%;
+    font-size: 14px;
+  }
+
+  button {
+    width: 100%;
+    font-size: 14px;
+  }
+ 
+/*  */
+
+.search-button {
+    width: auto; /* 버튼이 꽉 차지 않도록 */
+  }
+}
+
+ .filter-container {
+  display: flex;          /* ✅ 핵심! */
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;  /* ✅ 가운데 정렬 */
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+  .filter-container label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    width: auto; /* ✅ 100% 대신 내용 크기에 맞춤 */
+    white-space: nowrap; /* ✅ 줄바꿈 방지 */
+  }
+
+.input-dept {
+  width: 100px;       /* 고정 너비로 동일하게 맞추기 */
+  max-width: none;   /* 최대치 제한 없애기 */
+  min-width: 0;
+}
+
+/* 사번 이름 입력칸 동일 사이즈 통일일 */
+.input-name,
+.input-empid {
+  width: 80px;       /* 고정 너비로 동일하게 맞추기 */
+  max-width: none;   /* 최대치 제한 없애기 */
+  min-width: 0;
+}
+
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  h1, h2 {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .summary {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+.toast {
+  visibility: hidden;
+  min-width: 160px;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: fixed;
+  z-index: 9999;
+  top: 20px;
+  right: 20px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+}
+/* 첫 번째 헤더 줄 (날짜 줄) 고정 */
+#edit-table thead tr:nth-child(1) th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: #007bff;
+  color: white;
+}
+
+/* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
+#edit-table thead tr:nth-child(2) th {
+  position: sticky;
+  z-index: 2;
+  background-color: #007bff;
+  color: white;
+}
+#edit-table thead tr:nth-child(2) th::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: white; /* ← 배경색과 동일하게 맞춤 */
+  z-index: 3;
+}
+/*테이블과  div라인 간격조정정*/
+.filter-container {
+  margin-bottom: 20px; /* ✅ 버튼 아래 공간 확보 */
+}
+
+/* 데스크탑모드*/
+@media (min-width: 769px) {
+   .summary {
+    font-size: clamp(14px, 2vw, 20px);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .filter-container label {
+    font-size: 19px;
+    font-weight: bold;
+  }
+
+  .input-name,
+  .input-empid {
+    font-size: 18px;
+    height: 20px;
+    font-weight: bold;
+    padding: 6px 8px;
+  }
+
+  h1 {
+    font-size: clamp(20px, 2vw, 26px);       /* ✅ 제목도 더 크게 */
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+}
