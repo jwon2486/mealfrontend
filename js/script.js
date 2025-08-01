@@ -342,19 +342,30 @@ function checkPreviousWeek(userId, currentWeekStart, callback) {
     prevFriday.setDate(prevMonday.getDate() + 4);
     const prevEnd = prevFriday.toISOString().split("T")[0];
 
-    getData(`/meals?user_id=${userId}&start=${prevStart}&end=${prevEnd}`, (mealData) => {
-        let hasMeal = false;
-        Object.values(mealData).forEach(day => {
-            if (day.breakfast || day.lunch || day.dinner) hasMeal = true;
-        });
+    // ✅ meals와 selfcheck를 동시에 호출 → 한 번만 요청 발생
+    Promise.all([
+        new Promise((resolve, reject) => 
+            getData(`/meals?user_id=${userId}&start=${prevStart}&end=${prevEnd}`, resolve, reject)
+        ),
+        new Promise((resolve, reject) => 
+            getData(`/selfcheck?user_id=${userId}&date=${prevStart}`, resolve, reject)
+        )
+    ])
+    .then(([mealData, checkData]) => {
+        // ✅ mealData에 신청 내역 있는지 확인
+        const hasMeal = Object.values(mealData).some(day => 
+            day.breakfast || day.lunch || day.dinner
+        );
 
-        getData(`/selfcheck?user_id=${userId}&date=${prevStart}`, (checkData) => {
-            const isChecked = checkData.checked === 1;
-            isBlockedWeek = !hasMeal && !isChecked;
+        // ✅ selfcheck 체크 여부
+        const isChecked = checkData.checked === 1;
 
-            if (callback) callback();
-        });
-    });
+        // ✅ 차단 여부 결정
+        isBlockedWeek = !hasMeal && !isChecked;
+
+        if (callback) callback();
+    })
+    .catch(err => console.error("❌ checkPreviousWeek 통합 요청 실패:", err));
 }
 
 
