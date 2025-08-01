@@ -6,13 +6,36 @@ body {
     margin: 0;
 }
 
-h1, h2 {
-    font-size: 25px;
-    margin-top: 5px;
+.logo-title {
+    display: flex;
+    align-items: center;   /* 로고와 텍스트를 수직 중앙 */
+    justify-content: center; /* 가로 중앙 */
+    text-align: center;
+    margin: 0 auto;
+}
+
+.logo-title img {
+    width: 240px;            /* 로고 크기 조절 */
+    height: auto;
+}
+
+
+h1{
+    font-size: 22px;
+    margin: 0;
+    font-weight: 500; /* 얇은 폰트 */
   }
 
+h2 {
+    font-size: 22px;
+    margin: 0;
+  }
+#date-picker-container{
+margin: 0;
+}
+
 #welcome {
-  margin-top: 10px;           /* 필요 시 조정 가능 */
+  margin-top: 0;           /* 필요 시 조정 가능 */
   font-weight: bold;
   font-size: 20px;
   text-align: center;
@@ -35,7 +58,7 @@ h1, h2 {
   font-size: 24px;        /* 원하는 크기로 설정 (예: 20px) */
   font-weight: bold;      /* 필요 시 생략 가능 */
   color: #333;            /* 색상 지정 */
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 input[type="date"] {
@@ -146,8 +169,9 @@ tr:hover {
 .deadline-info {
   width: 100%;
   max-width: 530px;
-  margin: 16px auto;
-  padding: 16px;
+  margin: 0 auto;
+  align-content: center;
+  padding: 5px;
   border: 1px solid #ccc;
   background: #f9f9f9;
   font-size: 20px;
@@ -201,7 +225,7 @@ tr:hover {
 }
 
 /* 로그인 및 주 선택 영역 스타일 */
-.login-container, #date-picker-container {
+.login-container{
     display: flex;
     flex-direction: column;
     align-items: center;   /* ⭐ 가운데 정렬 */
@@ -215,7 +239,7 @@ tr:hover {
 /* 저장 버튼 스타일 */
 .action-btn {
     padding: 10px 20px;
-    margin-top: 15px;
+    margin-top: 8px;
     font-size: 16px;
     border: none;
     border-radius: 5px;
@@ -234,13 +258,27 @@ button:hover {
 /*모바일 대응*/
 @media (max-width: 768px) {
   body {
-    font-size: 2vw; /* 뷰포트 너비에 따라 자동 조절 */
+    font-size: 3vw; /* 뷰포트 너비에 따라 자동 조절 */
     padding-left: 8px;
     padding-right: 8px;
   }
 
+  .logo-title {
+    display: flex;
+    align-items: center;   /* 로고와 텍스트를 수직 중앙 */
+    justify-content: center; /* 가로 중앙 */
+    text-align: center;
+    width: 400px;
+    margin: 0 auto;
+}
+
+.logo-title img {
+    width: 200px;            /* 로고 크기 조절 */
+    height: auto;
+}
+
   #welcome {
-  margin-top: 10px;           /* 필요 시 조정 가능 */
+ /* margin-top: 10px; 필요 시 조정 가능 */
   /*font-weight: bold;*/
   font-size: 15px;
   text-align: center;
@@ -251,11 +289,11 @@ button:hover {
   font-size: 18px;        /* 원하는 크기로 설정 (예: 20px) */
   font-weight: bold;      /* 필요 시 생략 가능 */
   color: #333;            /* 색상 지정 */
-  margin-top: 8px;
+  margin-top: 0;
   }
 
   table {
-    font-size: 16px;
+    font-size: 3vw;
     width: 100%;
     max-width: 430px;
     /*font-weight: bold;*/
@@ -308,6 +346,7 @@ button:hover {
     min-width: 10px;  /* 최소 너비 설정 (원하는 값 조절 가능) */
     padding: 6px 8px; /* 모바일에서 padding 조절 가능 */
     font-size: 3vw;   /* 필요시 글씨도 조절 */
+    margin-top: 2px;
   }
 
   .login-container {
@@ -333,8 +372,8 @@ button:hover {
    .deadline-info {
     max-width: 410px;
     font-size: 16px;
-    padding: 12px;
-    margin: 12px auto;
+    padding: 5px;
+    margin: 0 auto;
   }
 
   .table-wrapper {
