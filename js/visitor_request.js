@@ -382,7 +382,7 @@ function isNextWeekDeadlinePassed(selectedDate) {
   nextWeekSunday.setDate(nextWeekMonday.getDate() + 6);
 
   // 🌿 디버그 로그
-  console.log("🌿 현재시각:", now.toISOString());
+  console.log("현재시간:", getKSTDate().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }));
   console.log("🌿 이번주 수요일16:", wednesday16.toISOString());
   console.log("🌿 이번주 일요일:", sundayEnd.toISOString());
   console.log("🌿 다음주 시작:", nextWeekMonday.toISOString());
