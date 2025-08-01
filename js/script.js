@@ -201,7 +201,7 @@ function getCurrentWeekDates() {
 // ✅ 주간 식수 신청 테이블 동적 생성
 function renderMealTable(dates) {
     const tableBody = document.getElementById("meal-body");
-    tableBody.innerHTML = ""; // 기존 내용 삭제
+    tableBody.innerHTML = "";
 
     const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -212,7 +212,6 @@ function renderMealTable(dates) {
 
         const row = document.createElement("tr");
 
-        // 날짜 셀
         const dateCell = document.createElement("td");
         dateCell.innerText = dateStr;
         if (isHoliday) {
@@ -235,44 +234,33 @@ function renderMealTable(dates) {
             btn.className = "meal-btn";
             btn.dataset.date = dateStr;
             btn.dataset.type = type;
-            btn.innerText = "❌미신청";
 
             const cell = document.createElement("td");
 
-            // ✅ 클릭 제한
-            if (isHoliday) {
-                //btn.style.backgroundColor = "#ffe6e6";
+            if (isBlockedWeek) {
+                btn.disabled = true;
+                btn.innerText = "🚫 차단됨";
+                btn.style.backgroundColor = "#ccc";
+                btn.style.color = "#666";
+                btn.title = "앞 주 신청 및 본인 확인이 없어 차단됨";
+            } else if (isHoliday) {
                 btn.style.color = "red";
+                btn.innerText = "❌공휴일";
                 btn.disabled = false;
                 btn.title = "공휴일 신청 불가";
                 btn.onclick = () => alert("⛔ 공휴일에는 식수 신청이 불가능합니다.");
-
-                // ✅ 버튼이 들어있는 셀도 붉은색 배경
                 cell.style.backgroundColor = "#ffe6e6";
-            }
-            else if (isDeadlinePassed(dateStr, type)) {
-                //btn.disabled = true;
+            } else if (isDeadlinePassed(dateStr, type)) {
                 btn.style.backgroundColor = "#ffe6e6";
                 btn.style.color = "#666";
                 btn.title = "신청 마감됨";
                 btn.innerText = "❌ 마감";
                 btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
-            }
-            else{
+            } else {
+                btn.innerText = "❌미신청";
                 btn.onclick = () => toggleMeal(btn);
             }
-            
-           // btn.onclick = function () {
-           //     if (isDeadlinePassed(dateStr, type)) {
-                    // ✅ 마감된 버튼 클릭 시 토스트만 표시
-                    //showToast(`⚠️ ${type}은 신청 마감 시간이 지났습니다.`);
-                    //alert(`${type}은 신청 마감 시간이 지났습니다.`);
-          //      } else {
-                    // ✅ 마감 전이면 정상적으로 토글 동작
-           //         toggleMeal(this);
-           //     }
-           // };
-            
+
             cell.appendChild(btn);
             row.appendChild(cell);
         });
@@ -314,38 +302,71 @@ function loadWeekData() {
     window.currentWeekStartDate = start;
     window.currentWeekEndDate = end;
 
-     // ✅ 이 시점에 정확히 값을 전달
-    loadSelfCheck(userId, start);
-    
+    // ✅ 차단 여부 먼저 체크
+    checkPreviousWeek(userId, start, () => {
+        document.getElementById("welcome").innerHTML =
+            `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
 
-    // 상단 사용자 이름 및 주간 범위 표시
-    document.getElementById("welcome").innerHTML = `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
-  //document.getElementById("weekRangeText").innerText = `선택 날짜: ${start} ~ ${end} `;
+        renderMealTable(dates);
 
-    renderMealTable(dates); // 버튼 테이블 새로 생성
+        // ✅ 버튼이 차단 상태가 아니어야 신청 내역 로드
+        const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
+        getData(url, (data) => {
+            if (!isBlockedWeek) {
+                dates.forEach(date => {
+                    const dayData = data[date];
+                    if (!dayData) return;
 
-    const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
-    getData(url, (data) => {
-        dates.forEach(date => {
-            const dayData = data[date];
-            if (!dayData) return;
-
-            ["조식", "중식", "석식"].forEach(type => {
-                const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
-                if (dayData[key]) {
-                    const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
-                    if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
-                }
-            });
+                    ["조식", "중식", "석식"].forEach(type => {
+                        const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
+                        if (dayData[key]) {
+                            const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
+                            if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
+                        }
+                    });
+                });
+            }
+            updateMealSummary();
         });
 
-        // ✅ 합계 다시 계산
-        updateMealSummary(); 
-    
+        loadSelfCheck(userId, start);
     });
-    // ✅ 체크박스 상태도 같이 불러오기
-    loadSelfCheck(userId, start);
 }
+
+function checkPreviousWeek(userId, currentWeekStart, callback) {
+    const prevMonday = new Date(currentWeekStart);
+    prevMonday.setDate(prevMonday.getDate() - 7);
+    const prevStart = prevMonday.toISOString().split("T")[0];
+
+    const prevFriday = new Date(prevMonday);
+    prevFriday.setDate(prevMonday.getDate() + 4);
+    const prevEnd = prevFriday.toISOString().split("T")[0];
+
+    getData(`/meals?user_id=${userId}&start=${prevStart}&end=${prevEnd}`, (mealData) => {
+        let hasMeal = false;
+        Object.values(mealData).forEach(day => {
+            if (day.breakfast || day.lunch || day.dinner) hasMeal = true;
+        });
+
+        getData(`/selfcheck?user_id=${userId}&date=${prevStart}`, (checkData) => {
+            const isChecked = checkData.checked === 1;
+            isBlockedWeek = !hasMeal && !isChecked;
+
+            if (callback) callback();
+        });
+    });
+}
+
+
+function disableCurrentWeekButtons() {
+    document.querySelectorAll(".meal-btn").forEach(btn => {
+        btn.disabled = true;
+        btn.innerText = "차단됨";
+        btn.style.backgroundColor = "#ccc";
+        btn.title = "앞 주 신청 및 본인 확인이 없어 차단됨";
+    });
+}
+
 
 
 
@@ -664,12 +685,26 @@ function loadSelfCheck(userId, date) {
   getData(`/selfcheck?user_id=${userId}&date=${date}`,
     (data) => {
       checkbox.checked = data.checked === 1;
-    },
+       // ✅ 현재 날짜가 주차 종료일 이후면 체크박스 비활성화
+            const currentDate = new Date();
+            const weekStart = new Date(date);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 4); // 주 금요일 기준
+
+            if (currentDate > weekEnd) {
+                checkbox.disabled = true;
+                checkbox.title = "이미 지난 주의 본인 확인은 수정할 수 없습니다.";
+            } else {
+                checkbox.disabled = false;
+                checkbox.title = "";
+            }
+        },
     (error) => {
       console.error("❌ selfcheck 불러오기 실패:", error);
     }
   );
 }
+
 
 // ✅ 전역 함수 등록
 window.login = login;
@@ -678,3 +713,4 @@ window.saveMeals = saveMeals;
 window.loadWeekData = loadWeekData;
 window.goToVisitor = goToVisitor;
 window.goToTeamEdit = goToTeamEdit;
+let isBlockedWeek = false;  // ✅ 차단 여부 전역 저장
