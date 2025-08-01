@@ -150,6 +150,10 @@ text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
     background-color: #0056b3;
   }
   
+  #load-thisweek-btn {
+    margin-left: 5px;   /* 이번주 조회 버튼 왼쪽에 간격 (선택사항) */
+  }
+
   /* 데이터 없음 표시 */
   td[colspan="8"] {
     color: gray;

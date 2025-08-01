@@ -155,6 +155,24 @@ document.getElementById("load-visit-data-btn").addEventListener("click", () => {
   loadWeeklyVisitData();  // ✅ 명시적으로 조회 버튼 눌렀을 때 실행
 });
 
+// 이번 주 월요일 계산 함수
+function getThisWeekMonday() {
+  const today = getKSTDate();
+  const day = today.getDay(); // 0=Sunday, 1=Monday, ...
+  const monday = new Date(today);
+  // 이번 주 월요일로 이동
+  monday.setDate(today.getDate() - ((day + 6) % 7));
+  return monday.toISOString().split("T")[0];
+}
+
+// 버튼 클릭 시 이번 주 데이터 로드
+document.getElementById("load-thisweek-btn").addEventListener("click", () => {
+  const thisMonday = getThisWeekMonday();
+  document.getElementById("visit-week-date").value = thisMonday;
+  document.getElementById("visit-date").value = thisMonday;
+  loadWeeklyVisitData();
+});
+
 
 
 function loadLoginInfo() {
