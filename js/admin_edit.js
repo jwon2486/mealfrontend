@@ -13,7 +13,7 @@ function formatDateWithDay(dateStr) {
 // ✅ selfcheck 데이터 조회 함수
 async function fetchSelfcheckMap(startDate, endDate) {
   return new Promise((resolve) => {
-    getData(`/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
+    getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
       const map = {};
       Object.entries(data).forEach(([userId, checked]) => {
         map[userId] = checked === 1;
@@ -65,32 +65,32 @@ function applySelfcheckFilter() {
 }
 
 function applyCombinedFilter() {
-    const dept = document.getElementById("searchDept").value.trim().toLowerCase();
-    const id = document.getElementById("searchEmpId").value.trim().toLowerCase();
-    const name = document.getElementById("searchName").value.trim().toLowerCase();
-    const selfcheckFilter = document.getElementById("selfcheckFilter").value;
-    const regionFilter = document.getElementById("filterRegion").value.trim().toLowerCase(); // ✅ 추가
+    const dept = document.getElementById("searchDept")?.value.trim().toLowerCase() || "";
+    const id = document.getElementById("searchEmpId")?.value.trim().toLowerCase() || "";
+    const name = document.getElementById("searchName")?.value.trim().toLowerCase() || "";
+    const selfcheckFilter = document.getElementById("selfcheckFilter")?.value || "";
+    const regionFilter = document.getElementById("filterRegion")?.value.trim().toLowerCase() || "";
 
     document.querySelectorAll("#edit-body tr").forEach(tr => {
         const deptVal = tr.children[0].innerText.toLowerCase();
         const idVal = tr.children[1].innerText.toLowerCase();
         const nameVal = tr.children[2].innerText.toLowerCase();
+        const regionVal = tr.children[3].innerText.toLowerCase();
         const selfcheckCell = tr.querySelector("td.selfcheck-col");
 
         const matchesDept = !dept || deptVal.includes(dept);
         const matchesId = !id || idVal.includes(id);
         const matchesName = !name || nameVal.includes(name);
-        const regionVal = tr.children[3].innerText.toLowerCase(); // ✅ 추가
-        const matchesRegion = !regionFilter || regionVal.includes(regionFilter); // ✅ 추가
-
+        const matchesRegion = !regionFilter || regionVal.includes(regionFilter);
 
         let matchesSelfcheck = true;
-        if (selfcheckFilter === "1") matchesSelfcheck = selfcheckCell.textContent === "✅";
-        else if (selfcheckFilter === "0") matchesSelfcheck = selfcheckCell.textContent === "❌";
+        if (selfcheckFilter === "1") matchesSelfcheck = selfcheckCell?.textContent === "✅";
+        else if (selfcheckFilter === "0") matchesSelfcheck = selfcheckCell?.textContent === "❌";
 
         tr.style.display = (matchesDept && matchesId && matchesName && matchesRegion && matchesSelfcheck) ? "" : "none";
     });
 }
+
 
 
 
