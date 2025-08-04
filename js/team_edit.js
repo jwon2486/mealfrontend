@@ -2,6 +2,41 @@
 
 let holidayList = [];
 let editMode = "all";
+let selfcheckMap = {};
+//본인확인 불러오는 함수
+async function fetchSelfcheckMap(startDate, endDate) {
+  return new Promise((resolve) => {
+    getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
+      const map = {};
+      Object.entries(data).forEach(([userId, checked]) => {
+        map[userId] = checked === 1;
+      });
+      resolve(map);
+    }, (err) => {
+      console.error("❌ selfcheck 조회 실패:", err);
+      resolve({});
+    });
+  });
+}
+//본인확인 ox 여부 필터링 함수
+function applySelfcheckFilter() {
+    const filter = document.getElementById("selfcheckFilter").value;
+
+    document.querySelectorAll("#edit-body tr").forEach(tr => {
+        const selfcheckCell = tr.querySelector("td.selfcheck-col");
+        if (!selfcheckCell) return;
+
+        if (filter === "") {
+            tr.style.display = "";
+        } else if (filter === "1" && selfcheckCell.textContent === "✅") {
+            tr.style.display = "";
+        } else if (filter === "0" && selfcheckCell.textContent === "❌") {
+            tr.style.display = "";
+        } else {
+            tr.style.display = "none";
+        }
+    });
+}
 
 function formatDateWithDay(dateStr) {
     const date = new Date(dateStr);
@@ -10,7 +45,7 @@ function formatDateWithDay(dateStr) {
     return `${dateStr} (${day})`;
 }
 
-function loadEditData(selectedWeek) {
+async function loadEditData(selectedWeek) {
     editMode = "all";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
@@ -21,6 +56,8 @@ function loadEditData(selectedWeek) {
         alert("❗ 주간 날짜가 지정되지 않았습니다.");
         return;
     }
+    // ✅ selfcheck 데이터 불러오기 추가
+    selfcheckMap = await fetchSelfcheckMap(start, end);
 
     const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;
     getData(url, (flatData) => {
@@ -65,7 +102,8 @@ function loadEditData(selectedWeek) {
         applyStickyHeaderOffsets();  // th 고정용 코드
         generateTableBody(dates, groupedValues);
         updateSummary(groupedValues, dates);
-        filterEditData();
+        //filterEditData();
+        applySelfcheckFilter();
     }, (err) => {
         alert("❌ 서버에서 데이터를 가져오지 못했습니다.");
     });
@@ -76,7 +114,7 @@ function generateTableHeader(dates) {
     thead.innerHTML = "";
 
     const topRow = document.createElement("tr");
-    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th>`;
+    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
 
     dates.forEach(date => {
         const isHoliday = holidayList.includes(normalizeDate(date));
@@ -105,8 +143,17 @@ function generateTableBody(dates, data) {
 
     data.forEach(emp => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td>`;
 
+        // ✅ selfcheck 상태 가져오기
+        const selfcheckStatus = selfcheckMap[emp.id] ? "✅" : "❌";
+
+        // ✅ 부서, 사번, 이름, 본인확인 열 추가
+        tr.innerHTML = `<td>${emp.dept}</td>
+                        <td>${emp.id}</td>
+                        <td>${emp.name}</td>
+                        <td class="selfcheck-col">${selfcheckStatus}</td>`;
+
+        // ✅ 날짜별 식사 버튼 생성
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
             ["조식", "중식", "석식"].forEach(type => {
@@ -136,7 +183,7 @@ function generateTableBody(dates, data) {
                     btn.title = "공휴일에는 신청할 수 없습니다.";
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
                 } else if (isDeadlinePassed(date, type)) {
-                    btn.classList.add("meal-deadline");  // ✅ 마감 클래스 추가
+                    btn.classList.add("meal-deadline"); 
                     btn.title = "신청 마감됨";
                     btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
                 } else {
@@ -152,6 +199,7 @@ function generateTableBody(dates, data) {
         tbody.appendChild(tr);
     });
 }
+
 
 function toggleMeal(btn) {
     if (btn.classList.contains("selected")) {
@@ -404,10 +452,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // ✅ 본인확인 드롭다운 필터 이벤트 리스너 추가
+    document.getElementById("selfcheckFilter")
+            .addEventListener("change", applySelfcheckFilter);
 });
+
 
 document.getElementById("editWeekPicker").addEventListener("change", function () {
     loadEditData(this.value);
+    // ✅ selfcheck 필터 자동 적용
+    setTimeout(() => applySelfcheckFilter(), 300);
 });
 
 function applyStickyHeaderOffsets() {

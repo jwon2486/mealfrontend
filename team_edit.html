@@ -31,6 +31,12 @@
     <div class="filter-container">
         <label>이름: <input type="text" id="searchName" class="input-name"></label>
         <label>사번: <input type="text" id="searchEmpId" class="input-empid"></label>
+        <label for="selfcheckFilter">본인확인:</label>
+        <select id="selfcheckFilter">
+          <option value="">전체</option>
+          <option value="1">본인확인 O</option>
+          <option value="0">본인확인 X</option>
+        </select>
     </div>
     <div class="search-button-wrapper">
       <button class="search-button" onclick="loadEditData(document.getElementById('editWeekPicker').value)">🔍 부서원 조회</button>
