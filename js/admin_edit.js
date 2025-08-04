@@ -69,6 +69,7 @@ function applyCombinedFilter() {
     const id = document.getElementById("searchEmpId").value.trim().toLowerCase();
     const name = document.getElementById("searchName").value.trim().toLowerCase();
     const selfcheckFilter = document.getElementById("selfcheckFilter").value;
+    const regionFilter = document.getElementById("filterRegion").value.trim().toLowerCase(); // ✅ 추가
 
     document.querySelectorAll("#edit-body tr").forEach(tr => {
         const deptVal = tr.children[0].innerText.toLowerCase();
@@ -79,12 +80,15 @@ function applyCombinedFilter() {
         const matchesDept = !dept || deptVal.includes(dept);
         const matchesId = !id || idVal.includes(id);
         const matchesName = !name || nameVal.includes(name);
+        const regionVal = tr.children[3].innerText.toLowerCase(); // ✅ 추가
+        const matchesRegion = !regionFilter || regionVal.includes(regionFilter); // ✅ 추가
+
 
         let matchesSelfcheck = true;
         if (selfcheckFilter === "1") matchesSelfcheck = selfcheckCell.textContent === "✅";
         else if (selfcheckFilter === "0") matchesSelfcheck = selfcheckCell.textContent === "❌";
 
-        tr.style.display = (matchesDept && matchesId && matchesName && matchesSelfcheck) ? "" : "none";
+        tr.style.display = (matchesDept && matchesId && matchesName && matchesRegion && matchesSelfcheck) ? "" : "none";
     });
 }
 
@@ -175,7 +179,11 @@ function generateTableHeader(dates) {
 
     const topRow = document.createElement("tr");
     
-    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
+    topRow.innerHTML = `<th rowspan="2">부서</th>
+                    <th rowspan="2">사번</th>
+                    <th rowspan="2">이름</th>
+                    <th rowspan="2">근무지역</th>
+                    <th rowspan="2">본인확인</th>`;
     
     dates.forEach(date => {
         const isHoliday = holidayList.includes(normalizeDate(date));
@@ -214,8 +222,9 @@ function generateTableBody(dates, data) {
 
         const selfcheckStatus = selfcheckMap[emp.id] ? "✅" : "❌";
         tr.innerHTML = `<td>${emp.dept}</td>
-                <td>${emp.id}</td>
-                <td>${emp.name}</td>
+                 <td>${emp.id}</td>
+                 <td>${emp.name}</td>
+                 <td>${emp.region}</td>
                 <td class="selfcheck-col">${selfcheckStatus}</td>`;
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
@@ -591,6 +600,7 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
                     id: entry.user_id,
                     name: entry.name,
                     dept: entry.dept,
+                    region: entry.region,
                     meals: {}
                 };
             }
