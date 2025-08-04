@@ -1,12 +1,29 @@
 
 let holidayList = [];  // 서버에서 불러온 공휴일 날짜 배열
-let editMode = "apply"; 
+let editMode = "apply";
+let selfcheckMap = {};
 
 function formatDateWithDay(dateStr) {
     const date = new Date(dateStr);
     const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
     const day = weekdays[date.getDay()];
     return `${dateStr} (${day})`;
+}
+
+// ✅ selfcheck 데이터 조회 함수
+async function fetchSelfcheckMap(startDate, endDate) {
+  return new Promise((resolve) => {
+    getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
+      const map = {};
+      Object.entries(data).forEach(([userId, checked]) => {
+        map[userId] = checked === 1;
+      });
+      resolve(map);
+    }, (err) => {
+      console.error("❌ selfcheck 조회 실패:", err);
+      resolve({});
+    });
+  });
 }
 
 // ✅ 서버에서 식수 신청 내역 조회 (관리자용)
@@ -44,6 +61,23 @@ function loadEditData(selectedWeek) {
             // ✅ 기존 테이블 초기화 명확히!
             document.getElementById("edit-body").innerHTML = "";
             document.getElementById("table-head").innerHTML = "";
+            document.getElementById("selfcheckFilter").addEventListener("change", () => {
+            const filter = document.getElementById("selfcheckFilter").value;
+            document.querySelectorAll("#edit-body tr").forEach(tr => {
+                const selfcheckCell = tr.querySelector("td.selfcheck-col");
+                if (!selfcheckCell) return;
+
+                if (filter === "") {
+                tr.style.display = "";
+                } else if (filter === "1" && selfcheckCell.textContent === "✅") {
+                tr.style.display = "";
+                } else if (filter === "0" && selfcheckCell.textContent === "❌") {
+                tr.style.display = "";
+                } else {
+                tr.style.display = "none";
+                }
+            });
+            });
             
             
             const grouped = {};
@@ -122,7 +156,7 @@ function generateTableHeader(dates) {
 
     const topRow = document.createElement("tr");
     
-    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th>`;
+    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
     
     dates.forEach(date => {
         const isHoliday = holidayList.includes(normalizeDate(date));
@@ -159,9 +193,11 @@ function generateTableBody(dates, data) {
     data.forEach(emp => {
         const tr = document.createElement("tr");
 
-        // 부서 / 사번 / 이름 셀
-        tr.innerHTML = `<td>${emp.dept}</td><td>${emp.id}</td><td>${emp.name}</td>`;
-
+        const selfcheckStatus = selfcheckMap[emp.id] ? "✅" : "❌";
+        tr.innerHTML = `<td>${emp.dept}</td>
+                <td>${emp.id}</td>
+                <td>${emp.name}</td>
+                <td class="selfcheck-col">${selfcheckStatus}</td>`;
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
             ["조식", "중식", "석식"].forEach(type => {
@@ -477,7 +513,7 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
 
     const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;  // ✅ 추가 파라미터 사용
 
-    getData(url, (response) => {
+    getData(url, async (response) => {
         const dates = getDateArray(start, end);
 
         const grouped = {};
@@ -505,7 +541,9 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
             if (a.name > b.name) return 1;
             return 0;
         });
-        
+        const selfcheckMapData = await fetchSelfcheckMap(start, end);
+        selfcheckMap = selfcheckMapData;
+
         
         generateTableHeader(dates);
         applyStickyHeaderOffsets(); // ✅ 이 줄을 꼭 추가하세요!
