@@ -110,6 +110,7 @@ async function loadEditData(selectedWeek) {
     const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;
 
     getData(url, (flatData) => {
+        console.log(`${entry.name} (${entry.user_id}) → region: ${entry.region}`);
         try {
             if (!Array.isArray(flatData)) {
                 if (Array.isArray(flatData.data)) {
@@ -126,6 +127,7 @@ async function loadEditData(selectedWeek) {
 
             const grouped = {};
             flatData.forEach(entry => {
+                console.log("🔍 region 확인:", entry.user_id, entry.name, entry.region);  // ✅ 여기에 추가!
                 if (!entry.user_id || !entry.name || !entry.dept || !entry.date) return;
                 if (entry.breakfast !== 1 && entry.lunch !== 1 && entry.dinner !== 1) return;
 
@@ -135,6 +137,7 @@ async function loadEditData(selectedWeek) {
                         id: entry.user_id,
                         name: entry.name,
                         dept: entry.dept,
+                        region: entry.region,
                         meals: {}
                     };
                 }
