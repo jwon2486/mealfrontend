@@ -27,7 +27,7 @@ async function fetchSelfcheckMap(startDate, endDate) {
 }
 
 // ✅ 서버에서 식수 신청 내역 조회 (관리자용)
-function loadEditData(selectedWeek) {
+async function loadEditData(selectedWeek) {
     editMode = "apply";  // ✅ 신청자 모드 설정
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
     const { start, end } = range;
@@ -36,21 +36,16 @@ function loadEditData(selectedWeek) {
         alert("❗ 주간 날짜가 지정되지 않았습니다.");
         return;
     }
+    // ✅ selfcheck 데이터 불러오기
+    selfcheckMap = await fetchSelfcheckMap(start, end);
 
-    const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;  // ✅ mode=apply 추가!
-
+    const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;
 
     getData(url, (flatData) => {
-        console.log("✅ 서버에서 받은 data:", flatData);
-        console.log("📌 flatData type:", typeof flatData);
-        console.log("📌 flatData length:", flatData.length);
-
         try {
-
             if (!Array.isArray(flatData)) {
-                // 만약 flatData가 { data: [...] } 형태라면
                 if (Array.isArray(flatData.data)) {
-                    flatData = flatData.data; // 내부 배열로 교체
+                    flatData = flatData.data;
                 } else {
                     console.error("❌ 예상하지 못한 응답 형식:", flatData);
                     alert("❌ 서버 응답 형식이 예상과 다릅니다.");
@@ -58,43 +53,13 @@ function loadEditData(selectedWeek) {
                 }
             }
 
-            // ✅ 기존 테이블 초기화 명확히!
             document.getElementById("edit-body").innerHTML = "";
             document.getElementById("table-head").innerHTML = "";
-            document.getElementById("selfcheckFilter").addEventListener("change", () => {
-            const filter = document.getElementById("selfcheckFilter").value;
-            document.querySelectorAll("#edit-body tr").forEach(tr => {
-                const selfcheckCell = tr.querySelector("td.selfcheck-col");
-                if (!selfcheckCell) return;
 
-                if (filter === "") {
-                tr.style.display = "";
-                } else if (filter === "1" && selfcheckCell.textContent === "✅") {
-                tr.style.display = "";
-                } else if (filter === "0" && selfcheckCell.textContent === "❌") {
-                tr.style.display = "";
-                } else {
-                tr.style.display = "none";
-                }
-            });
-            });
-            
-            
             const grouped = {};
             flatData.forEach(entry => {
-                if (!entry.user_id || !entry.name || !entry.dept || !entry.date) {
-                    console.warn("⚠️ 누락된 필드:", entry);
-                    return;
-                }
-                
-                // 모든 식사 신청이 없으면 포함시키지 않음
-                if (
-                entry.breakfast !== 1 &&
-                entry.lunch !== 1 &&
-                entry.dinner !== 1
-                ) {
-                return; // 신청 없는 사람은 무시
-                }
+                if (!entry.user_id || !entry.name || !entry.dept || !entry.date) return;
+                if (entry.breakfast !== 1 && entry.lunch !== 1 && entry.dinner !== 1) return;
 
                 const uid = entry.user_id;
                 if (!grouped[uid]) {
@@ -105,16 +70,13 @@ function loadEditData(selectedWeek) {
                         meals: {}
                     };
                 }
-
                 grouped[uid].meals[entry.date] = {
                     breakfast: entry.breakfast === 1,
                     lunch: entry.lunch === 1,
                     dinner: entry.dinner === 1
                 };
-
             });
 
-    
             const dates = getDateArray(start, end);
             const groupedValues = Object.values(grouped).sort((a, b) => {
                 if (a.dept < b.dept) return -1;
@@ -125,28 +87,19 @@ function loadEditData(selectedWeek) {
             });
 
             generateTableHeader(dates);
-            applyStickyHeaderOffsets();  // 👈 추가
+            applyStickyHeaderOffsets();
             generateTableBody(dates, groupedValues);
             updateSummary(groupedValues, dates);
-
-            filterEditData();  // ✅ 필터 적용 추가
-
-            // if (groupedValues.length > 0) {
-            //     updateSummary(groupedValues, dates);
-            // } else {
-            //     console.warn("📭 불러온 데이터가 없습니다.");
-            // }
+            filterEditData();
 
         } catch (e) {
             console.error("📛 데이터 처리 중 오류:", e);
             alert("❌ 데이터 처리 중 문제가 발생했습니다.");
         }
     }, (err) => {
-        // ✅ 메시지를 좀 더 정제
         alert("❌ 서버에서 데이터를 가져오지 못했습니다.");
         console.error("❌ GET 요청 실패:", err);
     });
-
 }
 
 // ✅ 테이블 헤더 생성
