@@ -26,6 +26,70 @@ async function fetchSelfcheckMap(startDate, endDate) {
   });
 }
 
+function filterEditData() {
+    const dept = document.getElementById("searchDept").value.trim().toLowerCase();
+    const id = document.getElementById("searchEmpId").value.trim().toLowerCase();
+    const name = document.getElementById("searchName").value.trim().toLowerCase();
+
+    const rows = document.querySelectorAll("#edit-body tr");
+    rows.forEach(row => {
+        const deptVal = row.children[0].innerText.toLowerCase();
+        const idVal = row.children[1].innerText.toLowerCase();
+        const nameVal = row.children[2].innerText.toLowerCase();
+
+        const show = (!dept || deptVal.includes(dept)) &&
+                     (!id || idVal.includes(id)) &&
+                     (!name || nameVal.includes(name));
+
+        row.style.display = show ? "" : "none";
+    });
+}
+
+// ✅ 여기 추가
+function applySelfcheckFilter() {
+    const filter = document.getElementById("selfcheckFilter").value;
+    document.querySelectorAll("#edit-body tr").forEach(tr => {
+        const selfcheckCell = tr.querySelector("td.selfcheck-col");
+        if (!selfcheckCell) return;
+
+        if (filter === "") {
+            tr.style.display = "";
+        } else if (filter === "1" && selfcheckCell.textContent === "✅") {
+            tr.style.display = "";
+        } else if (filter === "0" && selfcheckCell.textContent === "❌") {
+            tr.style.display = "";
+        } else {
+            tr.style.display = "none";
+        }
+    });
+}
+
+function applyCombinedFilter() {
+    const dept = document.getElementById("searchDept").value.trim().toLowerCase();
+    const id = document.getElementById("searchEmpId").value.trim().toLowerCase();
+    const name = document.getElementById("searchName").value.trim().toLowerCase();
+    const selfcheckFilter = document.getElementById("selfcheckFilter").value;
+
+    document.querySelectorAll("#edit-body tr").forEach(tr => {
+        const deptVal = tr.children[0].innerText.toLowerCase();
+        const idVal = tr.children[1].innerText.toLowerCase();
+        const nameVal = tr.children[2].innerText.toLowerCase();
+        const selfcheckCell = tr.querySelector("td.selfcheck-col");
+
+        const matchesDept = !dept || deptVal.includes(dept);
+        const matchesId = !id || idVal.includes(id);
+        const matchesName = !name || nameVal.includes(name);
+
+        let matchesSelfcheck = true;
+        if (selfcheckFilter === "1") matchesSelfcheck = selfcheckCell.textContent === "✅";
+        else if (selfcheckFilter === "0") matchesSelfcheck = selfcheckCell.textContent === "❌";
+
+        tr.style.display = (matchesDept && matchesId && matchesName && matchesSelfcheck) ? "" : "none";
+    });
+}
+
+
+
 // ✅ 서버에서 식수 신청 내역 조회 (관리자용)
 async function loadEditData(selectedWeek) {
     editMode = "apply";  // ✅ 신청자 모드 설정
@@ -90,7 +154,9 @@ async function loadEditData(selectedWeek) {
             applyStickyHeaderOffsets();
             generateTableBody(dates, groupedValues);
             updateSummary(groupedValues, dates);
-            filterEditData();
+            //filterEditData();
+            //applySelfcheckFilter();
+            applyCombinedFilter();
 
         } catch (e) {
             console.error("📛 데이터 처리 중 오류:", e);
@@ -425,6 +491,54 @@ function updateSummary(data, dates) {
 
 // ✅ 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
+//     document.getElementById("selfcheckFilter").addEventListener("change", () => {
+//     const filter = document.getElementById("selfcheckFilter").value;
+//     document.querySelectorAll("#edit-body tr").forEach(tr => {
+//       const selfcheckCell = tr.querySelector("td.selfcheck-col");
+//       if (!selfcheckCell) return;
+
+//       if (filter === "") {
+//         tr.style.display = "";
+//       } else if (filter === "1" && selfcheckCell.textContent === "✅") {
+//         tr.style.display = "";
+//       } else if (filter === "0" && selfcheckCell.textContent === "❌") {
+//         tr.style.display = "";
+//       } else {
+//         tr.style.display = "none";
+//       }
+//     });
+//   });
+// });
+    // 🔽 필터 이벤트 리스너 통합
+    document.getElementById("selfcheckFilter").addEventListener("change", applyCombinedFilter);
+    document.getElementById("searchDept").addEventListener("input", applyCombinedFilter);
+    document.getElementById("searchEmpId").addEventListener("input", applyCombinedFilter);
+    document.getElementById("searchName").addEventListener("input", applyCombinedFilter);
+
+    // ✅ 기존 초기화 코드 유지
+    const picker = document.getElementById("editWeekPicker");
+
+    const today = getKSTDate();
+    const day = today.getDay(); 
+    const diffToNextMonday = day === 0 ? 1 : 8 - day;
+
+    const nextMonday = new Date(today);
+    nextMonday.setDate(today.getDate() + diffToNextMonday);
+
+    const nextMondayStr = nextMonday.toISOString().split("T")[0];
+    picker.value = nextMondayStr;
+
+    const year = nextMonday.getFullYear();
+    const holidayApiUrl = `/holidays?year=${year}`;
+
+    fetchHolidayList(holidayApiUrl, (holidays) => {
+        holidayList = holidays;
+        editMode = "all";
+        loadAllEmployeesForEdit(nextMondayStr);
+    });
+    });
+
+
     const picker = document.getElementById("editWeekPicker");
 
     // ✅ 다음 주 월요일 계산
@@ -446,7 +560,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editMode = "all";  // 명확히 전체 조회 모드 지정
     loadAllEmployeesForEdit(nextMondayStr);  // ✅ 전체 인원 기준 초기 로딩
     });
-    });
+
 
 // ✅ 주 선택 변경 시 자동 조회
 document.getElementById("editWeekPicker").addEventListener("change", function () {
@@ -504,7 +618,9 @@ function loadAllEmployeesForEdit(selectedWeek = null) {
         updateSummary(groupedValues, dates);
 
         // ✅ 필터 자동 적용
-        filterEditData();
+        //filterEditData();
+        //applySelfcheckFilter();
+        applyCombinedFilter();
 
     }, (err) => {
         console.error("❌ 전체보기 실패:", err);
