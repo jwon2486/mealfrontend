@@ -13,7 +13,7 @@ function formatDateWithDay(dateStr) {
 // ✅ selfcheck 데이터 조회 함수
 async function fetchSelfcheckMap(startDate, endDate) {
   return new Promise((resolve) => {
-    getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
+    getData(`/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
       const map = {};
       Object.entries(data).forEach(([userId, checked]) => {
         map[userId] = checked === 1;
