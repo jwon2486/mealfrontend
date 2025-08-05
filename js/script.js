@@ -41,6 +41,8 @@ function login(event) {
             rank: data.rank,
             type: data.type,
             level: data.level,  // ✅ level 추가
+            region: data.region
+
         };
 
         // alert(data.type);
@@ -361,7 +363,12 @@ function checkPreviousWeek(userId, currentWeekStart, callback) {
         const isChecked = checkData.checked === 1;
 
         // ✅ 차단 여부 결정
-        isBlockedWeek = !hasMeal && !isChecked;
+        // ✅ 차단 여부 결정 (에코센터만 적용)
+        if (window.currentUser.region === "에코센터") {
+            isBlockedWeek = !hasMeal && !isChecked;
+        } else {
+            isBlockedWeek = false; // 다른 지역은 차단하지 않음
+        }
 
         if (callback) callback();
     })
