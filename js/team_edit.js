@@ -81,6 +81,7 @@ async function loadEditData(selectedWeek) {
             id: entry.user_id,
             name: entry.name,
             dept: entry.dept,
+            region: entry.region,
             meals: {}
         };
     }
@@ -102,8 +103,8 @@ async function loadEditData(selectedWeek) {
         applyStickyHeaderOffsets();  // th 고정용 코드
         generateTableBody(dates, groupedValues);
         updateSummary(groupedValues, dates);
-        //filterEditData();
         applySelfcheckFilter();
+        filterEditData();
     }, (err) => {
         alert("❌ 서버에서 데이터를 가져오지 못했습니다.");
     });
@@ -114,7 +115,11 @@ function generateTableHeader(dates) {
     thead.innerHTML = "";
 
     const topRow = document.createElement("tr");
-    topRow.innerHTML = `<th rowspan="2">부서</th><th rowspan="2">사번</th><th rowspan="2">이름</th><th rowspan="2">본인확인</th>`;
+    topRow.innerHTML = `<th rowspan="2">부서</th>
+                    <th rowspan="2">사번</th>
+                    <th rowspan="2">이름</th>
+                    <th rowspan="2">근무지역</th>
+                    <th rowspan="2">본인확인</th>`;
 
     dates.forEach(date => {
         const isHoliday = holidayList.includes(normalizeDate(date));
@@ -151,6 +156,7 @@ function generateTableBody(dates, data) {
         tr.innerHTML = `<td>${emp.dept}</td>
                         <td>${emp.id}</td>
                         <td>${emp.name}</td>
+                        <td>${emp.region || ""}</td>  <!-- ✅ region 열 추가 -->
                         <td class="selfcheck-col">${selfcheckStatus}</td>`;
 
         // ✅ 날짜별 식사 버튼 생성
@@ -218,13 +224,14 @@ function toggleMeal(btn) {
 function filterEditData() {
     const id = document.getElementById("searchEmpId").value.trim().toLowerCase();
     const name = document.getElementById("searchName").value.trim().toLowerCase();
+    const region = document.getElementById("regionFilter")?.value || "";
 
     const rows = document.querySelectorAll("#edit-body tr");
     rows.forEach(row => {
         const idVal = row.children[1].innerText.toLowerCase();
         const nameVal = row.children[2].innerText.toLowerCase();
-
-        const show = (!id || idVal.includes(id)) && (!name || nameVal.includes(name));
+        const regionVal = row.children[3].innerText;
+        const show =(!id || idVal.includes(id)) &&(!name || nameVal.includes(name)) &&(!region || regionVal === region);
         row.style.display = show ? "" : "none";
     });
 }
@@ -421,7 +428,8 @@ function onSearch() {
 
     // ✅ 사용자가 직접 선택한 값 또는 다음 주
     const selected = picker.value;
-    loadEditData(selected); // 테이블 렌더링
+     // ✅ 근무지역 필터 적용
+    setTimeout(() => filterEditData(), 300);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -433,6 +441,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     window.currentUser = currentUser; // ← 전역 등록
     console.log("✅ 현재 로그인한 사용자 정보:", window.currentUser);
+    // ✅ 근무지역 드롭다운 초기값 설정
+    const region = currentUser.region;
+    const regionFilter = document.getElementById("regionFilter");
+    if (region && regionFilter) {
+        const validOptions = Array.from(regionFilter.options).map(o => o.value);
+        if (validOptions.includes(region)) {
+            regionFilter.value = region;
+            filterEditData();  // ✅ 자동 필터링까지 적용
+        }
+    }
 
     const picker = document.getElementById("editWeekPicker");
     const { start } = getNextWeekRange();  // ✅ 다음 주 월요일로 변경됨
@@ -454,8 +472,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ✅ 본인확인 드롭다운 필터 이벤트 리스너 추가
-    document.getElementById("selfcheckFilter")
-            .addEventListener("change", applySelfcheckFilter);
+    document.getElementById("selfcheckFilter").addEventListener("change", applySelfcheckFilter);
+    document.getElementById("regionFilter").addEventListener("change", filterEditData);  // ✅ 근무지역 필터
 });
 
 

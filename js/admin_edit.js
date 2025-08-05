@@ -524,6 +524,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("searchDept").addEventListener("input", applyCombinedFilter);
     document.getElementById("searchEmpId").addEventListener("input", applyCombinedFilter);
     document.getElementById("searchName").addEventListener("input", applyCombinedFilter);
+    document.getElementById("filterRegion").addEventListener("change", () => {
+    const week = document.getElementById("editWeekPicker").value;
+    if (editMode === "all") {
+        loadAllEmployeesForEdit(week);
+    } else {
+        loadEditData(week);
+    }
+    });
 
     // ✅ 기존 초기화 코드 유지
     const picker = document.getElementById("editWeekPicker");
