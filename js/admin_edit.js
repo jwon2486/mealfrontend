@@ -221,12 +221,17 @@ function generateTableBody(dates, data) {
     data.forEach(emp => {
         const tr = document.createElement("tr");
 
-        const selfcheckStatus = selfcheckMap[emp.id] ? "✅" : "❌";
-        tr.innerHTML = `<td>${emp.dept}</td>
-                 <td>${emp.id}</td>
-                 <td>${emp.name}</td>
-                 <td>${emp.region}</td>
-                <td class="selfcheck-col">${selfcheckStatus}</td>`;
+        const checked = selfcheckMap[emp.id] ? "checked" : "";
+        const checkbox = `
+        <input type="checkbox" class="admin-selfcheck-toggle"
+                data-id="${emp.id}" ${checked} />`;
+        tr.innerHTML = `
+        <td>${emp.dept}</td>
+        <td>${emp.id}</td>
+        <td>${emp.name}</td>
+        <td>${emp.region}</td>
+        <td class="selfcheck-col">${checkbox}</td>`;
+
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
             ["조식", "중식", "석식"].forEach(type => {
@@ -532,6 +537,29 @@ document.addEventListener("DOMContentLoaded", () => {
         loadEditData(week);
     }
     });
+
+    document.addEventListener("change", function (e) {
+  if (e.target.classList.contains("admin-selfcheck-toggle")) {
+    const userId = e.target.dataset.id;
+    const checked = e.target.checked ? 1 : 0;
+
+    const weekPicker = document.getElementById("editWeekPicker");
+    const { start } = getWeekRange(weekPicker.value);
+
+    postData("/selfcheck", {
+      user_id: userId,
+      date: start,
+      checked: checked
+    }, 
+    () => {
+      console.log(`✅ selfcheck 업데이트 성공 (${userId}, ${start})`);
+      loadAllEmployeesForEdit(weekPicker.value);
+    },
+    (err) => {
+      console.error("❌ selfcheck 업데이트 실패:", err);
+    });
+  }
+});
 
     // ✅ 기존 초기화 코드 유지
     const picker = document.getElementById("editWeekPicker");
