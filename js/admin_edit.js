@@ -64,6 +64,7 @@ function applySelfcheckFilter() {
     });
 }
 
+//본인확인 체크여부 필터링 함수
 function applyCombinedFilter() {
     const dept = document.getElementById("searchDept")?.value.trim().toLowerCase() || "";
     const id = document.getElementById("searchEmpId")?.value.trim().toLowerCase() || "";
@@ -76,7 +77,7 @@ function applyCombinedFilter() {
         const idVal = tr.children[1].innerText.toLowerCase();
         const nameVal = tr.children[2].innerText.toLowerCase();
         const regionVal = tr.children[3].innerText.toLowerCase();
-        const selfcheckCell = tr.querySelector("td.selfcheck-col");
+        const selfcheckInput = tr.querySelector("td.selfcheck-col input[type='checkbox']");
 
         const matchesDept = !dept || deptVal.includes(dept);
         const matchesId = !id || idVal.includes(id);
@@ -84,8 +85,11 @@ function applyCombinedFilter() {
         const matchesRegion = !regionFilter || regionVal.includes(regionFilter);
 
         let matchesSelfcheck = true;
-        if (selfcheckFilter === "1") matchesSelfcheck = selfcheckCell?.textContent === "✅";
-        else if (selfcheckFilter === "0") matchesSelfcheck = selfcheckCell?.textContent === "❌";
+        if (selfcheckFilter === "1") {
+            matchesSelfcheck = selfcheckInput?.checked === true;
+        } else if (selfcheckFilter === "0") {
+            matchesSelfcheck = selfcheckInput?.checked === false;
+        }
 
         tr.style.display = (matchesDept && matchesId && matchesName && matchesRegion && matchesSelfcheck) ? "" : "none";
     });
