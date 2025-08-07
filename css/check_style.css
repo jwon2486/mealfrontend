@@ -83,6 +83,13 @@ td {
   gap: 10px;
 }
 
+.admin-selfcheck-toggle {
+    width: 20px;     /* 원하는 크기로 조절 */
+    height: 20px;
+    transform: scale(1.0); /* 전체 크기 비율로 키우기 */
+    cursor: pointer;
+}
+
 /* 신청 여부 스타일 */
 .meal-yes {
     color: #28a745;
