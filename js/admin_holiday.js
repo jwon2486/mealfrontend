@@ -37,6 +37,7 @@ async function loadHolidays(year) {
   }
 }
 
+//자동 공휴일목록 호출 함수
 async function fetchPublicHolidays(year) {
   try {
     const response = await fetch(`https://mealbackend-cmub.onrender.com/api/public-holidays?year=${year}`);
@@ -114,7 +115,62 @@ function renderCalendar(year) {
   }
 }
 
+//공휴일 수동 추가 함수
+async function addHoliday() {
+  const dateInput = document.getElementById("holidayPicker");
+  const descInput = document.getElementById("holidayDescription");
 
+  const date = dateInput.value;
+  const description = descInput.value.trim();
+
+  if (!date) {
+    alert("📅 날짜를 선택하세요.");
+    return;
+  }
+  if (!description) {
+    alert("📝 설명을 입력하세요.");
+    return;
+  }
+
+  try {
+    await new Promise((resolve, reject) => {
+      postData("/holidays", { date, description }, resolve, reject);
+    });
+
+    alert("✅ 공휴일이 추가되었습니다.");
+    const year = new Date(date).getFullYear();
+    loadHolidays(year);
+
+    // 입력창 초기화
+    dateInput.value = "";
+    descInput.value = "";
+  } catch (err) {
+    console.error("🚨 공휴일 추가 실패:", err);
+    alert("❌ 공휴일 추가 중 오류가 발생했습니다.");
+  }
+}
+
+//공휴일 삭제 함수
+async function deleteHoliday(date) {
+  if (!confirm(`📅 ${date} 공휴일을 삭제하시겠습니까?`)) return;
+
+  try {
+    await new Promise((resolve, reject) => {
+      deleteData(`/holidays?date=${date}`, resolve, reject); 
+    });
+
+    alert("🗑 공휴일이 삭제되었습니다.");
+    const year = new Date(date).getFullYear();
+    loadHolidays(year); // 삭제 후 목록 새로고침
+  } catch (err) {
+    console.error("🚨 공휴일 삭제 실패:", err);
+    alert("❌ 공휴일 삭제 중 오류가 발생했습니다.");
+  }
+}
+
+
+
+//공휴일 렌더링 함수
 function renderHolidayList(holidayList) {
   console.log("📋 공휴일 정보 호출됨:", holidayList.length, "건");
   const container = document.getElementById("holiday-list");
