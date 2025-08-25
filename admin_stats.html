@@ -91,7 +91,9 @@
        </label>
        <button onclick="loadWeeklyDeptStats()">📅 주간 부서별 신청현황 조회</button>
        <button onclick="downloadPivotStyleExcel()">⬇️ 피벗형 통계 다운로드</button>
-       <button onclick="downloadWeeklyDeptExcel()">⬇️ 엑셀 다운로드</button>
+       <!-- <button onclick="downloadWeeklyDeptExcel()">⬇️ 엑셀 다운로드</button> -->
+       <button id="btnDaySelectToggle" type="button" onclick="toggleAllDayCheckboxes()">전체선택</button>
+       
       </div>
       <br />
       <table id="weekly-dept-table">

@@ -798,13 +798,19 @@ function createWeeklyTableHeaders(range, holidays) {
   tr2.innerHTML = "";
   tr3.innerHTML = "";
 
-  range.forEach(d => {
+  range.forEach((d, idx) => {
     const date = new Date(d);
     const label = `${date.getMonth() + 1}월 ${date.getDate()}일 (${["일","월","화","수","목","금","토"][date.getDay()]})`;
-    
-    const holidayClass = isHoliday(d) ? ' class="holiday-header"' : '';
-    tr1.innerHTML += `<th colspan="5"${holidayClass}>${label}</th>`;
 
+    const holidayClass = isHoliday(d) ? ' class="holiday-header"' : '';
+
+    // ✅ 헤더에 체크박스 추가
+    tr1.innerHTML += `
+      <th colspan="5"${holidayClass}>
+        <input type="checkbox" class="day-checkbox" value="${d}" checked />
+        ${label}
+      </th>`;
+    
     tr2.innerHTML += `
       <th colspan="2"${holidayClass}>조식</th>
       <th${holidayClass}>중식</th>
@@ -820,6 +826,34 @@ function createWeeklyTableHeaders(range, holidays) {
   thead.appendChild(tr1);
   thead.appendChild(tr2);
   thead.appendChild(tr3);
+  setTimeout(updateDayToggleButtonLabel, 0);
+document.getElementById('weekly-dept-thead').addEventListener('change', (e) => {
+  if (e.target.classList.contains('day-checkbox')) updateDayToggleButtonLabel();
+});
+}
+
+// ✅ 모든 날짜 헤더 체크박스를 전체선택/해제 토글
+function toggleAllDayCheckboxes() {
+  const boxes = document.querySelectorAll('.day-checkbox');
+  if (!boxes.length) {
+    alert('표를 먼저 조회해주세요. (주간 현황 조회 버튼 클릭)');
+    return;
+  }
+  const hasUnchecked = Array.from(boxes).some(cb => !cb.checked);
+  boxes.forEach(cb => cb.checked = hasUnchecked);
+
+  const btn = document.getElementById('btnDaySelectToggle');
+  if (btn) btn.textContent = hasUnchecked ? '선택해제' : '전체선택';
+}
+
+// ✅ 버튼 라벨을 현재 선택 상태에 맞게 동기화
+function updateDayToggleButtonLabel() {
+  const btn = document.getElementById('btnDaySelectToggle');
+  if (!btn) return;
+  const boxes = document.querySelectorAll('.day-checkbox');
+  if (!boxes.length) { btn.textContent = '전체선택'; return; }
+  const allChecked = Array.from(boxes).every(cb => cb.checked);
+  btn.textContent = allChecked ? '선택해제' : '전체선택';
 }
 
 function appendSummaryRow(label, sums, tbody, isTotal = false) {
@@ -877,10 +911,23 @@ function downloadPivotStyleExcel() {
     return;
   }
 
-  const range = getWeeklyDateRange(base);  // 월~금 날짜 배열 반환
+  const range = getWeeklyDateRange(base);  // 월~금
   const start = range[0];
-  const end = range[range.length - 1];
+  const end   = range[range.length - 1];
+
+  // ✅ 헤더 체크박스에서 선택 날짜 수집
+  const boxes = document.querySelectorAll('.day-checkbox');
+  const checkedDates = Array.from(boxes).filter(b => b.checked).map(b => b.value);
+
+  const params = new URLSearchParams({ start, end });
+  // 모두 선택 또는 체크박스가 없으면 days 없이 주 전체, 일부만 선택되면 days 전송
+  if (boxes.length > 0 && checkedDates.length > 0 && checkedDates.length < 5) {
+    params.set('days', checkedDates.join(','));
+  }
 
   showToast("📥 피벗형 엑셀 다운로드 중...");
-  window.location.href = `${API_BASE_URL}/admin/stats/pivot_excel?start=${start}&end=${end}`;
+  window.location.href = `${API_BASE_URL}/admin/stats/pivot_excel?` + params.toString();
+
+  updateDayToggleButtonLabel(); // 라벨 동기화
 }
+

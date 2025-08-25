@@ -155,6 +155,15 @@ th.holiday-header {
     justify-content: space-between;
     margin-bottom: 10px;
   }
+/* 기본 체크박스 커스텀 */
+.day-checkbox {
+  accent-color: #28a745; /* ✅ 최신 브라우저 지원: 체크마크만 초록색 */
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+
 
 /* 부서별 신청현황 (dept-section) - 기존보다 넓이를 stats-table과 맞춤 */
 #dept-section {
