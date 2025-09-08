@@ -327,7 +327,8 @@ button:hover {
 
 /* 사번 이름 입력칸 동일 사이즈 통일일 */
 .input-name,
-.input-empid {
+.input-empid,
+.input-dept {
   width: 80px;       /* 고정 너비로 동일하게 맞추기 */
   max-width: none;   /* 최대치 제한 없애기 */
   min-width: 0;
@@ -407,18 +408,27 @@ button:hover {
     margin-bottom: 6px;
   }
 
+  #selfcheckFilter,
+  #filterRegion {
+    font-size: 18px;
+    height: 32px;
+  }
+
   .filter-container label {
     font-size: 19px;
     font-weight: bold;
   }
 
   .input-name,
-  .input-empid {
+  .input-empid,
+  .input-dept {
     font-size: 18px;
     height: 20px;
     font-weight: bold;
     padding: 6px 8px;
   }
+
+  
 
   h1 {
     font-size: clamp(20px, 2vw, 26px);       /* ✅ 제목도 더 크게 */

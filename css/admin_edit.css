@@ -2,7 +2,6 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    align-items: center;
     background-color: #f8f9fa;
     margin: 0;
     padding: 20px;
@@ -10,7 +9,6 @@ body {
 
 .table-container {
   width: 100%;
-
   margin: auto;
   overflow-x: auto;
   max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
@@ -23,30 +21,9 @@ body {
   z-index: 1;
 }
 
-/* ✅ 첫 번째 헤더 행 고정 */
-#check-table thead tr:nth-child(1) th {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: #007bff;
-  color: white;
-}
-
-/* ✅ 두 번째 헤더 행: top은 JS에서 동적으로 설정 */
-#check-table thead tr:nth-child(2) th {
-  position: sticky;
-  z-index: 2;
-  background-color: #007bff;
-  color: white;
-}
-
-
-
 table {
     width: 100%;
-    max-width: 1800px;
     border-collapse: collapse;
-    align-items: center;
     background: white;
     border-radius: 10px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -104,6 +81,13 @@ td {
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+}
+
+.admin-selfcheck-toggle {
+    width: 20px;     /* 원하는 크기로 조절 */
+    height: 20px;
+    transform: scale(1.0); /* 전체 크기 비율로 키우기 */
+    cursor: pointer;
 }
 
 /* 신청 여부 스타일 */
@@ -288,11 +272,6 @@ button:hover {
     padding: 6px;
   }
 
-  th {
-  white-space: nowrap; /* 줄바꿈 방지 */
-  }
-  
-
   .filter-container,
   .search-container,
   .action-buttons {
@@ -305,7 +284,300 @@ button:hover {
   }
 
   
-  select{
+  select{/* 전체 페이지 스타일 */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+.table-container {
+  width: 100%;
+  margin: auto;
+  overflow-x: auto;
+  max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
+  overflow-y: auto;    /* ✅ 세로 스크롤 활성화 */
+}
+
+/* 테이블 헤더 고정 (선택적으로 사용할 경우) */
+.table-container thead th {
+  position: sticky;
+  z-index: 1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 체크 페이지: 첫 번째 헤더 줄 고정 */
+#check-table thead tr:nth-child(1) th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: #007bff;
+  color: white;
+}
+
+/* 체크 페이지: 두 번째 헤더 줄 고정 */
+#check-table thead tr:nth-child(2) th {
+  position: sticky;
+  top: 40px;
+  z-index: 2;
+  background-color: #007bff;
+  color: white;
+}
+
+/* 기본 thead sticky */
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #007bff;
+  color: #fff;
+}
+
+/* 테이블 헤더 스타일 */
+th {
+    border: 1px solid white !important;
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+}
+
+th[colspan] {
+  background-color: #007bff !important;
+  color: white;
+  font-size: 16px;
+  padding: 8px;
+}
+
+th.holiday-header {
+  background-color: #ffdddd !important;
+  color: red !important;
+}
+
+/* 날짜 표시 스타일 */
+.date-header {
+    background-color: #007bff;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* 테이블 본문 스타일 */
+td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+/* ===== 필터/검색 영역 ===== */
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.admin-selfcheck-toggle {
+    width: 20px;
+    height: 20px;
+    transform: scale(1.0);
+    cursor: pointer;
+}
+
+/* 신청 여부 스타일 */
+.meal-yes {
+    color: #28a745;
+    font-weight: bold;
+}
+.meal-no {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* 홀수/짝수 행 색상 변경 */
+tr:nth-child(even) { background-color: #f2f2f2; }
+tr:hover { background-color: #d6e4ff; transition: 0.3s; }
+
+/* 마감된 식사 버튼 스타일 */
+.meal-deadline {
+  background-color: #ffe5e5 !important;
+  color: #990000 !important;
+  cursor: not-allowed;
+}
+
+/* 신청/미신청 버튼 스타일 */
+.meal-btn {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+.meal-btn.selected { background-color: #28a745; color: white; }
+.meal-btn { background-color: #e0e0e0; color: black; }
+.meal-btn:hover { background-color: #c0c0c0; }
+
+/* 버튼 공통 */
+button {
+    padding: 10px 16px;
+    margin-bottom: 5px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    max-width: 140px;
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+button:hover { background-color: #0056b3; }
+
+/* 버튼 그룹 */
+.action-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.dashboard-btn {
+  min-width: 150px;
+  padding: 10px 20px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.btn-search, .btn-all, .save-btn, .dashboard-btn {
+  width: auto !important;
+}
+.btn-search { min-width: 90px; font-size: 14px; }
+.btn-all { min-width: 110px; font-size: 14px; }
+.save-btn { min-width: 80px; font-size: 15px; font-weight: bold; }
+
+/* 검색 버튼 wrapper */
+.search-button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: medium;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 요약 박스 */
+.summary {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  background-color: #eef1f7;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: left;
+  width: clamp(260px, 80%, 1000px);
+  margin: 20px auto;
+}
+
+/* 토스트 */
+.toast {
+  visibility: hidden;
+  min-width: 160px;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: fixed;
+  z-index: 9999;
+  top: 20px;
+  right: 20px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 768px) {
+  body { padding: 5px; }
+  table { font-size: 12px; width: 100%; }
+  th, td { padding: 6px; }
+
+  .filter-container, .search-container, .action-buttons {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  select, button { width: 100%; font-size: 14px; }
+  .search-button { width: auto; }
+}
+
+@media (min-width: 769px) {
+  .summary { font-size: clamp(14px, 2vw, 20px); }
+  #selfcheckFilter, #filterRegion { font-size: 18px; height: 32px; }
+  .filter-container label {
+    font-size: 19px;
+    font-weight: bold;
+  }
+  h1 {
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+}
+
+/* === 검색 인풋 크기 고정 + flex shrink 방지 (최종 패치) === */
+.search-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.search-container label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+#filterDept,
+#filterId,
+#filterName,
+.filterDept,
+.filterID,
+.filtername {
+  box-sizing: border-box;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+/* 원하는 너비 값 (id+class 동시 적용, 우선순위 보장) */
+#filterDept.filterDept { width: 120px !important; min-width: 100px; max-width: 160px; }
+#filterId.filterID     { width: 140px !important; min-width: 120px; max-width: 180px; }
+#filterName.filtername { width: 160px !important; min-width: 140px; max-width: 200px; }
+
     width: 100%;
     font-size: 14px;
   }
@@ -348,8 +620,9 @@ button:hover {
 
 /* 사번 이름 입력칸 동일 사이즈 통일일 */
 .input-name,
-.input-empid {
-  width: 80px;       /* 고정 너비로 동일하게 맞추기 */
+.input-empid,
+.input-dept {
+  width: 120px;       /* 고정 너비로 동일하게 맞추기 */
   max-width: none;   /* 최대치 제한 없애기 */
   min-width: 0;
 }
@@ -391,16 +664,16 @@ button:hover {
   visibility: visible;
   opacity: 1;
 }
-/* 첫 번째 헤더 줄 (날짜 줄) 고정 
+/* 첫 번째 헤더 줄 (날짜 줄) 고정 */
 #edit-table thead tr:nth-child(1) th {
   position: sticky;
   top: 0;
   z-index: 3;
   background-color: #007bff;
   color: white;
-}*/
+}
 
-/* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 
+/* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
 #edit-table thead tr:nth-child(2) th {
   position: sticky;
   z-index: 2;
@@ -412,10 +685,9 @@ button:hover {
   position: absolute;
   left: 0;
   width: 100%;
-  background-color: white; /* ← 배경색과 동일하게 맞춤 
+  background-color: white; /* ← 배경색과 동일하게 맞춤 */
   z-index: 3;
-}*/
-
+}
 /*테이블과  div라인 간격조정정*/
 .filter-container {
   margin-bottom: 20px; /* ✅ 버튼 아래 공간 확보 */
@@ -429,18 +701,27 @@ button:hover {
     margin-bottom: 6px;
   }
 
+  #selfcheckFilter,
+  #filterRegion {
+    font-size: 18px;
+    height: 32px;
+  }
+
   .filter-container label {
-    font-size: 14px;
+    font-size: 19px;
     font-weight: bold;
   }
 
   .input-name,
-  .input-empid {
+  .input-empid,
+  .input-dept {
     font-size: 18px;
     height: 20px;
     font-weight: bold;
     padding: 6px 8px;
   }
+
+  
 
   h1 {
     font-size: clamp(20px, 2vw, 26px);       /* ✅ 제목도 더 크게 */

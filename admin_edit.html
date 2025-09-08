@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 - 신청 내역 변경</title>
-    <link rel="stylesheet" href="css/check_style.css">
+    <link rel="stylesheet" href="css/admin_edit.css">
 <script>
   const savedUser = sessionStorage.getItem("currentUser");
   if (!savedUser) {
@@ -40,6 +40,8 @@
       <option value="1">✅ 완료</option>
       <option value="0">❌ 미완료</option>
     </select>
+    </label>
+    <label>근무지역:
     <select id="filterRegion">
     <option value="">전체</option>
     <option value="에코센터">에코센터</option>

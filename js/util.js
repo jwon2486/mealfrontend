@@ -201,8 +201,8 @@ function normalizeDate(dateStr) {
 function fetchHolidayList(path, onSuccess, onError) {
     getData(`${API_BASE_URL}${path}`,
         (data) => {
-            const holidays = data.map(item => normalizeDate(item.date));
-            if (onSuccess) onSuccess(holidays);
+            // ⬇️ 원본 data 그대로 넘김 (날짜+description 포함)
+            if (onSuccess) onSuccess(data);
         },
         (err) => {
             console.error("공휴일 불러오기 실패:", err);

@@ -1,7 +1,11 @@
 // import { getData, postData, fetchHolidayList, normalizeDate } from "./util.js";
 
 let holidayList = [];  // 서버에서 불러온 공휴일 날짜 배열
+let holidayMap = {};   // ⬅️ 날짜(YYYY-MM-DD) → 설명 텍스트
 let flag_type = "직영";
+
+
+
 
 // ✅ 로그인 처리
 function login(event) {
@@ -216,9 +220,20 @@ function renderMealTable(dates) {
 
         const dateCell = document.createElement("td");
         dateCell.innerText = dateStr;
+
         if (isHoliday) {
-            dateCell.style.color = "red";
-            dateCell.style.backgroundColor = "#ffe6e6";
+        dateCell.style.color = "red";
+        dateCell.style.backgroundColor = "#ffe6e6";
+
+        // ⬇️ 공휴일 설명 (없으면 "(공휴일)"로 표시)
+        const key  = normalizeDate(dateStr);
+        const desc = (holidayMap && holidayMap[key]) ? holidayMap[key] : "";
+        const sub  = document.createElement("div");
+        sub.className = "holiday-desc";
+        sub.innerText = desc ? `(${desc})` : "(공휴일)";
+        sub.style.fontSize = "12px";
+        sub.style.marginTop = "2px";
+        dateCell.appendChild(sub);
         }
 
         const dayCell = document.createElement("td");
@@ -653,23 +668,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     fetchHolidayList(`/api/public-holidays?year=${year}`, (holidays) => {
-        //window.holidayList = holidays;
-        holidayList = holidays;
+    // holidays가 문자열 배열(날짜만)일 수도, 객체 배열({date, description})일 수도 있으니 둘 다 처리
+    holidayList = Array.isArray(holidays)
+        ? holidays.map(h => typeof h === "string" ? normalizeDate(h) : normalizeDate(h.date))
+        : [];
 
-        if (savedUser) {
-            window.currentUser = JSON.parse(savedUser);
-            document.getElementById("userId").value = window.currentUser.userId;
-            document.getElementById("userName").value = window.currentUser.userName;
-
-            document.getElementById("login-container").style.display = "none";
-            document.getElementById("mainArea").style.display = "block";
-            document.getElementById("welcome").innerText =
-                `${window.currentUser.userName}님 (${window.currentUser.dept} / ${window.currentUser.rank}) 안녕하세요.`;
-            
-            loadWeekData();
-            //login(); // 자동 로그인
-        }
+    holidayMap = {};
+    (Array.isArray(holidays) ? holidays : []).forEach(h => {
+        const key  = typeof h === "string" ? normalizeDate(h) : normalizeDate(h.date);
+        const desc = typeof h === "string" ? "" : (h.description || h.desc || h.name || "");
+        holidayMap[key] = desc;         // 예: "2025-12-25" → "성탄절"
     });
+
+    if (savedUser) {
+        window.currentUser = JSON.parse(savedUser);
+        document.getElementById("userId").value = window.currentUser.userId;
+        document.getElementById("userName").value = window.currentUser.userName;
+
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("mainArea").style.display = "block";
+        document.getElementById("welcome").innerText =
+        `${window.currentUser.userName}님 (${window.currentUser.dept} / ${window.currentUser.rank}) 안녕하세요.`;
+
+        loadWeekData();
+    }
+    });
+
     // 주 선택 시 자동 갱신
     document.getElementById("weekPicker").addEventListener("change", loadWeekData);
 });

@@ -21,24 +21,6 @@ body {
   z-index: 1;
 }
 
-/* ✅ 첫 번째 헤더 행 고정 */
-#check-table thead tr:nth-child(1) th {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: #007bff;
-  color: white;
-}
-
-/* ✅ 두 번째 헤더 행: top은 JS에서 동적으로 설정 */
-#check-table thead tr:nth-child(2) th {
-  position: sticky;
-  z-index: 2;
-  background-color: #007bff;
-  color: white;
-}
-
-
 table {
     width: 100%;
     border-collapse: collapse;
@@ -47,6 +29,32 @@ table {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 체크 페이지: 첫 번째 헤더 줄 고정 */
+#check-table thead tr:nth-child(1) th {
+  position: sticky;
+  top: 0;            /* ← 필수 */
+  z-index: 3;
+  background-color: #007bff;  /* 헤더 배경 유지 */
+  color: white;
+}
+
+/* (필요 시) 두 번째 헤더 줄도 고정하는 경우 */
+#check-table thead tr:nth-child(2) th {
+  position: sticky;
+  top: 40px;         /* 1줄 헤더 높이에 맞춰 조정 (상황에 맞게 36~48px 등) */
+  z-index: 2;
+  background-color: #007bff;
+  color: white;
+}
+
+/* 범용: thead th에 sticky 설정 시 top이 없으면 동작X → 기본값 제공 */
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #007bff; /* 스크롤 시 겹침 방지 */
+  color: #fff;
+}
 /* 테이블 헤더 스타일 */
 th {
     border: 1px solid white !important;
@@ -91,7 +99,7 @@ td {
   flex-direction: column;
   align-items: center;
   gap: 10px;           /* 두 줄 간격 */
-  margin-bottom: 20px;
+  
 }
 
 .filter-row {
@@ -99,6 +107,13 @@ td {
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+}
+
+.admin-selfcheck-toggle {
+    width: 20px;     /* 원하는 크기로 조절 */
+    height: 20px;
+    transform: scale(1.0); /* 전체 크기 비율로 키우기 */
+    cursor: pointer;
 }
 
 /* 신청 여부 스타일 */
@@ -123,15 +138,11 @@ tr:hover {
     transition: 0.3s;
 }
 
-/* 이름칸 좌우폭*/
-.input-name {
-  min-width: 50px;   /* 최소 120px */
-  max-width: 150px;   /* 최대 300px */
-  width: 100%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
-}
 
-/* 사번칸 좌우폭*/
-.input-empid {
+/* 부서 사번 이름칸 좌우폭*/
+.filterDept,
+.filterID,
+.filtername {
   min-width: 100px;
   max-width: 150px;
   width: 100%;
@@ -283,11 +294,6 @@ button:hover {
     padding: 6px;
   }
 
-  th {
-  white-space: nowrap; /* 줄바꿈 방지 */
-  }
-  
-
   .filter-container,
   .search-container,
   .action-buttons {
@@ -296,7 +302,6 @@ button:hover {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
   }
 
   
@@ -323,7 +328,6 @@ button:hover {
   align-items: center;
   justify-content: center;  /* ✅ 가운데 정렬 */
   gap: 10px;
-  margin-bottom: 20px;
 }
 
   .filter-container label {
@@ -341,13 +345,6 @@ button:hover {
   min-width: 0;
 }
 
-/* 사번 이름 입력칸 동일 사이즈 통일일 */
-.input-name,
-.input-empid {
-  width: 80px;       /* 고정 너비로 동일하게 맞추기 */
-  max-width: none;   /* 최대치 제한 없애기 */
-  min-width: 0;
-}
 
   .login-container {
     display: flex;
@@ -386,30 +383,7 @@ button:hover {
   visibility: visible;
   opacity: 1;
 }
-/* 첫 번째 헤더 줄 (날짜 줄) 고정 */
-#edit-table thead tr:nth-child(1) th {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: #007bff;
-  color: white;
-}
 
-/* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
-#edit-table thead tr:nth-child(2) th {
-  position: sticky;
-  z-index: 2;
-  background-color: #007bff;
-  color: white;
-}
-#edit-table thead tr:nth-child(2) th::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  width: 100%;
-  background-color: white; /* ← 배경색과 동일하게 맞춤 */
-  z-index: 3;
-}
 /*테이블과  div라인 간격조정정*/
 .filter-container {
   margin-bottom: 20px; /* ✅ 버튼 아래 공간 확보 */
@@ -423,18 +397,18 @@ button:hover {
     margin-bottom: 6px;
   }
 
+  #selfcheckFilter,
+  #filterRegion {
+    font-size: 18px;
+    height: 32px;
+  }
+
   .filter-container label {
     font-size: 19px;
     font-weight: bold;
   }
 
-  .input-name,
-  .input-empid {
-    font-size: 18px;
-    height: 20px;
-    font-weight: bold;
-    padding: 6px 8px;
-  }
+  
 
   h1 {
     font-size: clamp(20px, 2vw, 26px);       /* ✅ 제목도 더 크게 */
