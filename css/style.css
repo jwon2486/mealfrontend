@@ -42,9 +42,32 @@ margin: 0;
   color: #333;                /* 선택 사항 */
 }
 
-.selfcheckment{
-  font-size: 22px;
+.meal-table-area {
+  position: relative;   /* 자식 기준으로 absolute 배치 가능 */
+}
+
+.meal-header {
+  display: flex;
+  justify-content: space-between; /* 왼쪽, 오른쪽 고정 */
+  align-items: center;            /* 세로 중앙 정렬 */
+  margin-bottom: 10px;
+}
+
+.mealchart {
+  font-size: 20px;
   font-weight: bold;
+  position: absolute;
+  left: 0;              /* 화면 왼쪽 고정 */
+  margin-top: 34px;
+}
+
+.selfcheckment {
+  font-size: 25px;
+  font-weight: bold;
+  position: absolute;
+  left: 50%;            /* 화면 중앙 기준 */
+  transform: translateX(-50%);  /* 가운데 정확히 정렬 */
+  margin-top: 10px; 
 }
 
 .selfcheckbox {
@@ -68,8 +91,7 @@ font-size: 18px;
 /* 테이블 스타일 */
 table {
     width: 100%;
-    margin: auto;
-    margin-top: 10px;
+    margin-top: 35px;
     border-collapse: collapse;
     max-width: 700px ;
     background: white;
@@ -293,11 +315,33 @@ button:hover {
   margin-top: 0;
   }
 
+  /* 헤더 줄 배치: 왼쪽(mealchart) + 중앙(selfcheckment) */
+  .meal-table-area {
+    min-width: 0;          /* 기존 600px 해제 */
+  }
+
+  .meal-header {
+    position: relative;
+    height: 30px;       /* 한 줄 높이 확보 */
+    margin-bottom: 0;
+  }
+
+  .mealchart {
+    position: absolute;
+    left: 8px;          /* 화면 좌측 여백 */
+    top: 1;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+
+
   table {
     font-size: 3vw;
     width: 100%;
-    max-width: 430px;
-    /*font-weight: bold;*/
+    max-width: 410px;
+    margin: auto 0;
   }
 
   th{
@@ -390,10 +434,16 @@ button:hover {
     margin-top: 5px;
   }
 
-.selfcheckment{
-  font-size: 18px;
-  margin-left: 250px;
-}
+ .selfcheckment {
+    position: absolute;
+    left: 50%;          /* 화면 중앙 기준 */
+    transform: translateX(-50%);
+    top: 0;
+    margin: 0;
+    font-size: 20px;
+    font-weight: bold;
+    white-space: nowrap; /* 줄바꿈 방지 (길어질 경우 필요) */
+  }
 
 .selfcheckbox {
   transform: scale(1.5);
