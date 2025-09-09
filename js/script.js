@@ -231,8 +231,8 @@ function renderMealTable(dates) {
         const sub  = document.createElement("div");
         sub.className = "holiday-desc";
         sub.innerText = desc ? `(${desc})` : "(공휴일)";
-        sub.style.fontSize = "12px";
-        sub.style.marginTop = "2px";
+        sub.style.fontSize = "15px";
+        sub.style.marginTop = "0px";
         dateCell.appendChild(sub);
         }
 
@@ -380,7 +380,7 @@ function checkPreviousWeek(userId, currentWeekStart, callback) {
         // ✅ 차단 여부 결정
         // ✅ 차단 여부 결정 (에코센터만 적용)
         if (window.currentUser.region === "에코센터") {
-            isBlockedWeek = !hasMeal && !isChecked;
+            isBlockedWeek = !hasMeal || !isChecked;
         } else {
             isBlockedWeek = false; // 다른 지역은 차단하지 않음
         }

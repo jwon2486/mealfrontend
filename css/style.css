@@ -43,19 +43,19 @@ margin: 0;
 }
 
 .selfcheckment{
-  font-size: 20px;
-  margin-left: 400px;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .selfcheckbox {
-  transform: scale(1.8);
+  transform: scale(2.0);
   accent-color: #007bff;
   cursor: pointer;
   margin-left: 10px;
 }
 
 #mealSummary {
-  font-size: 24px;        /* 원하는 크기로 설정 (예: 20px) */
+  font-size: 22px;        /* 원하는 크기로 설정 (예: 20px) */
   font-weight: bold;      /* 필요 시 생략 가능 */
   color: #333;            /* 색상 지정 */
   margin-top: 0;
@@ -69,6 +69,7 @@ font-size: 18px;
 table {
     width: 100%;
     margin: auto;
+    margin-top: 10px;
     border-collapse: collapse;
     max-width: 700px ;
     background: white;
@@ -92,7 +93,7 @@ td {
     padding: 8px;
     border-bottom: 1px solid #ddd;
     text-align: center;
-    font-size: 20px;
+    font-size: 18px;
 }
 
 /* 홀수/짝수 행 색상 변경 */
@@ -174,7 +175,7 @@ tr:hover {
   padding: 5px;
   border: 1px solid #ccc;
   background: #f9f9f9;
-  font-size: 20px;
+  font-size: 19px;
   text-align: left;     /* 또는 center, 필요에 따라 */
   line-height: 1.6;
   box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
@@ -304,7 +305,7 @@ button:hover {
   }
 
   td{
-    font-size: 18px;
+    font-size: 16px;
     padding: 6px;
   }
 
