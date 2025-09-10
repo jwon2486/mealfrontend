@@ -351,44 +351,42 @@ function loadWeekData() {
 }
 
 function checkPreviousWeek(userId, currentWeekStart, callback) {
+    // ✅ 기준: 2주 전 월요일
     const prevMonday = new Date(currentWeekStart);
-    prevMonday.setDate(prevMonday.getDate() - 7);
+    prevMonday.setDate(prevMonday.getDate() - 14);   // 🔄 -7 → -14 로 변경
     const prevStart = prevMonday.toISOString().split("T")[0];
 
+    // ✅ 2주 전 금요일
     const prevFriday = new Date(prevMonday);
     prevFriday.setDate(prevMonday.getDate() + 4);
     const prevEnd = prevFriday.toISOString().split("T")[0];
 
-    // ✅ meals와 selfcheck를 동시에 호출 → 한 번만 요청 발생
+    // ✅ meals + selfcheck 체크
     Promise.all([
-        new Promise((resolve, reject) => 
+        new Promise((resolve, reject) =>
             getData(`/meals?user_id=${userId}&start=${prevStart}&end=${prevEnd}`, resolve, reject)
         ),
-        new Promise((resolve, reject) => 
+        new Promise((resolve, reject) =>
             getData(`/selfcheck?user_id=${userId}&date=${prevStart}`, resolve, reject)
         )
     ])
     .then(([mealData, checkData]) => {
-        // ✅ mealData에 신청 내역 있는지 확인
-        const hasMeal = Object.values(mealData).some(day => 
+        const hasMeal = Object.values(mealData).some(day =>
             day.breakfast || day.lunch || day.dinner
         );
-
-        // ✅ selfcheck 체크 여부
         const isChecked = checkData.checked === 1;
 
-        // ✅ 차단 여부 결정
-        // ✅ 차단 여부 결정 (에코센터만 적용)
         if (window.currentUser.region === "에코센터") {
             isBlockedWeek = !hasMeal || !isChecked;
         } else {
-            isBlockedWeek = false; // 다른 지역은 차단하지 않음
+            isBlockedWeek = false;
         }
 
         if (callback) callback();
     })
-    .catch(err => console.error("❌ checkPreviousWeek 통합 요청 실패:", err));
+    .catch(err => console.error("❌ checkPreviousWeek(2주 전) 실패:", err));
 }
+
 
 
 function disableCurrentWeekButtons() {
@@ -539,14 +537,20 @@ function isThisWeek(dateStr) {
 
 // ✅ 오늘 기준으로 다음 주 월요일 날짜 반환
 function setDefaultWeek() {
-    const today = new getKSTDate();
-    const monday = new Date(today);
-    const day = today.getDay();
+  const today = new getKSTDate();
+  const day = today.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
 
-    const diff = day === 0 ? -6 : 1 - day;
-    monday.setDate(today.getDate() + diff + 7);  // 🔄 다음 주 월요일로 이동
+  const monday = new Date(today);
 
-    document.getElementById("weekPicker").value = monday.toISOString().split("T")[0];
+  // 에코센터: 다음 주 월요일, 그 외: 이번 주 월요일
+  if (window.currentUser?.region === "에코센터") {
+    monday.setDate(today.getDate() + diffToMonday + 7);
+  } else {
+    monday.setDate(today.getDate() + diffToMonday);
+  }
+
+  document.getElementById("weekPicker").value = monday.toISOString().split("T")[0];
 }
 
 // ✅ 마감시간 규칙
