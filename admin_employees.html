@@ -64,6 +64,7 @@
           <th>부서</th>
           <th>타입</th> <!-- ✅ 추가 -->
           <th>직급</th> <!-- ✅ 추가 -->
+          <th>권한</th>
           <th>수정</th>
           <th>삭제</th>
         </tr>
@@ -90,6 +91,12 @@
       <option value="방문자">방문자</option>
     </select>
     <input type="text" id="empRank" placeholder="직급" />
+    <!-- ✅ 신규: 권한 레벨 -->
+    <select id="empLevel" style="height: 32px; width: 120px;">
+    <option value="1" selected>1 (일반)</option>
+    <option value="2">2 (담당자)</option>
+    <option value="3">3 (관리자)</option>
+    </select>
   </div>
   </br>
   <div class="form-buttons">

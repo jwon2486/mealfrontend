@@ -15,7 +15,8 @@ function loadEmployees() {
         <td>${emp.region}</td>
         <td>${emp.dept}</td>
         <td>${emp.type}</td>
-        <td>${emp.rank || ""}</td> 
+        <td>${emp.rank || ""}</td>
+        <td>${emp.level ?? ""}</td>
         <td><button class="edit" onclick="selectEmployeeToEdit(this)">✏️</button></td>
         <td><button class="delete" onclick="deleteEmployee('${emp.id}')">🗑️</button></td>
       `;
@@ -36,6 +37,7 @@ function addEmployee() {
   const type = document.getElementById("empType").value.trim();
   const rank = document.getElementById("empRank").value.trim();
   const region = document.getElementById("empRegion").value.trim();
+
 
   if (!id || !name || !dept || !type || !region) {
     alert("⚠️ 모든 입력값을 채워주세요.");
@@ -59,6 +61,7 @@ function updateEmployee() {
   const type = document.getElementById("empType").value.trim();
   const rank = document.getElementById("empRank").value.trim();
   const region = document.getElementById("empRegion").value.trim();
+  const level = parseInt(document.getElementById("empLevel").value || "1", 10);
   
 
   if (!id || !name || !dept || !type || !region) {
@@ -66,7 +69,7 @@ function updateEmployee() {
     return;
   }
 
-  putData(`${baseUrl}/${id}`, { name, dept, rank, type, region }, () => {
+  putData(`${baseUrl}/${id}`, { name, dept, rank, type, region, level }, () => {
     alert("✅ 수정 완료");
     loadEmployees();
     clearForm();
@@ -98,6 +101,7 @@ function selectEmployeeToEdit(btn) {
   document.getElementById("empDept").value = cells[3].innerText;
   document.getElementById("empType").value = cells[4].innerText;
   document.getElementById("empRank").value = cells[5].innerText;
+  document.getElementById("empLevel").value = cells[6].innerText || "1";
   
   
 
@@ -113,6 +117,7 @@ function clearForm() {
   document.getElementById("empType").value = "";
   document.getElementById("empRank").value = "";
   document.getElementById("empRegion").value = "";
+  document.getElementById("empLevel").value = "1";
   document.getElementById("empId").disabled = false;
 }
 
