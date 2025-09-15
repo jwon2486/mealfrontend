@@ -351,32 +351,57 @@ function loadWeekData() {
 }
 
 function checkPreviousWeek(userId, currentWeekStart, callback) {
-    // ✅ 기준: 2주 전 월요일
+    // ---- 1주 전 주차(바로 전 주) 월요일~금요일 ----
+    const lastMonday = new Date(currentWeekStart);
+    lastMonday.setDate(lastMonday.getDate() - 7);
+    const lastStart = lastMonday.toISOString().split("T")[0];
+
+    const lastFriday = new Date(lastMonday);
+    lastFriday.setDate(lastMonday.getDate() + 4);
+    const lastEnd = lastFriday.toISOString().split("T")[0];
+
+    // ---- 2주 전 주차 월요일~금요일 ----
     const prevMonday = new Date(currentWeekStart);
-    prevMonday.setDate(prevMonday.getDate() - 14);   // 🔄 -7 → -14 로 변경
+    prevMonday.setDate(prevMonday.getDate() - 14);
     const prevStart = prevMonday.toISOString().split("T")[0];
 
-    // ✅ 2주 전 금요일
     const prevFriday = new Date(prevMonday);
     prevFriday.setDate(prevMonday.getDate() + 4);
     const prevEnd = prevFriday.toISOString().split("T")[0];
 
-    // ✅ meals + selfcheck 체크
+    // ✅ 두 주의 meals + selfcheck 모두 조회
     Promise.all([
+        // 바로 전 주 식사
+        new Promise((resolve, reject) =>
+            getData(`/meals?user_id=${userId}&start=${lastStart}&end=${lastEnd}`, resolve, reject)
+        ),
+        // 2주 전 식사
         new Promise((resolve, reject) =>
             getData(`/meals?user_id=${userId}&start=${prevStart}&end=${prevEnd}`, resolve, reject)
         ),
+        // 바로 전 주 본인확인(월요일)
+        new Promise((resolve, reject) =>
+            getData(`/selfcheck?user_id=${userId}&date=${lastStart}`, resolve, reject)
+        ),
+        // 2주 전 본인확인(월요일)
         new Promise((resolve, reject) =>
             getData(`/selfcheck?user_id=${userId}&date=${prevStart}`, resolve, reject)
         )
     ])
-    .then(([mealData, checkData]) => {
-        const hasMeal = Object.values(mealData).some(day =>
-            day.breakfast || day.lunch || day.dinner
+    .then(([mealData1, mealData2, checkData1, checkData2]) => {
+        // 두 주 중 한 주라도 식사 신청이 있으면 hasMeal = true
+        const hasMeal = [mealData1, mealData2].some(mealData =>
+            Object.values(mealData).some(day =>
+                day.breakfast || day.lunch || day.dinner
+            )
         );
-        const isChecked = checkData.checked === 1;
+
+        // 두 주 중 한 주라도 본인확인 체크가 있으면 isChecked = true
+        const isChecked =
+            checkData1.checked === 1 || checkData2.checked === 1;
 
         if (window.currentUser.region === "에코센터") {
+            // ✅ 둘 다 없을 때만 차단
             isBlockedWeek = !hasMeal && !isChecked;
         } else {
             isBlockedWeek = false;
@@ -384,8 +409,9 @@ function checkPreviousWeek(userId, currentWeekStart, callback) {
 
         if (callback) callback();
     })
-    .catch(err => console.error("❌ checkPreviousWeek(2주 전) 실패:", err));
+    .catch(err => console.error("❌ checkPreviousWeek(1~2주 전) 실패:", err));
 }
+
 
 
 
@@ -403,9 +429,19 @@ function disableCurrentWeekButtons() {
 
 // ✅ 저장 요청 (선택된 버튼 → 서버로 전송)
 function saveMeals() {
-  const checkbox = document.getElementById("selfCheck");
-const checkedValue = checkbox && checkbox.checked ? 1 : 0;
+    const checkbox = document.getElementById("selfCheck");
+    const checkedValue = checkbox && checkbox.checked ? 1 : 0;
 
+    // ✅ [추가] 본인확인 없이 식사만 선택했는지 검사
+    let hasMealSelected = false;
+    document.querySelectorAll(".meal-btn.selected").forEach(() => {
+        hasMealSelected = true;
+    });
+
+    if (hasMealSelected && checkedValue === 0) {
+        alert("본인확인을 체크해주세요!");
+        return;  // ⛔ 저장 로직 중단
+    }
 postData("/selfcheck", {
   user_id: window.currentUser.userId,
   date: window.currentWeekStartDate,
