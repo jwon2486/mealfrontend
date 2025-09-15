@@ -1,11 +1,7 @@
 // import { getData, postData, fetchHolidayList, normalizeDate } from "./util.js";
 
 let holidayList = [];  // 서버에서 불러온 공휴일 날짜 배열
-let holidayMap = {};   // ⬅️ 날짜(YYYY-MM-DD) → 설명 텍스트
 let flag_type = "직영";
-
-
-
 
 // ✅ 로그인 처리
 function login(event) {
@@ -45,30 +41,17 @@ function login(event) {
             rank: data.rank,
             type: data.type,
             level: data.level,  // ✅ level 추가
-            region: data.region
-
         };
 
         // alert(data.type);
         
         
-        sessionStorage.setItem("flagType", data.type);
-        flag_type = sessionStorage.getItem("flagType");
+        localStorage.setItem("flagType", data.type);
+        flag_type = localStorage.getItem("flagType");
         //alert(flag_type + 'flag');
 
 
-        sessionStorage.setItem("currentUser", JSON.stringify(window.currentUser));
-
-        // 로그인 성공 후
-        if (document.getElementById("rememberMe").checked) {
-            localStorage.setItem("savedUserId", userId);
-            localStorage.setItem("savedUserName", userName);
-        } else {
-            localStorage.removeItem("savedUserId");
-            localStorage.removeItem("savedUserName");
-        }
-        
-        document.getElementById("deadline-info").style.display = "block";
+        localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
 
         // ✅ 버튼 초기화 및 표시 처리
 const adminBtn = document.getElementById("adminBtn");
@@ -93,7 +76,6 @@ if (window.currentUser.level === 2 && teamEditBtn) {
 
         document.getElementById("login-container").style.display = "none";
         document.getElementById("mainArea").style.display = "block";
-        document.getElementById("deadline-info").style.display = "block";  // 추가
         
         // ✅ 내부 요소들도 명시적으로 보이게 설정
         document.getElementById("date-picker-container").style.display = "block";
@@ -115,42 +97,9 @@ if (window.currentUser.level === 2 && teamEditBtn) {
         
 }
 
-let isAllSelected = false;  // 현재 상태 기억
-
-function toggleSelectAll() {
-    const btnList = document.querySelectorAll(".meal-btn");
-    let changed = false;
-
-    btnList.forEach(btn => {
-        const date = btn.dataset.date;
-        const type = btn.dataset.type;
-
-        if (isDeadlinePassed(date, type)) return; // 마감된 건 무시
-
-        const shouldSelect = !isAllSelected;
-
-        // 상태 전환 필요할 때만 toggle
-        const selected = btn.classList.contains("selected");
-        if (shouldSelect && !selected) {
-            toggleMeal(btn);
-            changed = true;
-        } else if (!shouldSelect && selected) {
-            toggleMeal(btn);
-            changed = true;
-        }
-    });
-
-    // 상태 반전
-    if (changed) {
-        isAllSelected = !isAllSelected;
-        const toggleBtn = document.getElementById("toggleSelectBtn");
-        toggleBtn.innerText = isAllSelected ? "전체 선택 해제" : "전체 선택";
-    }
-}
-
 function logout() {
-    sessionStorage.removeItem("currentUser");
-    sessionStorage.removeItem("flag_type");
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("flag_type");
     window.location.reload();
 
     // 모든 화면 초기화
@@ -160,14 +109,13 @@ function logout() {
     document.getElementById("welcome").innerText = "";
     document.getElementById("weekRangeText").innerText = "";
     document.getElementById("mealSummary").innerText = "";
-    
 
     
 }
 
 // ✅ 로그아웃 처리
 function logout() {
-    sessionStorage.clear();
+    localStorage.removeItem("currentUser");
     window.currentUser = null;
 
     // 모든 화면 초기화
@@ -178,7 +126,6 @@ function logout() {
     document.getElementById("welcome").innerText = "";
     document.getElementById("weekRangeText").innerText = "";
     document.getElementById("mealSummary").innerText = ""; 
-    document.getElementById("deadline-info").style.display = "none";
 }
 
 // ✅ 선택된 주간 날짜 배열 반환
@@ -207,7 +154,7 @@ function getCurrentWeekDates() {
 // ✅ 주간 식수 신청 테이블 동적 생성
 function renderMealTable(dates) {
     const tableBody = document.getElementById("meal-body");
-    tableBody.innerHTML = "";
+    tableBody.innerHTML = ""; // 기존 내용 삭제
 
     const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -218,22 +165,12 @@ function renderMealTable(dates) {
 
         const row = document.createElement("tr");
 
+        // 날짜 셀
         const dateCell = document.createElement("td");
         dateCell.innerText = dateStr;
-
         if (isHoliday) {
-        dateCell.style.color = "red";
-        dateCell.style.backgroundColor = "#ffe6e6";
-
-        // ⬇️ 공휴일 설명 (없으면 "(공휴일)"로 표시)
-        const key  = normalizeDate(dateStr);
-        const desc = (holidayMap && holidayMap[key]) ? holidayMap[key] : "";
-        const sub  = document.createElement("div");
-        sub.className = "holiday-desc";
-        sub.innerText = desc ? `(${desc})` : "(공휴일)";
-        sub.style.fontSize = "15px";
-        sub.style.marginTop = "0px";
-        dateCell.appendChild(sub);
+            dateCell.style.color = "red";
+            dateCell.style.backgroundColor = "#ffe6e6";
         }
 
         const dayCell = document.createElement("td");
@@ -251,33 +188,44 @@ function renderMealTable(dates) {
             btn.className = "meal-btn";
             btn.dataset.date = dateStr;
             btn.dataset.type = type;
+            btn.innerText = "❌ 미신청";
 
             const cell = document.createElement("td");
 
-            if (isBlockedWeek) {
-                btn.disabled = true;
-                btn.innerText = "🚫 차단됨";
-                btn.style.backgroundColor = "#ccc";
-                btn.style.color = "#666";
-                btn.title = "앞 주 신청 및 본인 확인이 없어 차단됨";
-            } else if (isHoliday) {
+            // ✅ 클릭 제한
+            if (isHoliday) {
+                //btn.style.backgroundColor = "#ffe6e6";
                 btn.style.color = "red";
-                btn.innerText = "❌공휴일";
                 btn.disabled = false;
                 btn.title = "공휴일 신청 불가";
                 btn.onclick = () => alert("⛔ 공휴일에는 식수 신청이 불가능합니다.");
+
+                // ✅ 버튼이 들어있는 셀도 붉은색 배경
                 cell.style.backgroundColor = "#ffe6e6";
-            } else if (isDeadlinePassed(dateStr, type)) {
+            }
+            else if (isDeadlinePassed(dateStr, type)) {
+                //btn.disabled = true;
                 btn.style.backgroundColor = "#ffe6e6";
                 btn.style.color = "#666";
                 btn.title = "신청 마감됨";
-                btn.innerText = "❌ 마감";
+                btn.innerText = "❌ 마감됨";
                 btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
-            } else {
-                btn.innerText = "❌미신청";
+            }
+            else{
                 btn.onclick = () => toggleMeal(btn);
             }
-
+            
+           // btn.onclick = function () {
+           //     if (isDeadlinePassed(dateStr, type)) {
+                    // ✅ 마감된 버튼 클릭 시 토스트만 표시
+                    //showToast(`⚠️ ${type}은 신청 마감 시간이 지났습니다.`);
+                    //alert(`${type}은 신청 마감 시간이 지났습니다.`);
+          //      } else {
+                    // ✅ 마감 전이면 정상적으로 토글 동작
+           //         toggleMeal(this);
+           //     }
+           // };
+            
             cell.appendChild(btn);
             row.appendChild(cell);
         });
@@ -290,20 +238,18 @@ function renderMealTable(dates) {
 function toggleMeal(btn) {
     if (btn.classList.contains("selected")) {
         btn.classList.remove("selected");
-        btn.innerText = "❌미신청";
+        btn.innerText = "❌ 미신청";
         btn.style.backgroundColor = "#e0e0e0";
         btn.style.color = "#000";
     } else {
         btn.classList.add("selected");
-        btn.innerText = "✅신청";
+        btn.innerText = "✅ 신청";
         btn.style.backgroundColor = "#28a745";
         btn.style.color = "#fff";
     }
     
     // ✅ 합계 다시 계산
-    updateMealSummary(); 
-    const currentWeekDates = getCurrentWeekDates();
-
+    updateMealSummary();
 }
 
 // ✅ 주간 신청 내역 서버에서 불러오기 → 버튼에 반영
@@ -316,106 +262,36 @@ function loadWeekData() {
     const start = dates[0];
     const end = dates[dates.length - 1];
 
-    window.currentWeekStartDate = start;
-    window.currentWeekEndDate = end;
+    // 상단 사용자 이름 및 주간 범위 표시
+    document.getElementById("welcome").innerText = `${userName}님, 안녕하세요.`;
+    document.getElementById("weekRangeText").innerText = `선택 날짜: ${start} ~ ${end} `;
 
-    // ✅ 차단 여부 먼저 체크
-    checkPreviousWeek(userId, start, () => {
-        document.getElementById("welcome").innerHTML =
-            `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
+    renderMealTable(dates); // 버튼 테이블 새로 생성
 
-        renderMealTable(dates);
+    const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
+    getData(url, (data) => {
+        dates.forEach(date => {
+            const dayData = data[date];
+            if (!dayData) return;
 
-        // ✅ 버튼이 차단 상태가 아니어야 신청 내역 로드
-        const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
-        getData(url, (data) => {
-            if (!isBlockedWeek) {
-                dates.forEach(date => {
-                    const dayData = data[date];
-                    if (!dayData) return;
-
-                    ["조식", "중식", "석식"].forEach(type => {
-                        const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
-                        if (dayData[key]) {
-                            const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
-                            if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
-                        }
-                    });
-                });
-            }
-            updateMealSummary();
+            ["조식", "중식", "석식"].forEach(type => {
+                const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
+                if (dayData[key]) {
+                    const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
+                    if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
+                }
+            });
         });
 
-        loadSelfCheck(userId, start);
+        // ✅ 합계 다시 계산
+        updateMealSummary();
     });
 }
-
-function checkPreviousWeek(userId, currentWeekStart, callback) {
-    // ✅ 기준: 2주 전 월요일
-    const prevMonday = new Date(currentWeekStart);
-    prevMonday.setDate(prevMonday.getDate() - 14);   // 🔄 -7 → -14 로 변경
-    const prevStart = prevMonday.toISOString().split("T")[0];
-
-    // ✅ 2주 전 금요일
-    const prevFriday = new Date(prevMonday);
-    prevFriday.setDate(prevMonday.getDate() + 4);
-    const prevEnd = prevFriday.toISOString().split("T")[0];
-
-    // ✅ meals + selfcheck 체크
-    Promise.all([
-        new Promise((resolve, reject) =>
-            getData(`/meals?user_id=${userId}&start=${prevStart}&end=${prevEnd}`, resolve, reject)
-        ),
-        new Promise((resolve, reject) =>
-            getData(`/selfcheck?user_id=${userId}&date=${prevStart}`, resolve, reject)
-        )
-    ])
-    .then(([mealData, checkData]) => {
-        const hasMeal = Object.values(mealData).some(day =>
-            day.breakfast || day.lunch || day.dinner
-        );
-        const isChecked = checkData.checked === 1;
-
-        if (window.currentUser.region === "에코센터") {
-            isBlockedWeek = !hasMeal || !isChecked;
-        } else {
-            isBlockedWeek = false;
-        }
-
-        if (callback) callback();
-    })
-    .catch(err => console.error("❌ checkPreviousWeek(2주 전) 실패:", err));
-}
-
-
-
-function disableCurrentWeekButtons() {
-    document.querySelectorAll(".meal-btn").forEach(btn => {
-        btn.disabled = true;
-        btn.innerText = "차단됨";
-        btn.style.backgroundColor = "#ccc";
-        btn.title = "앞 주 신청 및 본인 확인이 없어 차단됨";
-    });
-}
-
-
-
 
 // ✅ 저장 요청 (선택된 버튼 → 서버로 전송)
 function saveMeals() {
-  const checkbox = document.getElementById("selfCheck");
-const checkedValue = checkbox && checkbox.checked ? 1 : 0;
-
-postData("/selfcheck", {
-  user_id: window.currentUser.userId,
-  date: window.currentWeekStartDate,
-  checked: checkedValue
-},
-() => console.log("✅ selfcheck 저장 성공"),
-(err) => console.error("❌ selfcheck 저장 실패:", err));
-
     if (!window.currentUser) {
-        const savedUser = sessionStorage.getItem("currentUser");
+        const savedUser = localStorage.getItem("currentUser");
         if (savedUser) {
             window.currentUser = JSON.parse(savedUser);  // 복원 시도
         } else {
@@ -457,9 +333,6 @@ postData("/selfcheck", {
     });
 
     console.log("🧪 전송할 meals:", meals);  // 추가
-
-    
-
 
     // 서버에 POST 요청
     postData("/meals", { meals },
@@ -515,129 +388,51 @@ function updateMealSummary() {
 //         });
 // }
 
-//이번주 날짜 함수
-function isThisWeek(dateStr) {
-    const now = getKSTDate ? getKSTDate() : new Date();
-    const day = now.getDay();
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + diffToMonday);
-    monday.setHours(0, 0, 0, 0);
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
-
-    const target = new Date(dateStr);
-    return target >= monday && target <= sunday;
-}
-
-
-
-// ✅ 오늘 기준으로 다음 주 월요일 날짜 반환
+// ✅ 오늘 기준으로 이번 주 월요일 날짜 반환
 function setDefaultWeek() {
-  const today = new getKSTDate();
-  const day = today.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
+    const today = new getKSTDate();
+    const monday = new Date(today);
+    const day = today.getDay();
 
-  const monday = new Date(today);
+    // 일요일(0)은 월요일(-6), 월요일(1)은 그대로
+    const diff = day === 0 ? -6 : 1 - day;
+    monday.setDate(today.getDate() + diff);
 
-  // 에코센터: 다음 주 월요일, 그 외: 이번 주 월요일
-  if (window.currentUser?.region === "에코센터") {
-    monday.setDate(today.getDate() + diffToMonday + 7);
-  } else {
-    monday.setDate(today.getDate() + diffToMonday);
-  }
-
-  document.getElementById("weekPicker").value = monday.toISOString().split("T")[0];
+    document.getElementById("weekPicker").value = monday.toISOString().split("T")[0];
 }
 
-// ✅ 마감시간 규칙
+// ✅ 특정 식사 버튼이 마감되었는지 여부 반환
 function isDeadlinePassed(dateStr, mealType) {
-    const now = getKSTDate();
+    const now = getKSTDate(); // 현재 시간
     const mealDate = new Date(dateStr);
-    mealDate.setHours(0, 0, 0, 0); // ✅ 추가: 날짜 비교 오류 방지
 
-    // 기준: 2주 뒤 월요일 이후면 마감 없음
-    const day = now.getDay(); // 0(일)~6(토)
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-
-    const thisMonday = new Date(now);
-    thisMonday.setDate(now.getDate() + diffToMonday);
-    thisMonday.setHours(0, 0, 0, 0);  // 명시적으로 정규화
-
-    const twoWeeksLaterMonday = new Date(thisMonday);
-    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
-
-    // ✅ 1. 과거 날짜면 무조건 마감
-    if (mealDate < new Date(now.toDateString())) {
-        return true;
+    // 마감 기준 시간 계산
+    let deadline = new Date(mealDate);
+    if (mealType === "조식") {
+        // 전날 오후 3시
+        deadline.setDate(mealDate.getDate() - 1);
+        deadline.setHours(15, 0, 0, 0);
+    } else if (mealType === "중식") {
+        // 당일 오전 10시
+        deadline.setHours(10, 0, 0, 0);
+    } else if (mealType === "석식") {
+        // 당일 오후 3시
+        deadline.setHours(15, 0, 0, 0);
     }
 
-    // ✅ 2. 2주 후 월요일 이후면 마감 없음
-    if (mealDate >= twoWeeksLaterMonday) {
-        return false;
-    }
-
-    if (isThisWeek(dateStr)) {
-        // ✅ 이번 주 식사는 기존 마감 규칙 사용
-        let deadline = new Date(mealDate);
-        if (mealType === "조식") {
-            deadline.setDate(mealDate.getDate() - 1);
-            deadline.setHours(9, 0, 0, 0);
-        } else if (mealType === "중식") {
-            deadline.setHours(10, 30, 0, 0);
-        } else if (mealType === "석식") {
-            deadline.setHours(14, 30, 0, 0);
-        }
-        return now > deadline;
-    } else {
-        // ✅ 다음 주 식사는 이번 주 수요일 16:00까지만 신청 가능
-
-        // 이번 주 월요일 계산
-        const thisMonday = new Date(now);
-        const day = thisMonday.getDay();
-        const diff = day === 0 ? -6 : 1 - day;
-        thisMonday.setDate(now.getDate() + diff);
-        thisMonday.setHours(0, 0, 0, 0);
-
-        // 이번 주 수요일 16시 마감 시각 계산
-        const thisWednesdayDeadline = new Date(thisMonday);
-        thisWednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
-        thisWednesdayDeadline.setHours(16, 0, 0, 0);
-
-        return now > thisWednesdayDeadline;
-    }
+    return now > deadline;
 }
-
 
 // ✅ 자동 로그인 및 주차 변경 이벤트
 document.addEventListener("DOMContentLoaded", function () {
     setDefaultWeek(); // ✅ 이번 주 자동 설정
-    const savedUser = sessionStorage.getItem("currentUser");
+    const savedUser = localStorage.getItem("currentUser");
     const year = new Date().getFullYear();
-
-    // ✅ localStorage에 저장된 로그인 정보 불러오기
-    const savedId = localStorage.getItem("savedUserId");
-    const savedName = localStorage.getItem("savedUserName");
-
-    if (savedId && savedName) {
-        const userIdInput = document.getElementById("userId");
-        const userNameInput = document.getElementById("userName");
-        const rememberCheckbox = document.getElementById("rememberMe");
-
-        if (userIdInput && userNameInput && rememberCheckbox) {
-            userIdInput.value = savedId;
-            userNameInput.value = savedName;
-            rememberCheckbox.checked = true;
-        }
-    }
 
 
     if (savedUser) {
         window.currentUser = JSON.parse(savedUser);
-        flag_type = sessionStorage.getItem("flagType");
+        flag_type = window.currentUser.type;
 
         // ✅ 관리자 버튼 노출 여부 처리
         const adminBtn = document.getElementById("adminButton");
@@ -671,43 +466,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    fetchHolidayList(`/api/public-holidays?year=${year}`, (holidays) => {
-    // holidays가 문자열 배열(날짜만)일 수도, 객체 배열({date, description})일 수도 있으니 둘 다 처리
-    holidayList = Array.isArray(holidays)
-        ? holidays.map(h => typeof h === "string" ? normalizeDate(h) : normalizeDate(h.date))
-        : [];
+    fetchHolidayList(`/holidays?year=${year}`, (holidays) => {
+        //window.holidayList = holidays;
+        holidayList = holidays;
 
-    holidayMap = {};
-    (Array.isArray(holidays) ? holidays : []).forEach(h => {
-        const key  = typeof h === "string" ? normalizeDate(h) : normalizeDate(h.date);
-        const desc = typeof h === "string" ? "" : (h.description || h.desc || h.name || "");
-        holidayMap[key] = desc;         // 예: "2025-12-25" → "성탄절"
+        if (savedUser) {
+            window.currentUser = JSON.parse(savedUser);
+            document.getElementById("userId").value = window.currentUser.userId;
+            document.getElementById("userName").value = window.currentUser.userName;
+
+            document.getElementById("login-container").style.display = "none";
+            document.getElementById("mainArea").style.display = "block";
+            document.getElementById("welcome").innerText =
+                `${window.currentUser.userName}님 (${window.currentUser.dept} / ${window.currentUser.rank}) 안녕하세요.`;
+            
+            loadWeekData();
+            //login(); // 자동 로그인
+        }
     });
-
-    if (savedUser) {
-        window.currentUser = JSON.parse(savedUser);
-        document.getElementById("userId").value = window.currentUser.userId;
-        document.getElementById("userName").value = window.currentUser.userName;
-
-        document.getElementById("login-container").style.display = "none";
-        document.getElementById("mainArea").style.display = "block";
-        document.getElementById("welcome").innerText =
-        `${window.currentUser.userName}님 (${window.currentUser.dept} / ${window.currentUser.rank}) 안녕하세요.`;
-
-        loadWeekData();
-    }
-    });
-
     // 주 선택 시 자동 갱신
     document.getElementById("weekPicker").addEventListener("change", loadWeekData);
-});
-
-document.getElementById("rememberMe").addEventListener("change", function () {
-    if (!this.checked) {
-        // 체크 해제되면 input 초기화
-        document.getElementById("userId").value = "";
-        document.getElementById("userName").value = "";
-    }
 });
 
 
@@ -723,35 +501,6 @@ function goToTeamEdit() {
     location.href = "team_edit.html";
 }
 
-//체크박스 상태 불러오는 함수
-function loadSelfCheck(userId, date) {
-  const checkbox = document.getElementById("selfCheck");
-  if (!checkbox) return;
-
-  getData(`/selfcheck?user_id=${userId}&date=${date}`,
-    (data) => {
-      checkbox.checked = data.checked === 1;
-       // ✅ 현재 날짜가 주차 종료일 이후면 체크박스 비활성화
-            const currentDate = new Date();
-            const weekStart = new Date(date);
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 4); // 주 금요일 기준
-
-            if (currentDate > weekEnd) {
-                checkbox.disabled = true;
-                checkbox.title = "이미 지난 주의 본인 확인은 수정할 수 없습니다.";
-            } else {
-                checkbox.disabled = false;
-                checkbox.title = "";
-            }
-        },
-    (error) => {
-      console.error("❌ selfcheck 불러오기 실패:", error);
-    }
-  );
-}
-
-
 // ✅ 전역 함수 등록
 window.login = login;
 window.logout = logout;
@@ -759,4 +508,3 @@ window.saveMeals = saveMeals;
 window.loadWeekData = loadWeekData;
 window.goToVisitor = goToVisitor;
 window.goToTeamEdit = goToTeamEdit;
-let isBlockedWeek = false;  // ✅ 차단 여부 전역 저장
