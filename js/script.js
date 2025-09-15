@@ -377,7 +377,7 @@ function checkPreviousWeek(userId, currentWeekStart, callback) {
         const isChecked = checkData.checked === 1;
 
         if (window.currentUser.region === "에코센터") {
-            isBlockedWeek = !hasMeal || !isChecked;
+            isBlockedWeek = !hasMeal && !isChecked;
         } else {
             isBlockedWeek = false;
         }
