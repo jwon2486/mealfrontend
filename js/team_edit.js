@@ -189,9 +189,12 @@ function generateTableBody(dates, data) {
                     btn.title = "공휴일에는 신청할 수 없습니다.";
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
                 } else if (isDeadlinePassed(date, type)) {
-                    btn.classList.add("meal-deadline"); 
-                    btn.title = "신청 마감됨";
-                    btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
+                console.log("마감판정", date, type, isDeadlinePassed(date, type));
+                btn.classList.add("meal-deadline"); 
+                btn.title = "신청 마감됨";
+                btn.disabled = true; // ✅ 버튼 비활성화 추가
+                // 필요 시 알림 유지:
+                btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
                 } else {
                     btn.onclick = () => toggleMeal(btn);
                 }
@@ -363,11 +366,11 @@ function isDeadlinePassed(dateStr, mealType) {
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
             deadline.setDate(mealDate.getDate() - 1);
-            deadline.setHours(9, 0, 0, 0); // 전날 오후 3시
+            deadline.setHours(9, 0, 0, 0); // 전날 오전 0시
         } else if (mealType === "중식") {
-            deadline.setHours(10, 30, 0, 0); // 당일 오전 10시
+            deadline.setHours(10, 30, 0, 0); // 당일 오전 10시 30분
         } else if (mealType === "석식") {
-            deadline.setHours(14, 30, 0, 0); // 당일 오후 3시
+            deadline.setHours(14, 30, 0, 0); // 당일 오후 2시 30분
         }
         return now > deadline;
     }
@@ -388,15 +391,18 @@ function isDeadlinePassed(dateStr, mealType) {
 
 function isThisWeek(dateStr) {
     const target = new Date(dateStr);
+    target.setHours(0, 0, 0, 0);
     const now = getKSTDate();
 
     const monday = new Date(now);
     const day = now.getDay();
     const diff = day === 0 ? -6 : 1 - day;
     monday.setDate(now.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
 
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
 
     return target >= monday && target <= sunday;
 }
