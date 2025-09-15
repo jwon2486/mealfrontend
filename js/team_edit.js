@@ -337,6 +337,7 @@ function getDateArray(start, end) {
 function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
+    mealDate.setHours(0, 0, 0, 0);
 
      // ✅ 2주 뒤 월요일부터는 마감 제한 없음
     const day = now.getDay(); // 0(일) ~ 6(토)
