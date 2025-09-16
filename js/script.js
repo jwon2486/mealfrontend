@@ -319,53 +319,39 @@ function loadWeekData() {
     window.currentWeekStartDate = start;
     window.currentWeekEndDate = end;
 
-    // ✅ 차단 여부 먼저 체크 (마감시간 API 사용)
-checkMealEligibility(userId, start, (eligible) => {
-    isBlockedWeek = !eligible; // eligible이 false면 차단
+    // ✅ 차단 여부 먼저 체크
+    checkPreviousWeek(userId, start, () => {
+        document.getElementById("welcome").innerHTML =
+            `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
 
-    document.getElementById("welcome").innerHTML =
-        `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
+        renderMealTable(dates);
 
-    renderMealTable(dates);
+        // ✅ 버튼이 차단 상태가 아니어야 신청 내역 로드
+        const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
+        getData(url, (data) => {
+            if (!isBlockedWeek) {
+                dates.forEach(date => {
+                    const dayData = data[date];
+                    if (!dayData) return;
 
-    // ✅ 버튼이 차단 상태가 아니어야 신청 내역 로드
-    const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
-    getData(url, (data) => {
-        if (!isBlockedWeek) {
-            dates.forEach(date => {
-                const dayData = data[date];
-                if (!dayData) return;
-
-                ["조식", "중식", "석식"].forEach(type => {
-                    const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
-                    if (dayData[key]) {
-                        const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
-                        if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
-                    }
+                    ["조식", "중식", "석식"].forEach(type => {
+                        const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
+                        if (dayData[key]) {
+                            const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
+                            if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
+                        }
+                    });
                 });
-            });
-        }
-        updateMealSummary();
-    });
+            }
+            updateMealSummary();
+        });
 
-    loadSelfCheck(userId, start);
-});
-}
-
-// ✅ [추가] 마감시간 API 호출
-function checkMealEligibility(userId, targetDate, callback) {
-    const url = `/api/check_meal_eligibility?user_id=${encodeURIComponent(userId)}&target_date=${encodeURIComponent(targetDate)}`;
-    getData(url, (data) => {
-        callback(data.eligible);
-    }, (err) => {
-        console.error("❌ 마감시간 API 호출 실패:", err);
-        callback(false);
+        loadSelfCheck(userId, start);
     });
 }
 
-//기존 ✅ 마감시간 프론트엔드 코드 (예비용)
-/* function checkPreviousWeek(userId, currentWeekStart, callback) {
-    //---- 1주 전 주차(바로 전 주) 월요일~금요일 ----
+function checkPreviousWeek(userId, currentWeekStart, callback) {
+    // ---- 1주 전 주차(바로 전 주) 월요일~금요일 ----
     const lastMonday = new Date(currentWeekStart);
     lastMonday.setDate(lastMonday.getDate() - 7);
     const lastStart = lastMonday.toISOString().split("T")[0];
@@ -424,7 +410,7 @@ function checkMealEligibility(userId, targetDate, callback) {
         if (callback) callback();
     })
     .catch(err => console.error("❌ checkPreviousWeek(1~2주 전) 실패:", err));
-} */
+}
 
 
 
