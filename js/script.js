@@ -127,12 +127,15 @@ function toggleSelectAll() {
         const date = btn.dataset.date;
         const type = btn.dataset.type;
 
-        if (isDeadlinePassed(date, type)) return; // 마감된 건 무시
+        // ① 마감된 식사 제외
+        if (isDeadlinePassed(date, type)) return;
+
+        // ② 공휴일인 경우 제외
+        if (holidayList.includes(normalizeDate(date))) return;
 
         const shouldSelect = !isAllSelected;
-
-        // 상태 전환 필요할 때만 toggle
         const selected = btn.classList.contains("selected");
+
         if (shouldSelect && !selected) {
             toggleMeal(btn);
             changed = true;
@@ -141,8 +144,7 @@ function toggleSelectAll() {
             changed = true;
         }
     });
-
-    // 상태 반전
+    // 반전
     if (changed) {
         isAllSelected = !isAllSelected;
         const toggleBtn = document.getElementById("toggleSelectBtn");
