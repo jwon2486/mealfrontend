@@ -645,31 +645,20 @@ function setDefaultWeek() {
 function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
-    mealDate.setHours(0, 0, 0, 0); // ✅ 추가: 날짜 비교 오류 방지
+    mealDate.setHours(0, 0, 0, 0);
 
-    // 기준: 2주 뒤 월요일 이후면 마감 없음
-    const day = now.getDay(); // 0(일)~6(토)
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-
-    const thisMonday = new Date(now);
-    thisMonday.setDate(now.getDate() + diffToMonday);
-    thisMonday.setHours(0, 0, 0, 0);  // 명시적으로 정규화
-
-    const twoWeeksLaterMonday = new Date(thisMonday);
-    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
-
-    // ✅ 1. 과거 날짜면 무조건 마감
-    if (mealDate < new Date(now.toDateString())) {
-        return true;
-    }
-
-    // ✅ 2. 2주 후 월요일 이후면 마감 없음
-    if (mealDate >= twoWeeksLaterMonday) {
-        return false;
-    }
-
+    // ✅ 추가: 이번 주 식사인데 저번 주 사전예약(created_at) 없으면 차단
     if (isThisWeek(dateStr)) {
-        // ✅ 이번 주 식사는 기존 마감 규칙 사용
+        const createdAtStr = window.mealCreatedAtMap[dateStr];
+        if (!createdAtStr) {
+            return true; // 사전 예약 기록이 없음 → 마감 처리
+        }
+        const createdAt = new Date(createdAtStr.replace(' ', 'T') + '+09:00');
+        if (createdAt > lastWeekWednesdayCutoff()) {
+            return true; // 저번 주 수요일 16시 이후 신청 → 마감 처리
+        }
+
+        // ⬇️ 기존 이번 주 식사 마감 로직 유지
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
             deadline.setDate(mealDate.getDate() - 1);
@@ -680,24 +669,22 @@ function isDeadlinePassed(dateStr, mealType) {
             deadline.setHours(14, 30, 0, 0);
         }
         return now > deadline;
-    } else {
-        // ✅ 다음 주 식사는 이번 주 수요일 16:00까지만 신청 가능
-
-        // 이번 주 월요일 계산
-        const thisMonday = new Date(now);
-        const day = thisMonday.getDay();
-        const diff = day === 0 ? -6 : 1 - day;
-        thisMonday.setDate(now.getDate() + diff);
-        thisMonday.setHours(0, 0, 0, 0);
-
-        // 이번 주 수요일 16시 마감 시각 계산
-        const thisWednesdayDeadline = new Date(thisMonday);
-        thisWednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
-        thisWednesdayDeadline.setHours(16, 0, 0, 0);
-
-        return now > thisWednesdayDeadline;
     }
+
+    // ⬇️ 기존 다음 주 마감 로직
+    const thisMonday = new Date(now);
+    const day = thisMonday.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    thisMonday.setDate(now.getDate() + diff);
+    thisMonday.setHours(0, 0, 0, 0);
+
+    const thisWednesdayDeadline = new Date(thisMonday);
+    thisWednesdayDeadline.setDate(thisMonday.getDate() + 2);
+    thisWednesdayDeadline.setHours(16, 0, 0, 0);
+
+    return now > thisWednesdayDeadline;
 }
+
 
 // === KST & Deadline Utilities (week-level created_at window) ===
 const pad2 = n => String(n).padStart(2,'0');
@@ -847,6 +834,23 @@ document.getElementById("rememberMe").addEventListener("change", function () {
         document.getElementById("userName").value = "";
     }
 });
+
+function lastWeekWednesdayCutoff() {
+    const now = (typeof getKSTDate === 'function') ? getKSTDate() : new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+
+    // 이번 주 월요일
+    const thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() + diffToMonday);
+    thisMonday.setHours(0,0,0,0);
+
+    // 저번 주 수요일 16:00
+    const lastWed = new Date(thisMonday);
+    lastWed.setDate(thisMonday.getDate() - 5); // 저번 주 수요일
+    lastWed.setHours(16,0,0,0);
+    return lastWed;
+}
 
 
 function goToVisitor() {
