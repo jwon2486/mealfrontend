@@ -334,39 +334,42 @@ function loadWeekData() {
     window.currentWeekStartDate = start;
     window.currentWeekEndDate = end;
 
-    // ✅ 차단 여부 먼저 체크
     checkPreviousWeek(userId, start, () => {
-        document.getElementById("welcome").innerHTML =
-            `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
+        // ✅ selfcheck 먼저 불러오기
+        loadSelfCheck(userId, start, () => {
+            // ⬇️ 여기서부터 테이블 렌더링
+            document.getElementById("welcome").innerHTML =
+                `${userName}님, 안녕하세요.&nbsp;&nbsp;선택 일자: ${start} ~ ${end}`;
 
-        renderMealTable(dates);
+            renderMealTable(dates);
 
-        // ✅ 버튼이 차단 상태가 아니어야 신청 내역 로드
-        const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
-        getData(url, (data) => {
-            if (!isBlockedWeek) {
-                dates.forEach(date => {
-                    const dayData = data[date];
-                    if (!dayData) return;
-                    if (dayData && dayData.created_at) { window.mealCreatedAtMap[date] = dayData.created_at; }
-                    ["조식", "중식", "석식"].forEach(type => {
-                        const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
-                        if (dayData[key]) {
-                            const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
-                            if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
+            // ✅ meals 불러오기
+            const url = `/meals?user_id=${userId}&start=${start}&end=${end}`;
+            getData(url, (data) => {
+                if (!isBlockedWeek) {
+                    dates.forEach(date => {
+                        const dayData = data[date];
+                        if (!dayData) return;
+
+                        if (dayData && dayData.created_at) {
+                            window.mealCreatedAtMap[date] = dayData.created_at;
                         }
-                    });
-                });
-            }
-            /*if (dayData && dayData.created_at) {
-            window.mealCreatedAtMap[date] = dayData.created_at;
-            }*/
-            updateMealSummary();
-        });
 
-        loadSelfCheck(userId, start);
+                        ["조식", "중식", "석식"].forEach(type => {
+                            const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
+                            if (dayData[key]) {
+                                const btn = document.querySelector(`.meal-btn[data-date="${date}"][data-type="${type}"]`);
+                                if (btn && !btn.classList.contains("selected")) toggleMeal(btn);
+                            }
+                        });
+                    });
+                }
+                updateMealSummary();
+            });
+        });
     });
 }
+
 
 function checkPreviousWeek(userId, currentWeekStart, callback) {
     // ---- 1주 전 주차(바로 전 주) 월요일~금요일 ----
@@ -900,41 +903,39 @@ function goToTeamEdit() {
 }
 
 //체크박스 상태 불러오는 함수
-function loadSelfCheck(userId, date) {
+function loadSelfCheck(userId, date, callback) {
   const checkbox = document.getElementById("selfCheck");
-  if (!checkbox) return;
+  if (!checkbox) {
+    if (callback) callback();
+    return;
+  }
 
   getData(`/selfcheck?user_id=${userId}&date=${date}`,
     (data) => {
       if (data && data.created_at) {
-        window.selfcheckCreatedAtMap[date] = data.created_at; // date는 주 시작(월요일)
-        // ✅ 세션 스토리지에도 함께 저장
-        sessionStorage.setItem(
-        "selfcheckCreatedAtMap",
-        JSON.stringify(window.selfcheckCreatedAtMap)
-    );
-        }
-      /*if (data && data.created_at) { window.selfcheckCreatedAtMap[date] = data.created_at; }*/
+        window.selfcheckCreatedAtMap[date] = data.created_at;
+        sessionStorage.setItem("selfcheckCreatedAtMap", JSON.stringify(window.selfcheckCreatedAtMap));
+      }
       checkbox.checked = data.checked === 1;
-       // ✅ 현재 날짜가 주차 종료일 이후면 체크박스 비활성화
-            const currentDate = new Date();
-            const weekStart = new Date(date);
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 4); // 주 금요일 기준
 
-            if (currentDate > weekEnd) {
-                checkbox.disabled = true;
-                checkbox.title = "이미 지난 주의 본인 확인은 수정할 수 없습니다.";
-            } else {
-                checkbox.disabled = false;
-                checkbox.title = "";
-            }
-        },
+      // 주차 종료일 이후면 비활성화
+      const currentDate = new Date();
+      const weekStart = new Date(date);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 4);
+
+      checkbox.disabled = currentDate > weekEnd;
+      checkbox.title = checkbox.disabled ? "이미 지난 주의 본인 확인은 수정할 수 없습니다." : "";
+
+      if (callback) callback();   // 🔥 호출 보장
+    },
     (error) => {
       console.error("❌ selfcheck 불러오기 실패:", error);
+      if (callback) callback();   // 실패해도 테이블은 그려야 하므로 실행
     }
   );
 }
+
 
 
 // ✅ 전역 함수 등록
