@@ -3,6 +3,7 @@
 let holidayList = [];  // 서버에서 불러온 공휴일 날짜 배열
 let holidayMap = {};   // ⬅️ 날짜(YYYY-MM-DD) → 설명 텍스트
 let flag_type = "직영";
+let isSelfcheckLate = false;  // ✅ 본인확인했지만 제한시간보다 늦게 체크했을때
 window.mealCreatedAtMap = window.mealCreatedAtMap || {};          // { 'YYYY-MM-DD': 'YYYY-MM-DD HH:MM:SS' }
 window.selfcheckCreatedAtMap = window.selfcheckCreatedAtMap || {}; // { 'YYYY-MM-DD(주 시작)': 'YYYY-MM-DD HH:MM:SS' }
 
@@ -106,6 +107,8 @@ if (window.currentUser.level === 2 && teamEditBtn) {
         document.getElementById("mealSummary").style.display = "block";
         document.getElementById("welcome").innerText = `${data.name}님 (${data.dept}), 안녕하세요.`;
 
+
+        
         setDefaultWeek(); // 🟡 로그인 시 기본 주차 설정
         loadWeekData();
 
@@ -276,8 +279,16 @@ function renderMealTable(dates) {
                 btn.style.color = "#666";
                 btn.title = "신청 마감됨";
                 btn.innerText = "❌ 마감";
-                btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
+                // ✅ 차단 여부에 따라 메시지 분리
+            btn.onclick = () => {
+            if (isBlockedWeek) {
+                alert("전주 본인확인 미체크로 인해 식사 수정이 불가능합니다");
+            } else if (isSelfcheckLate) {
+                alert("마감시간 이후 본인확인체크하여 식사 신청/변경이 불가능합니다.");
             } else {
+                alert(`${type}은 신청 마감 시간이 지났습니다.`);
+            }
+            };}else {
                 btn.innerText = "❌미신청";
                 btn.onclick = () => toggleMeal(btn);
             }
@@ -649,6 +660,20 @@ function isDeadlinePassed(dateStr, mealType) {
 
     // ① 이번 주(현재 진행 중인 주)의 식사인가?
     if (isThisWeek(dateStr)) {
+        // ✅ region이 테크센터면 본인확인·2주전 규칙 무시
+    if (window.currentUser?.region === "테크센터") {
+        // 오직 식사별 마감만 적용
+        let deadline = new Date(mealDate);
+        if (mealType === "조식") {
+            deadline.setDate(mealDate.getDate() - 1); // 전날 09:00
+            deadline.setHours(9, 0, 0, 0);
+        } else if (mealType === "중식") {
+            deadline.setHours(10, 30, 0, 0);          // 당일 10:30
+        } else if (mealType === "석식") {
+            deadline.setHours(14, 30, 0, 0);          // 당일 14:30
+        }
+        return now > deadline;
+    }
         // 이번 주 월요일(YYYY-MM-DD) 키로 selfcheck.created_at 조회
         const weekMonday = mondayOfNow(); 
         const createdAtStr = window.selfcheckCreatedAtMap[weekMonday];
@@ -658,7 +683,10 @@ function isDeadlinePassed(dateStr, mealType) {
 
         // (B) selfcheck를 저번 주 수요일 16:00 이후에 했다면 ⇒ 마감
         const createdAt = new Date(createdAtStr.replace(' ', 'T') + '+09:00');
-        if (createdAt > lastWeekWednesdayCutoff()) return true;
+        if (createdAt > lastWeekWednesdayCutoff()) {
+        isSelfcheckLate = true;   // ✅ 추가
+        return true;
+        }
 
         // (C) 통과했다면, 식사별 당일/전날 마감시각 적용
         let deadline = new Date(mealDate);
@@ -740,6 +768,11 @@ function makeCreatedAt() {
 
 // ✅ 자동 로그인 및 주차 변경 이벤트
 document.addEventListener("DOMContentLoaded", function () {
+    // ✅ [수정] selfcheckCreatedAtMap 세션 복원 (가장 먼저 실행되도록 이동)
+    const savedSelfcheckMap = sessionStorage.getItem("selfcheckCreatedAtMap");
+    if (savedSelfcheckMap) {
+        window.selfcheckCreatedAtMap = JSON.parse(savedSelfcheckMap);
+    }
     setDefaultWeek(); // ✅ 이번 주 자동 설정
     const savedUser = sessionStorage.getItem("currentUser");
     const year = new Date().getFullYear();
@@ -875,6 +908,11 @@ function loadSelfCheck(userId, date) {
     (data) => {
       if (data && data.created_at) {
         window.selfcheckCreatedAtMap[date] = data.created_at; // date는 주 시작(월요일)
+        // ✅ 세션 스토리지에도 함께 저장
+        sessionStorage.setItem(
+        "selfcheckCreatedAtMap",
+        JSON.stringify(window.selfcheckCreatedAtMap)
+    );
         }
       /*if (data && data.created_at) { window.selfcheckCreatedAtMap[date] = data.created_at; }*/
       checkbox.checked = data.checked === 1;
