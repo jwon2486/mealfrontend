@@ -660,17 +660,17 @@ function isDeadlinePassed(dateStr, mealType) {
 
     // ① 이번 주(현재 진행 중인 주)의 식사인가?
     if (isThisWeek(dateStr)) {
-        // ✅ region이 테크센터면 본인확인·2주전 규칙 무시
-    if (window.currentUser?.region === "테크센터") {
-        // 오직 식사별 마감만 적용
+    const isEco = window.currentUser?.region === "에코센터";
+    if (!isEco) {
+        // 에코센터가 아니면 → 일반 식사별 마감만 적용
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
-            deadline.setDate(mealDate.getDate() - 1); // 전날 09:00
+            deadline.setDate(mealDate.getDate() - 1);
             deadline.setHours(9, 0, 0, 0);
         } else if (mealType === "중식") {
-            deadline.setHours(10, 30, 0, 0);          // 당일 10:30
+            deadline.setHours(10, 30, 0, 0);
         } else if (mealType === "석식") {
-            deadline.setHours(14, 30, 0, 0);          // 당일 14:30
+            deadline.setHours(14, 30, 0, 0);
         }
         return now > deadline;
     }
