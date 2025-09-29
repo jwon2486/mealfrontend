@@ -645,58 +645,46 @@ function setDefaultWeek() {
 function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
-    mealDate.setHours(0, 0, 0, 0); // ✅ 추가: 날짜 비교 오류 방지
+    mealDate.setHours(0, 0, 0, 0);
 
-    // 기준: 2주 뒤 월요일 이후면 마감 없음
-    const day = now.getDay(); // 0(일)~6(토)
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-
-    const thisMonday = new Date(now);
-    thisMonday.setDate(now.getDate() + diffToMonday);
-    thisMonday.setHours(0, 0, 0, 0);  // 명시적으로 정규화
-
-    const twoWeeksLaterMonday = new Date(thisMonday);
-    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
-
-    // ✅ 1. 과거 날짜면 무조건 마감
-    if (mealDate < new Date(now.toDateString())) {
-        return true;
-    }
-
-    // ✅ 2. 2주 후 월요일 이후면 마감 없음
-    if (mealDate >= twoWeeksLaterMonday) {
-        return false;
-    }
-
+    // ① 이번 주(현재 진행 중인 주)의 식사인가?
     if (isThisWeek(dateStr)) {
-        // ✅ 이번 주 식사는 기존 마감 규칙 사용
+        // 이번 주 월요일(YYYY-MM-DD) 키로 selfcheck.created_at 조회
+        const weekMonday = mondayOfNow(); 
+        const createdAtStr = window.selfcheckCreatedAtMap[weekMonday];
+
+        // (A) 이번 주에 대한 selfcheck 기록 자체가 없으면 ⇒ 마감
+        if (!createdAtStr) return true;
+
+        // (B) selfcheck를 저번 주 수요일 16:00 이후에 했다면 ⇒ 마감
+        const createdAt = new Date(createdAtStr.replace(' ', 'T') + '+09:00');
+        if (createdAt > lastWeekWednesdayCutoff()) return true;
+
+        // (C) 통과했다면, 식사별 당일/전날 마감시각 적용
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
-            deadline.setDate(mealDate.getDate() - 1);
+            deadline.setDate(mealDate.getDate() - 1); // 전날 09:00
             deadline.setHours(9, 0, 0, 0);
         } else if (mealType === "중식") {
-            deadline.setHours(10, 30, 0, 0);
+            deadline.setHours(10, 30, 0, 0);          // 당일 10:30
         } else if (mealType === "석식") {
-            deadline.setHours(14, 30, 0, 0);
+            deadline.setHours(14, 30, 0, 0);          // 당일 14:30
         }
         return now > deadline;
-    } else {
-        // ✅ 다음 주 식사는 이번 주 수요일 16:00까지만 신청 가능
-
-        // 이번 주 월요일 계산
-        const thisMonday = new Date(now);
-        const day = thisMonday.getDay();
-        const diff = day === 0 ? -6 : 1 - day;
-        thisMonday.setDate(now.getDate() + diff);
-        thisMonday.setHours(0, 0, 0, 0);
-
-        // 이번 주 수요일 16시 마감 시각 계산
-        const thisWednesdayDeadline = new Date(thisMonday);
-        thisWednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
-        thisWednesdayDeadline.setHours(16, 0, 0, 0);
-
-        return now > thisWednesdayDeadline;
     }
+
+    // ② 다음 주 식사: 이번 주 수요일 16:00 이후면 전체 마감
+    const thisMonday = new Date(now);
+    const day = thisMonday.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    thisMonday.setDate(now.getDate() + diff);
+    thisMonday.setHours(0, 0, 0, 0);
+
+    const thisWednesdayDeadline = new Date(thisMonday);
+    thisWednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
+    thisWednesdayDeadline.setHours(16, 0, 0, 0);
+
+    return now > thisWednesdayDeadline;
 }
 
 // === KST & Deadline Utilities (week-level created_at window) ===
