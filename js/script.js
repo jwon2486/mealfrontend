@@ -458,15 +458,19 @@ function saveMeals() {
     document.querySelectorAll(".meal-btn.selected").forEach(() => {
         hasMealSelected = true;
     });
+
+
+
     // === 저장 버튼 가드: 다른 주/다음 주 마감 로직 ===
     const weekStartStr = window.currentWeekStartDate;
-
+     // ✅ 2주 뒤 주차 이상이면 마감 규칙 무시하고 저장 허용
+    if (!isTwoWeeksLaterOrMore(weekStartStr)) {
     // 1) '다음 주' 글로벌 마감: 이번 주 수요일 16:00 이후면 저장 차단
     if (isNextWeekGloballyClosed(weekStartStr)) {
     alert("마감시간이 지났기 때문에 변경이 불가능합니다. (다음 주 신청 마감: 이번 주 수요일 16:00)");
     return; // 저장 로직 중단
     }
-
+    }
     // 2) 같은 주/다른 주 분기 + 과거주 저장 가능 기간 가드
     const __sameWeek = isSameWeekAsNow(weekStartStr);
     var __createdAt = null;
@@ -660,6 +664,11 @@ function isDeadlinePassed(dateStr, mealType) {
     const now = getKSTDate();
     const mealDate = new Date(dateStr);
     mealDate.setHours(0, 0, 0, 0);
+
+    if (isTwoWeeksLaterOrMore(dateStr)) {
+    return false; // 마감 규칙 무시 → 버튼 항상 활성화
+    }
+    
 
     // ① 이번 주(현재 진행 중인 주)의 식사인가?
     if (isThisWeek(dateStr)) {
@@ -900,6 +909,15 @@ function goToAdminDashboard() {
 
 function goToTeamEdit() {
     location.href = "team_edit.html";
+}
+
+function isTwoWeeksLaterOrMore(weekStartStr) {
+    const now = (typeof getKSTDate === 'function') ? getKSTDate() : new Date();
+    const thisMonday = mondayOf(now); // 이번 주 월요일
+    const twoWeeksLaterMonday = new Date(thisMonday);
+    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14); // 2주 뒤 월요일
+
+    return new Date(weekStartStr) >= twoWeeksLaterMonday;
 }
 
 //체크박스 상태 불러오는 함수
