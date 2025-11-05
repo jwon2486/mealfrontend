@@ -155,14 +155,15 @@ document.getElementById("load-visit-data-btn").addEventListener("click", () => {
   loadWeeklyVisitData();  // ✅ 명시적으로 조회 버튼 눌렀을 때 실행
 });
 
+
 // 이번 주 월요일 계산 함수
 function getThisWeekMonday() {
-  const today = getKSTDate();
-  const day = today.getDay(); // 0=Sunday, 1=Monday, ...
-  const monday = new Date(today);
-  // 이번 주 월요일로 이동
-  monday.setDate(today.getDate() - ((day + 6) % 7));
-  return monday.toISOString().split("T")[0];
+  const today = getKSTDate();                   // KST 기준 현재 시각
+  const day = today.getDay();                   // 요일 (0=일, 1=월,...)
+  const monday = new Date(today);               // 복제
+  monday.setDate(today.getDate() - ((day + 6) % 7)); // 이번 주 월요일로 이동
+  monday.setHours(9, 0, 0, 0);                  // 오전 9시로 고정 → UTC 변환 시 하루 밀림 방지
+  return monday.toISOString().split("T")[0];    // YYYY-MM-DD 문자열 반환
 }
 
 // 버튼 클릭 시 이번 주 데이터 로드
