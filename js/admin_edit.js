@@ -550,10 +550,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const weekPicker = document.getElementById("editWeekPicker");
     const { start } = getWeekRange(weekPicker.value);
 
+  // 이전 주 월요일 09:00:00 (KST) 생성
+function prevMonday9(weekMondayYmd) {
+  // KST 기준을 보장하기 위해 +09:00 타임존으로 날짜 생성
+     const d = new Date(`${weekMondayYmd}T00:00:00+09:00`);
+    d.setDate(d.getDate() - 7); // 1주 전
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day} 09:00:00`;
+    }
+    const createdAt = prevMonday9(start);
+
+
     postData("/selfcheck", {
       user_id: userId,
       date: start,
-      checked: checked
+      checked: checked,
+      created_at: createdAt
     }, 
     () => {
       console.log(`✅ selfcheck 업데이트 성공 (${userId}, ${start})`);
