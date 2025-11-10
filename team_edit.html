@@ -67,5 +67,20 @@
     <script src="js/config.js"></script>
     <script src="js/util.js"></script>
     <script src="js/team_edit.js"></script>
+    <script>
+  // 1) 마감 시간 무시
+  window.isDeadlinePassed = () => false;
+
+  // 2) 다음 주 수요일 16시 마감 무시
+  window.isNextWeekGloballyClosed = () => false;
+
+  // 3) 과거 주 저장 제한 무시 (항상 저장 가능하게)
+  window.getSaveWindowForWeekStart = () => ({
+    start: new Date(0),
+    end: new Date(8640000000000000)
+  });
+
+  console.warn("⚠️ 현재 페이지는 마감시간 규칙이 임시로 비활성화된 상태입니다.");
+</script>
 </body>
 </html>
