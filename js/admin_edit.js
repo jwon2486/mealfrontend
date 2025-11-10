@@ -567,7 +567,8 @@ function prevMonday9(weekMondayYmd) {
       user_id: userId,
       date: start,
       checked: checked,
-      created_at: createdAt
+      created_at: createdAt,
+      force_update: true   // 관리자 모드 전용 덮어쓰기 허용
     }, 
     () => {
       console.log(`✅ selfcheck 업데이트 성공 (${userId}, ${start})`);
