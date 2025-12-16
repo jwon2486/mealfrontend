@@ -151,12 +151,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loadVisitorLogs();
 });
 
-//프론트엔드 시간값 보정 함수
+//프론트엔드 시간값 함수
 function formatToKoreanTime(datetimeStr) {
     if (!datetimeStr) return "-";
-    const date = new Date(datetimeStr.replace(' ', 'T') + 'Z');
+
+    // KST로 이미 저장된 문자열이므로 그대로 Date 생성
+    const date = new Date(datetimeStr.replace(' ', 'T'));
+
     return date.toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
