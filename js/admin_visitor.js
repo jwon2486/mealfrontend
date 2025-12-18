@@ -284,25 +284,25 @@ function submitAdminVisit() {
           saveAdminVisit(data);
 
         // 로그저장
-          const isChanged = existing.breakfast !== data.breakfast || existing.lunch !== data.lunch || existing.dinner !== data.dinner;
+        //   const isChanged = existing.breakfast !== data.breakfast || existing.lunch !== data.lunch || existing.dinner !== data.dinner;
           
-          if (isChanged) {
-            const before = `조식(${existing.breakfast}), 중식(${existing.lunch}), 석식(${existing.dinner})`;
-            const after  = `조식(${data.breakfast}), 중식(${data.lunch}), 석식(${data.dinner})`;
+        //   if (isChanged) {
+        //     const before = `조식(${existing.breakfast}), 중식(${existing.lunch}), 석식(${existing.dinner})`;
+        //     const after  = `조식(${data.breakfast}), 중식(${data.lunch}), 석식(${data.dinner})`;
     
-            const logPayload = {
-                visitor_id: existing.id || null,
-                applicant_id: id,
-                applicant_name: name,
-                dept: null,
-                date: data.date,
-                before_state: before,
-                after_state: after,
-                changed_at: new Date().toString()
-            };
+        //     const logPayload = {
+        //         visitor_id: existing.id || null,
+        //         applicant_id: id,
+        //         applicant_name: name,
+        //         dept: null,
+        //         date: data.date,
+        //         before_state: before,
+        //         after_state: after,
+        //         changed_at: new Date().toString()
+        //     };
     
-            postData("/visitor_logs", logPayload);
-        }
+        //     postData("/visitor_logs", logPayload);
+        // }
       });
    });
 }

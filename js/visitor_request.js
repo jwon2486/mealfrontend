@@ -325,27 +325,28 @@ function submitVisit() {
         saveVisit(visitData);  // ✅ 저장 함수 호출
         
         // ✅ 로그 조건: 변경 내역이 있는 경우만
-      const isChanged = existing.breakfast !== visitData.breakfast ||
-                        existing.lunch !== visitData.lunch ||
-                        existing.dinner !== visitData.dinner;
+            // ✅ 로그 조건: 변경 내역이 있는 경우만 기록
+      // const isChanged = existing.breakfast !== visitData.breakfast ||
+      //                   existing.lunch !== visitData.lunch ||
+      //                   existing.dinner !== visitData.dinner;
 
-        if (isChanged) {
-          const before = `조식(${existing.breakfast}), 중식(${existing.lunch}), 석식(${existing.dinner})`;
-          const after  = `조식(${visitData.breakfast}), 중식(${visitData.lunch}), 석식(${visitData.dinner})`;
+      //   if (isChanged) {
+      //     const before = `조식(${existing.breakfast}), 중식(${existing.lunch}), 석식(${existing.dinner})`;
+      //     const after  = `조식(${visitData.breakfast}), 중식(${visitData.lunch}), 석식(${visitData.dinner})`;
 
-            const logPayload = {
-              visitor_id: existing.id || null,
-              applicant_id: visitData.applicant_id,
-              applicant_name: visitData.applicant_name,
-              dept: null,
-              date: visitData.date,
-              before_state: before,
-              after_state: after,
-              changed_at: new Date().toISOString()
-            };
+      //       const logPayload = {
+      //         visitor_id: existing.id || null,
+      //         applicant_id: visitData.applicant_id,
+      //         applicant_name: visitData.applicant_name,
+      //         dept: null,
+      //         date: visitData.date,
+      //         before_state: before,
+      //         after_state: after,
+      //         changed_at: new Date().toISOString()
+      //       };
 
-            postData("/visitor_logs", logPayload);
-        }
+      //       postData("/visitor_logs", logPayload);
+      //   }
 
       });
     });
