@@ -842,32 +842,43 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    fetchHolidayList(`/api/public-holidays?year=${year}`, (holidays) => {
-    // holidays가 문자열 배열(날짜만)일 수도, 객체 배열({date, description})일 수도 있으니 둘 다 처리
-    holidayList = Array.isArray(holidays)
-        ? holidays.map(h => typeof h === "string" ? normalizeDate(h) : normalizeDate(h.date))
-        : [];
+    const nextYear = year + 1;
+
+fetchHolidayList(`/api/public-holidays?year=${year}`, (holidaysThisYear) => {
+  fetchHolidayList(`/api/public-holidays?year=${nextYear}`, (holidaysNextYear) => {
+
+    // 1) 두 해 결과 합치기
+    const merged = []
+      .concat(Array.isArray(holidaysThisYear) ? holidaysThisYear : [])
+      .concat(Array.isArray(holidaysNextYear) ? holidaysNextYear : []);
+
+    // 2) holidayList/holidayMap 구성 (기존 로직 그대로 확장)
+    holidayList = merged.map(h =>
+      (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date)
+    );
 
     holidayMap = {};
-    (Array.isArray(holidays) ? holidays : []).forEach(h => {
-        const key  = typeof h === "string" ? normalizeDate(h) : normalizeDate(h.date);
-        const desc = typeof h === "string" ? "" : (h.description || h.desc || h.name || "");
-        holidayMap[key] = desc;         // 예: "2025-12-25" → "성탄절"
+    merged.forEach(h => {
+      const key  = (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date);
+      const desc = (typeof h === "string") ? "" : (h.description || h.desc || h.name || "");
+      holidayMap[key] = desc;
     });
 
+    // 3) 기존 savedUser 자동로그인 흐름 그대로 유지
     if (savedUser) {
-        window.currentUser = JSON.parse(savedUser);
-        document.getElementById("userId").value = window.currentUser.userId;
-        document.getElementById("userName").value = window.currentUser.userName;
+      window.currentUser = JSON.parse(savedUser);
+      document.getElementById("userId").value = window.currentUser.userId;
+      document.getElementById("userName").value = window.currentUser.userName;
 
-        document.getElementById("login-container").style.display = "none";
-        document.getElementById("mainArea").style.display = "block";
-        document.getElementById("welcome").innerText =
+      document.getElementById("login-container").style.display = "none";
+      document.getElementById("mainArea").style.display = "block";
+      document.getElementById("welcome").innerText =
         `${window.currentUser.userName}님 (${window.currentUser.dept} / ${window.currentUser.rank}) 안녕하세요.`;
 
-        loadWeekData();
+      loadWeekData();
     }
-    });
+  });
+});
 
     // 주 선택 시 자동 갱신
     document.getElementById("weekPicker").addEventListener("change", loadWeekData);

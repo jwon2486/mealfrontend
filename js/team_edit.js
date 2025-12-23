@@ -464,19 +464,53 @@ document.addEventListener("DOMContentLoaded", () => {
     picker.value = start;
 
     const year = new Date().getFullYear();
-    fetchHolidayList(`/holidays?year=${year}`, (holidays) => {
-        holidayList = holidays;
-        loadEditData(start); // ✅ 부서원 테이블 다음 주 기준으로 자동 표시
+    const nextYear = year + 1;
+
+    // ✅ 1) 공공 공휴일(자동) + 2) DB 공휴일(수동) 둘 다 가져와서 병합
+fetchHolidayList(`/api/public-holidays?year=${year}`, (apiThisYear) => {
+  fetchHolidayList(`/api/public-holidays?year=${nextYear}`, (apiNextYear) => {
+
+    fetchHolidayList(`/holidays?year=${year}`, (customThisYear) => {
+      fetchHolidayList(`/holidays?year=${nextYear}`, (customNextYear) => {
+
+        const apiMerged = []
+          .concat(Array.isArray(apiThisYear) ? apiThisYear : [])
+          .concat(Array.isArray(apiNextYear) ? apiNextYear : []);
+
+        const customMerged = []
+          .concat(Array.isArray(customThisYear) ? customThisYear : [])
+          .concat(Array.isArray(customNextYear) ? customNextYear : []);
+
+        // ✅ api 날짜와 겹치는 custom은 제거(중복 방지)
+        const apiDates = new Set(
+          apiMerged.map(h => (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date))
+        );
+        const filteredCustom = customMerged.filter(h => {
+          const d = (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date);
+          return !apiDates.has(d);
+        });
+
+        const merged = [...apiMerged, ...filteredCustom];
+
+        // ✅ team_edit에서 쓰는 holidayList 구성(기존 방식 유지)
+        holidayList = merged.map(h =>
+          (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date)
+        );
+
+        // (선택) 설명까지 저장해두기
+        holidayMap = {};
+        merged.forEach(h => {
+          const key  = (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date);
+          const desc = (typeof h === "string") ? "" : (h.description || h.desc || h.name || "");
+          holidayMap[key] = desc;
+        });
+
+        loadEditData(start); // ✅ 기존 흐름 그대로
+      });
     });
 
-    ["searchName", "searchEmpId"].forEach(id => {
-        const input = document.getElementById(id);
-        input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                onSearch();
-            }
-        });
-    });
+  });
+});
 
     // ✅ 본인확인 드롭다운 필터 이벤트 리스너 추가
     document.getElementById("selfcheckFilter").addEventListener("change", applySelfcheckFilter);
