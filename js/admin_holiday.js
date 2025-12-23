@@ -1,6 +1,32 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const year = new Date().getFullYear();
+function initYearSelector() {
+  const select = document.getElementById("yearSelector");
+  const currentYear = new Date().getFullYear();
+
+  select.innerHTML = "";
+
+  const options = [
+    { year: currentYear, label: "올해" },
+    { year: currentYear + 1, label: "내년" }
+  ];
+
+  options.forEach((opt, idx) => {
+    const option = document.createElement("option");
+    option.value = opt.year;
+    option.innerText = `${opt.label} (${opt.year})`;
+    if (idx === 0) option.selected = true;
+    select.appendChild(option);
+  });
+}
+
+
+function updateCalendar() {
+  const year = Number(document.getElementById("yearSelector").value);
   loadHolidays(year);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initYearSelector();  // ⭐ 연도 옵션 생성 (올해/내년)
+  updateCalendar();    // ⭐ 기본값 = 올해 → loadHolidays 실행
 });
 
 let currentHolidayDetail = [];
