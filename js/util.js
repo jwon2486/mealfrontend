@@ -212,18 +212,20 @@ function fetchHolidayList(path, onSuccess, onError) {
 }
 
 function getCurrentWeekRange() {
-    const today = getKSTDate();
-    const day = today.getDay(); // 일요일: 0, 월요일: 1 ...
-    const diffToMonday = day === 0 ? -6 : 1 - day;
+  const today = new Date(); // 브라우저 로컬 = KST
+  const day = today.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
 
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + diffToMonday);
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diffToMonday);
 
-    const friday = new Date(monday);
-    friday.setDate(monday.getDate() + 4);
+  const friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
 
-    const format = (date) => date.toISOString().split("T")[0];
-    return { start: format(monday), end: format(friday) };
+  return {
+    start: getKSTDateString(monday),
+    end: getKSTDateString(friday)
+  };
 }
 
 // 요일을 한글로 반환하는 유틸 함수
@@ -245,8 +247,9 @@ function getWeekStartAndEnd(dateStr) {
     const friday = new Date(monday);
     friday.setDate(monday.getDate() + 4);
   
-    const format = (d) => d.toISOString().split("T")[0];
-    return { start: format(monday), end: format(friday) };
+    
+    return { start: getKSTDateString(monday), end: getKSTDateString(friday) };
+
 }
 
 function getLoginInfo() {
