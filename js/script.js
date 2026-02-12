@@ -155,38 +155,55 @@ function toggleSelectAll() {
     }
 }
 
+// ✅ 최종 로그아웃 (세션만 정리, 저장 로그인 정보는 유지)
 function logout() {
-    sessionStorage.removeItem("currentUser");
-    sessionStorage.removeItem("flag_type");
-    window.location.reload();
+  // 1) 세션(로그인 상태)만 제거
+  sessionStorage.removeItem("currentUser");
+  sessionStorage.removeItem("flagType");
+  sessionStorage.removeItem("selfcheckCreatedAtMap"); // 선택: 본인확인 캐시 초기화
 
-    // 모든 화면 초기화
-    document.getElementById("login-container").style.display = "block";
-    document.getElementById("mainArea").style.display = "none";
-    document.getElementById("meal-body").innerHTML = "";
-    document.getElementById("welcome").innerText = "";
-    document.getElementById("weekRangeText").innerText = "";
-    document.getElementById("mealSummary").innerText = "";
-    
+  window.currentUser = null;
 
-    
+  // 2) 화면 전환 (메인 숨기고 로그인 보여주기)
+  const mainArea = document.getElementById("mainArea");
+  const loginContainer = document.getElementById("login-container");
+  if (mainArea) mainArea.style.display = "none";
+  if (loginContainer) loginContainer.style.display = "block";
+
+  // 3) 메인 화면 데이터/UI 초기화
+  const mealBody = document.getElementById("meal-body");
+  if (mealBody) mealBody.innerHTML = "";
+
+  const weekPicker = document.getElementById("weekPicker");
+  if (weekPicker) weekPicker.value = "";
+
+  const welcome = document.getElementById("welcome");
+  if (welcome) welcome.innerText = "";
+
+  const weekRangeText = document.getElementById("weekRangeText");
+  if (weekRangeText) weekRangeText.innerText = "";
+
+  const mealSummary = document.getElementById("mealSummary");
+  if (mealSummary) mealSummary.innerText = "";
+
+  const selfCheck = document.getElementById("selfCheck");
+  if (selfCheck) {
+    selfCheck.checked = false;
+    selfCheck.disabled = false;
+    selfCheck.title = "";
+  }
+
+  // 4) 권한 버튼 숨김 (id 혼재 케이스 둘 다 처리)
+  //관리자 버튼 숨김
+  const adminBtn = document.getElementById("adminBtn");
+  if (adminBtn) adminBtn.style.display = "none";
+  // 팀 관리 버튼 숨김
+  const teamEditButton = document.getElementById("teamEditButton");
+  if (teamEditButton) teamEditButton.style.display = "none";
+
+  if (typeof showToast === "function") showToast("로그아웃 되었습니다.");
 }
 
-// ✅ 로그아웃 처리
-function logout() {
-    sessionStorage.clear();
-    window.currentUser = null;
-
-    // 모든 화면 초기화
-    document.getElementById("login-container").style.display = "block";
-    document.getElementById("date-picker-container").style.display = "none";
-    document.getElementById("meal-container").style.display = "none";
-    document.getElementById("meal-body").innerHTML = "";
-    document.getElementById("welcome").innerText = "";
-    document.getElementById("weekRangeText").innerText = "";
-    document.getElementById("mealSummary").innerText = ""; 
-    document.getElementById("deadline-info").style.display = "none";
-}
 
 // ✅ 선택된 주간 날짜 배열 반환
 function getCurrentWeekDates() {
@@ -811,7 +828,7 @@ document.addEventListener("DOMContentLoaded", function () {
         flag_type = sessionStorage.getItem("flagType");
 
         // ✅ 관리자 버튼 노출 여부 처리
-        const adminBtn = document.getElementById("adminButton");
+        const adminBtn = document.getElementById("adminBtn");
         if (window.currentUser?.level === 3 && adminBtn) {
             adminBtn.style.display = "inline-block";
         }
