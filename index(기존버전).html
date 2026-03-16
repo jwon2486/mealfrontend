@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식수 신청 시스템</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="logo-title">
+    <img src="logo/SnSYS_logo.png" alt="회사 로고">
+    </div>
+    <h1>식수 신청 시스템</h1>
+    
+
+     <!-- 로그인 영역 -->
+  <div id="login-wrapper">
+    <div id="login-container" class="login-container">
+      <div class="login-field">
+        <label for="userId">사번</label>
+        <input type="text" id="userId" placeholder="사번 입력">
+      </div>
+      <div class="login-field">
+        <label for="userName">이름</label>
+        <input type="text" id="userName" placeholder="이름 입력">
+      </div>
+      <div class="remember-me">
+        <button class="action-btn save-btn" onclick="login(event)">로그인</button>
+        <input type="checkbox" id="rememberMe">
+        <label for="rememberMe">로그인 정보 저장</label>
+      </div>
+  </div>
+
+    <!-- ✅ 로그인 후 보이는 영역 전체 감싸기 -->
+    <div id="mainArea" style="display: none;">
+        <!-- 달력 선택 -->
+        <div id="date-picker-container">
+            <label>주 선택: <input type="date" id="weekPicker" onchange="loadWeekData()"></label>
+        </div>
+
+        <!-- 이름 표시 -->
+        <div id="welcome">
+            <button onclick="logout()">로그아웃</button>
+        </div>
+        <div id="weekRangeText" style="margin-bottom: 10px; font-weight: bold; font-size: 18px;"></div>
+        <div id="mealSummary" style="margin-top: 5px; font-weight: bold;"></div>
+        <!-- 신청 화면 -->
+        
+        <div id="deadline-info" class="deadline-info">
+        <strong>📌 마감 안내</strong><br />
+        <strong><u>금주 식수</u> 마감 시간:</strong><br />
+        &nbsp;&nbsp;- <strong>조식: 전날 오전 9시</strong>까지<br />
+        &nbsp;&nbsp;- <strong>중식: 당일 오전 10시 30분</strong>까지<br />
+        &nbsp;&nbsp;- <strong>석식: 당일 오후 2시 30분</strong>까지<br />
+        <strong><u>차주 식수</u> 마감 시간:</strong><br />
+        &nbsp;&nbsp;- <strong>금주 수요일 오후 4시</strong>까지 신청/변경 가능<br />
+        &nbsp;&nbsp; <strong>※수요일</strong>이 지나면 </strong><strong>신청이 마감되고 차주에 변경가능</strong>합니다.
+        </div>
+
+        <div id="meal-container" class="meal-flex-container">
+
+        <!-- 왼쪽: 식사 신청 테이블 -->
+        <div class="meal-table-area">
+        <div class="meal-header">
+        <span class="mealchart">식수 신청 내역</span>
+        <span class="selfcheckment">신청현황 본인 확인: 
+            <input type="checkbox" id="selfCheck" class="selfcheckbox">
+        </span>
+        </div>
+            <table id="meal-table">
+            <thead>
+                <tr>
+                <th>날짜</th>
+                <th>요일</th>
+                <th>조식</th>
+                <th>중식</th>
+                <th>석식</th>
+                </tr>
+            </thead> 
+            <tbody id="meal-body"></tbody>
+            </table>
+            <div class="button-row">
+            <button class="action-btn save-btn" onclick="saveMeals()">저장</button>
+            <button class="action-btn logout-btn" onclick="logout()">로그아웃</button>
+            <button class="action-btn visitor-btn" onclick="goToVisitor()">방문자 신청</button>
+            <button id="adminBtn" class="action-btn admin-btn" onclick="goToAdminDashboard()" style="display: none;">관리자 페이지</button>
+            <button id="teamEditButton" class="action-btn team-btn" onclick="goToTeamEdit()" style="display: none;">팀 관리</button>
+            <button id="toggleSelectBtn" class="action-btn" onclick="toggleSelectAll()">전체 선택</button>
+            </div>
+        </div>
+
+    
+
+    <div id="toast" class="toast"></div>
+    <!-- ✅ 공통 유틸 먼저 불러오기 -->
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+    function goToAdminDashboard() {
+        window.location.href = "admin_dashboard.html";
+    }
+    function goToTeamEdit() {
+    window.location.href = "team_edit.html";
+}
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const savedUser = sessionStorage.getItem("currentUser");
+    if (savedUser) {
+        const currentUser = JSON.parse(savedUser);
+        const adminBtn = document.getElementById("adminBtn");
+        const teamEditBtn = document.getElementById("teamEditButton");
+
+        if (currentUser.level === 3 && adminBtn) {
+            adminBtn.style.display = "inline-block";
+        }
+
+        if (currentUser.level === 2 && teamEditBtn) {
+            teamEditBtn.style.display = "inline-block";
+        }
+    }
+    });
+</script>
+
+</body>
+
+</html>

@@ -1,127 +1,265 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>식수 신청 시스템</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>식수 신청 시스템</title>
+  <link rel="stylesheet" href="css/style_premium.css" />
 </head>
 <body>
-    <div class="logo-title">
-    <img src="logo/SnSYS_logo.png" alt="회사 로고">
-    </div>
-    <h1>식수 신청 시스템</h1>
-    
-
-     <!-- 로그인 영역 -->
-  <div id="login-wrapper">
-    <div id="login-container" class="login-container">
-      <div class="login-field">
-        <label for="userId">사번</label>
-        <input type="text" id="userId" placeholder="사번 입력">
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo/SnSYS_logo.png" alt="회사 로고" />
+        <div class="title">
+          <strong>에스엔시스 식수 신청 시스템</strong>
+          <span>Meal Request System</span>
+        </div>
       </div>
-      <div class="login-field">
-        <label for="userName">이름</label>
-        <input type="text" id="userName" placeholder="이름 입력">
+
+      <div class="top-actions">
+        <div id="topUserPill" class="pill" title="로그인 후 사용자 정보가 표시됩니다.">
+          👤 <span id="topUserText">로그인 필요</span>
+        </div>
       </div>
-      <div class="remember-me">
-        <button class="action-btn save-btn" onclick="login(event)">로그인</button>
-        <input type="checkbox" id="rememberMe">
-        <label for="rememberMe">로그인 정보 저장</label>
-      </div>
-  </div>
+    </header>
 
-    <!-- ✅ 로그인 후 보이는 영역 전체 감싸기 -->
-    <div id="mainArea" style="display: none;">
-        <!-- 달력 선택 -->
-        <div id="date-picker-container">
-            <label>주 선택: <input type="date" id="weekPicker" onchange="loadWeekData()"></label>
-        </div>
-
-        <!-- 이름 표시 -->
-        <div id="welcome">
-            <button onclick="logout()">로그아웃</button>
-        </div>
-        <div id="weekRangeText" style="margin-bottom: 10px; font-weight: bold; font-size: 18px;"></div>
-        <div id="mealSummary" style="margin-top: 5px; font-weight: bold;"></div>
-        <!-- 신청 화면 -->
-        
-        <div id="deadline-info" class="deadline-info">
-        <strong>📌 마감 안내</strong><br />
-        <strong><u>금주 식수</u> 마감 시간:</strong><br />
-        &nbsp;&nbsp;- <strong>조식: 전날 오전 9시</strong>까지<br />
-        &nbsp;&nbsp;- <strong>중식: 당일 오전 10시 30분</strong>까지<br />
-        &nbsp;&nbsp;- <strong>석식: 당일 오후 2시 30분</strong>까지<br />
-        <strong><u>차주 식수</u> 마감 시간:</strong><br />
-        &nbsp;&nbsp;- <strong>금주 수요일 오후 4시</strong>까지 신청/변경 가능<br />
-        &nbsp;&nbsp; <strong>※수요일</strong>이 지나면 </strong><strong>신청이 마감되고 차주에 변경가능</strong>합니다.
-        </div>
-
-        <div id="meal-container" class="meal-flex-container">
-
-        <!-- 왼쪽: 식사 신청 테이블 -->
-        <div class="meal-table-area">
-        <div class="meal-header">
-        <span class="mealchart">식수 신청 내역</span>
-        <span class="selfcheckment">신청현황 본인 확인: 
-            <input type="checkbox" id="selfCheck" class="selfcheckbox">
-        </span>
-        </div>
-            <table id="meal-table">
-            <thead>
-                <tr>
-                <th>날짜</th>
-                <th>요일</th>
-                <th>조식</th>
-                <th>중식</th>
-                <th>석식</th>
-                </tr>
-            </thead> 
-            <tbody id="meal-body"></tbody>
-            </table>
-            <div class="button-row">
-            <button class="action-btn save-btn" onclick="saveMeals()">저장</button>
-            <button class="action-btn logout-btn" onclick="logout()">로그아웃</button>
-            <button class="action-btn visitor-btn" onclick="goToVisitor()">방문자 신청</button>
-            <button id="adminBtn" class="action-btn admin-btn" onclick="goToAdminDashboard()" style="display: none;">관리자 페이지</button>
-            <button id="teamEditButton" class="action-btn team-btn" onclick="goToTeamEdit()" style="display: none;">팀 관리</button>
-            <button id="toggleSelectBtn" class="action-btn" onclick="toggleSelectAll()">전체 선택</button>
+    <main class="shell">
+      <div id="login-wrapper">
+        <section id="login-container" class="card login-card login-container">
+          <div class="login-head">
+            <div>
+              <div class="login-title">로그인</div>
+              <div class="login-desc">사번/이름으로 로그인합니다.</div>
             </div>
+          </div>
+
+          <div class="login-field">
+            <label for="userId">사번</label>
+            <input type="text" id="userId" placeholder="사번 입력" />
+          </div>
+
+          <div class="login-field">
+            <label for="userName">이름</label>
+            <input type="text" id="userName" placeholder="이름 입력" />
+          </div>
+
+          <div class="remember-me">
+            <button type="button" class="action-btn save-btn" onclick="login(event)">로그인</button>
+            <div class="remember-row">
+              <input type="checkbox" id="rememberMe" />
+              <label for="rememberMe">로그인 정보 저장</label>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="mainArea" class="hidden">
+        <div class="erp-layout">
+          <aside class="erp-sidebar">
+            <div class="erp-sidebar-inner">
+              <button
+                type="button"
+                class="erp-sidebar-head erp-sidebar-toggle"
+                id="mobileMenuToggle"
+                aria-expanded="false"
+                aria-controls="mobileSidebarBody"
+              >
+                <span class="erp-sidebar-head-text">
+                  <span class="erp-sidebar-title">MENU</span>
+                  <span class="erp-sidebar-subtitle">메뉴</span>
+                </span>
+                <span class="erp-sidebar-toggle-icon" aria-hidden="true"></span>
+              </button>
+
+              <div class="erp-sidebar-body" id="mobileSidebarBody">
+                <nav class="erp-nav" aria-label="업무 메뉴">
+                  <button type="button" class="erp-nav-link active" data-page="weeklySection">주간 신청</button>
+                  <button type="button" class="erp-nav-link" data-page="menuBoardSection">식단표 게시판</button>
+                </nav>
+
+                <div class="erp-sidebar-actions">
+                  <button type="button" class="action-btn visitor-btn erp-side-action" onclick="goToVisitor()">방문자 신청</button>
+                  <button type="button" id="adminBtn" class="action-btn admin-btn erp-side-action hidden" onclick="goToAdminDashboard()">관리자 페이지</button>
+                  <button type="button" id="teamEditButton" class="action-btn team-btn erp-side-action hidden" onclick="goToTeamEdit()">팀 관리</button>
+                  <button type="button" class="action-btn logout-btn erp-side-action" onclick="logout()">로그아웃</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <section class="erp-content">
+            <section id="weeklySection" class="card pad card-weekly erp-page active">
+              <div class="weekly-head">
+                <div>
+                  <div class="weekly-title">주간 신청</div>
+                </div>
+
+                <div id="date-picker-container">
+                  <label for="weekPicker">주 선택</label>
+                  <input type="date" id="weekPicker" onchange="loadWeekData()" />
+                </div>
+              </div>
+
+              
+
+              <div class="card weekly-summary-card">
+                <div class="weekly-summary-inner">
+                  <div id="welcome" class="welcome-text"></div>
+                  <div id="weekRangeText" class="week-range-text"></div>
+                  <div class="summary-row">
+                    <div class="summary">
+                      <span class="summary-label">📊 주간 신청 요약</span>
+                      <div class="sub" id="mealSummary">
+                        총 식수 0 (조식 0, 중식 0, 석식 0)
+                      </div>
+                    </div>
+
+                    <div id="deadline-info" class="deadline-mini">
+                      <div class="deadline-title">📌 신청 마감시간 안내</div>
+                      <div class="deadline-text">
+                        <strong>금주 식수:</strong> 조식 전날 09:00 / 중식 10:30 / 석식 14:30<br>
+                        <strong>차주 식수:</strong> 수요일 16:00 (이후 변경 불가)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card pad card-meal-history meal-history-card">
+                <div class="meal-header">
+                  <span class="mealchart">식수 신청 내역</span>
+                  <span class="selfcheckment">
+                    본인 확인 여부:
+                    <input type="checkbox" id="selfCheck" class="selfcheckbox" />
+                  </span>
+                </div>
+
+                <div id="meal-container" class="meal-flex-container">
+                  <div class="meal-table-area">
+                    <table id="meal-table">
+                      <thead>
+                        <tr>
+                          <th class="date">날짜</th>
+                          <th class="day">요일</th>
+                          <th class="breakfast">조식</th>
+                          <th class="lunch">중식</th>
+                          <th class="dinner">석식</th>
+                        </tr>
+                      </thead>
+                      <tbody id="meal-body"></tbody>
+                    </table>
+
+                    <div class="button-row meal-button-row">
+                      <button type="button" class="action-btn save-btn" onclick="saveMeals()">저장</button>
+                      <button type="button" id="toggleSelectBtn" class="action-btn" onclick="toggleSelectAll()">전체 선택</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="menuBoardSection" class="card pad erp-menu-board-section erp-page">
+              <div id="menuBoard">
+                <div class="menu-board-header">
+                  <h2 class="menu-board-title">🖼️ 식단표 게시판</h2>
+                  <div id="menuBoardAdminBar" class="menu-admin-inline hidden">
+                    <button type="button" id="menuUploadBtn" class="menu-upload-btn">업로드</button>
+                    <button type="button" id="menuDeleteBtn" class="menu-delete-btn">삭제</button>
+                    <input id="menuUploadInput" type="file" accept="image/*" class="hidden" />
+                  </div>
+                </div>
+                <p class="menu-board-desc">썸네일을 누르면 큰 이미지로 확인할 수 있습니다.</p>
+                <div class="menu-list" id="menuList"></div>
+              </div>
+            </section>
+          </section>
         </div>
+      </div>
 
-    
+      <div id="toast" class="toast"></div>
+    </main>
 
-    <div id="toast" class="toast"></div>
-    <!-- ✅ 공통 유틸 먼저 불러오기 -->
     <script src="js/config.js"></script>
     <script src="js/util.js"></script>
     <script src="js/script.js"></script>
     <script>
-    function goToAdminDashboard() {
-        window.location.href = "admin_dashboard.html";
-    }
-    function goToTeamEdit() {
-    window.location.href = "team_edit.html";
-}
+      (function () {
+        const mobileQuery = window.matchMedia("(max-width: 768px)");
 
-    document.addEventListener("DOMContentLoaded", function () {
-    const savedUser = sessionStorage.getItem("currentUser");
-    if (savedUser) {
-        const currentUser = JSON.parse(savedUser);
-        const adminBtn = document.getElementById("adminBtn");
-        const teamEditBtn = document.getElementById("teamEditButton");
-
-        if (currentUser.level === 3 && adminBtn) {
-            adminBtn.style.display = "inline-block";
+        function closeMobileSidebar() {
+          const mainArea = document.getElementById("mainArea");
+          const toggle = document.getElementById("mobileMenuToggle");
+          if (!mainArea || !toggle) return;
+          mainArea.classList.remove("mobile-sidebar-open");
+          toggle.setAttribute("aria-expanded", "false");
         }
 
-        if (currentUser.level === 2 && teamEditBtn) {
-            teamEditBtn.style.display = "inline-block";
-        }
-    }
-    });
-</script>
+        function syncMobileSidebar() {
+          const mainArea = document.getElementById("mainArea");
+          const toggle = document.getElementById("mobileMenuToggle");
+          if (!mainArea || !toggle) return;
 
+          if (mobileQuery.matches) {
+            mainArea.classList.remove("mobile-sidebar-open");
+            toggle.setAttribute("aria-expanded", "false");
+          } else {
+            mainArea.classList.remove("mobile-sidebar-open");
+            toggle.setAttribute("aria-expanded", "true");
+          }
+        }
+
+        function bindErpSidebar() {
+          const links = document.querySelectorAll(".erp-nav-link[data-page]");
+          const pages = document.querySelectorAll(".erp-page");
+          const mainArea = document.getElementById("mainArea");
+          const toggle = document.getElementById("mobileMenuToggle");
+          const sideActions = document.querySelectorAll(".erp-side-action");
+
+          if (links.length && pages.length) {
+            links.forEach((btn) => {
+              btn.addEventListener("click", function () {
+                const targetId = this.dataset.page;
+                if (!targetId) return;
+
+                links.forEach((el) => el.classList.remove("active"));
+                this.classList.add("active");
+
+                pages.forEach((page) => page.classList.remove("active"));
+                const target = document.getElementById(targetId);
+                if (target) target.classList.add("active");
+
+                if (mobileQuery.matches) closeMobileSidebar();
+              });
+            });
+          }
+
+          sideActions.forEach((btn) => {
+            btn.addEventListener("click", function () {
+              if (mobileQuery.matches) closeMobileSidebar();
+            });
+          });
+
+          if (toggle && mainArea) {
+            toggle.addEventListener("click", function () {
+              if (!mobileQuery.matches) return;
+              const willOpen = !mainArea.classList.contains("mobile-sidebar-open");
+              mainArea.classList.toggle("mobile-sidebar-open", willOpen);
+              toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+            });
+          }
+
+          syncMobileSidebar();
+          window.addEventListener("resize", syncMobileSidebar);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", bindErpSidebar);
+        } else {
+          bindErpSidebar();
+        }
+      })();
+    </script>
+  </div>
 </body>
-
 </html>
