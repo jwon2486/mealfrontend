@@ -671,9 +671,8 @@ function isThisWeek(dateStr) {
 
 
 
-// ✅ 오늘 기준으로 다음 주 월요일 날짜 반환
 // function setDefaultWeek() {
-//   const today = new getKSTDate();
+//   const today = (typeof getKSTDate === "function") ? getKSTDate() : new Date();
 //   const day = today.getDay();
 //   const diffToMonday = day === 0 ? -6 : 1 - day;
 
@@ -695,13 +694,7 @@ function setDefaultWeek() {
   const diffToMonday = day === 0 ? -6 : 1 - day;
 
   const monday = new Date(today);
-
-  // 에코센터: 다음 주 월요일, 그 외: 이번 주 월요일
-  if (window.currentUser?.region === "에코센터") {
-    monday.setDate(today.getDate() + diffToMonday + 7);
-  } else {
-    monday.setDate(today.getDate() + diffToMonday);
-  }
+  monday.setDate(today.getDate() + diffToMonday);
 
   document.getElementById("weekPicker").value = monday.toISOString().split("T")[0];
 }
