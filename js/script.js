@@ -60,7 +60,7 @@ function getMealButtonLabel(state) {
   const labels = {
     unselected: "미신청",
     selected: "✔ 신청",
-    deadline: "🚫마감",
+    deadline: "❌ 마감",
     blocked: "⛔차단",
     holiday: "공휴일"
   };
