@@ -10,6 +10,76 @@ window.selfcheckCreatedAtMap = window.selfcheckCreatedAtMap || {}; // { 'YYYY-MM
 
 
 
+function setDisplayClass(el, displayType) {
+  if (!el) return;
+  el.classList.remove(
+    "ui-hidden",
+    "ui-block",
+    "ui-inline-block",
+    "ui-flex",
+    "ui-inline-flex"
+  );
+  if (displayType === "none") {
+    el.classList.add("ui-hidden");
+  } else if (displayType === "block") {
+    el.classList.add("ui-block");
+  } else if (displayType == "inline-block") {
+    el.classList.add("ui-inline-block");
+  } else if (displayType === "flex") {
+    el.classList.add("ui-flex");
+  } else if (displayType === "inline-flex") {
+    el.classList.add("ui-inline-flex");
+  }
+}
+
+function showBlock(el) { setDisplayClass(el, "block"); }
+function showInlineBlock(el) { setDisplayClass(el, "inline-block"); }
+function showFlex(el) { setDisplayClass(el, "flex"); }
+function showInlineFlex(el) { setDisplayClass(el, "inline-flex"); }
+function hideElement(el) { setDisplayClass(el, "none"); }
+
+function setMealButtonVisualState(btn, state) {
+  if (!btn) return;
+  btn.classList.remove(
+    "state-unselected",
+    "state-selected",
+    "state-deadline",
+    "state-blocked",
+    "state-holiday"
+  );
+  btn.classList.add(`state-${state}`);
+}
+
+function setHolidayVisualState(...elements) {
+  elements.forEach((el) => {
+    if (el) el.classList.add("is-holiday");
+  });
+}
+
+function getMealButtonLabel(state) {
+  const labels = {
+    unselected: "미신청",
+    selected: "✔ 신청",
+    deadline: "🚫마감",
+    blocked: "⛔차단",
+    holiday: "공휴일"
+  };
+  return labels[state] || state;
+}
+
+function setMealButtonContent(btn, state) {
+  if (!btn) return;
+  btn.textContent = getMealButtonLabel(state);
+}
+
+function updateToggleSelectButtonLabel() {
+  const toggleBtn = document.getElementById("toggleSelectBtn");
+  if (!toggleBtn) return;
+  toggleBtn.textContent = isAllSelected ? "☑ 전체 선택 해제" : "☐ 전체 선택";
+}
+
+
+
 // ✅ 로그인 처리
 function login(event) {
     console.log("🧪 login() 함수 실행됨");
@@ -76,19 +146,19 @@ function login(event) {
             localStorage.removeItem("savedUserName");
         }
         
-        document.getElementById("deadline-info").style.display = "block";
+        showBlock(document.getElementById("deadline-info"));
 
         // ✅ 버튼 초기화 및 표시 처리
 const adminBtn = document.getElementById("adminBtn");
 const teamEditBtn = document.getElementById("teamEditButton");
-if (adminBtn) adminBtn.style.display = "none";
-if (teamEditBtn) teamEditBtn.style.display = "none";
+if (adminBtn) hideElement(adminBtn);
+if (teamEditBtn) hideElement(teamEditBtn);
 
 if (window.currentUser.level === 3 && adminBtn) {
-    adminBtn.style.display = "inline-block";
+    showInlineBlock(adminBtn);
 }
 if (window.currentUser.level === 2 && teamEditBtn) {
-    teamEditBtn.style.display = "inline-block";
+    showInlineBlock(teamEditBtn);
 }
 
         // ✅ 사용자 type에 따라 화면 분기
@@ -99,17 +169,17 @@ if (window.currentUser.level === 2 && teamEditBtn) {
 
         
 
-        document.getElementById("login-wrapper").style.display = "none";
-        document.getElementById("mainArea").style.display = "block";
-        document.getElementById("deadline-info").style.display = "block";  // 추가
+        hideElement(document.getElementById("login-wrapper"));
+        showBlock(document.getElementById("mainArea"));
+        showBlock(document.getElementById("deadline-info"));  // 추가
         
         // ✅ 내부 요소들도 명시적으로 보이게 설정
-        document.getElementById("date-picker-container").style.display = "block";
-        document.getElementById("meal-container").style.display = "block";
-        document.getElementById("weekPicker").style.display = "inline-block";
-        document.getElementById("welcome").style.display = "block";
-        document.getElementById("weekRangeText").style.display = "block";
-        document.getElementById("mealSummary").style.display = "block";
+        showBlock(document.getElementById("date-picker-container"));
+        showBlock(document.getElementById("meal-container"));
+        showInlineBlock(document.getElementById("weekPicker"));
+        showBlock(document.getElementById("welcome"));
+        showBlock(document.getElementById("weekRangeText"));
+        showBlock(document.getElementById("mealSummary"));
         document.getElementById("welcome").innerText = `${data.name}님 (${data.dept}), 안녕하세요.`;
 
 
@@ -158,8 +228,7 @@ function toggleSelectAll() {
     // 반전
     if (changed) {
         isAllSelected = !isAllSelected;
-        const toggleBtn = document.getElementById("toggleSelectBtn");
-        toggleBtn.innerText = isAllSelected ? "전체 선택 해제" : "전체 선택";
+        updateToggleSelectButtonLabel();
     }
 }
 
@@ -176,8 +245,8 @@ function logout() {
   const mainArea = document.getElementById("mainArea");
   const loginWrapper = document.getElementById("login-wrapper");
 
-  if (mainArea) mainArea.style.display = "none";
-  if (loginWrapper) loginWrapper.style.display = "flex";
+  if (mainArea) hideElement(mainArea);
+  if (loginWrapper) showFlex(loginWrapper);
 
   // 3) 메인 화면 데이터/UI 초기화
   const mealBody = document.getElementById("meal-body");
@@ -209,10 +278,10 @@ function logout() {
   // 4) 권한 버튼 숨김 (id 혼재 케이스 둘 다 처리)
   //관리자 버튼 숨김
   const adminBtn = document.getElementById("adminBtn");
-  if (adminBtn) adminBtn.style.display = "none";
+  if (adminBtn) hideElement(adminBtn);
   // 팀 관리 버튼 숨김
   const teamEditButton = document.getElementById("teamEditButton");
-  if (teamEditButton) teamEditButton.style.display = "none";
+  if (teamEditButton) hideElement(teamEditButton);
 
   if (typeof showToast === "function") showToast("로그아웃 되었습니다.");
 }
@@ -222,11 +291,11 @@ function showToast(msg){
   const toast = document.getElementById("toast");
 
   toast.textContent = msg;
-  toast.style.display = "block";
+  toast.classList.add("show");
 
   setTimeout(()=>{
     toast.textContent = "";
-    toast.style.display = "none";
+    toast.classList.remove("show");
   }, 2500);
 }
 
@@ -273,8 +342,7 @@ function renderMealTable(dates) {
         dateCell.innerText = dateStr;
 
         if (isHoliday) {
-        dateCell.style.color = "red";
-        dateCell.style.backgroundColor = "#ffe6e6";
+        setHolidayVisualState(dateCell);
 
         // ⬇️ 공휴일 설명 (없으면 "(공휴일)"로 표시)
         const key  = normalizeDate(dateStr);
@@ -291,8 +359,7 @@ function renderMealTable(dates) {
         dayCell.className = "day";
         dayCell.innerText = weekday;
         if (isHoliday) {
-            dayCell.style.color = "red";
-            dayCell.style.backgroundColor = "#ffe6e6";
+            setHolidayVisualState(dayCell);
         }
 
         row.appendChild(dateCell);
@@ -300,7 +367,7 @@ function renderMealTable(dates) {
 
         ["조식", "중식", "석식"].forEach(type => {
             const btn = document.createElement("button");
-            btn.className = "meal-btn";
+            btn.className = "meal-btn state-unselected";
             btn.dataset.date = dateStr;
             btn.dataset.type = type;
 
@@ -312,22 +379,20 @@ function renderMealTable(dates) {
 
             if (isBlockedWeek) {
                 btn.disabled = true;
-                btn.innerText = "🚫 차단됨";
-                btn.style.backgroundColor = "#ccc";
-                btn.style.color = "#666";
+                setMealButtonContent(btn, "blocked");
+                setMealButtonVisualState(btn, "blocked");
                 btn.title = "앞 주 신청 및 본인 확인이 없어 차단됨";
             } else if (isHoliday) {
-                btn.style.color = "red";
-                btn.innerText = "❌공휴일";
+                setMealButtonVisualState(btn, "holiday");
+                setMealButtonContent(btn, "holiday");
                 btn.disabled = false;
                 btn.title = "공휴일 신청 불가";
                 btn.onclick = () => alert("⛔ 공휴일에는 식수 신청이 불가능합니다.");
-                cell.style.backgroundColor = "#ffe6e6";
+                setHolidayVisualState(cell);
             } else if (isDeadlinePassed(dateStr, type)) {
-                btn.style.backgroundColor = "#ffe6e6";
-                btn.style.color = "#666";
+                setMealButtonVisualState(btn, "deadline");
                 btn.title = "신청 마감됨";
-                btn.innerText = "❌ 마감";
+                setMealButtonContent(btn, "deadline");
                 // ✅ 차단 여부에 따라 메시지 분리
             btn.onclick = () => {
             if (isBlockedWeek) {
@@ -338,7 +403,7 @@ function renderMealTable(dates) {
                 alert(`${type}은 신청 마감 시간이 지났습니다.`);
             }
             };}else {
-                btn.innerText = "❌미신청";
+                setMealButtonContent(btn, "unselected");
                 btn.onclick = () => toggleMeal(btn);
             }
 
@@ -354,14 +419,12 @@ function renderMealTable(dates) {
 function toggleMeal(btn) {
     if (btn.classList.contains("selected")) {
         btn.classList.remove("selected");
-        btn.innerText = "❌미신청";
-        btn.style.backgroundColor = "#e0e0e0";
-        btn.style.color = "#000";
+        setMealButtonContent(btn, "unselected");
+        setMealButtonVisualState(btn, "unselected");
     } else {
         btn.classList.add("selected");
-        btn.innerText = "✅신청";
-        btn.style.backgroundColor = "#28a745";
-        btn.style.color = "#fff";
+        setMealButtonContent(btn, "selected");
+        setMealButtonVisualState(btn, "selected");
     }
     
     // ✅ 합계 다시 계산
@@ -488,8 +551,8 @@ function checkPreviousWeek(userId, currentWeekStart, callback) {
 function disableCurrentWeekButtons() {
     document.querySelectorAll(".meal-btn").forEach(btn => {
         btn.disabled = true;
-        btn.innerText = "차단됨";
-        btn.style.backgroundColor = "#ccc";
+        setMealButtonContent(btn, "blocked");
+        setMealButtonVisualState(btn, "blocked");
         btn.title = "앞 주 신청 및 본인 확인이 없어 차단됨";
     });
 }
@@ -828,6 +891,7 @@ document.addEventListener("DOMContentLoaded", function () {
         window.selfcheckCreatedAtMap = JSON.parse(savedSelfcheckMap);
     }
     setDefaultWeek(); // ✅ 이번 주 자동 설정
+    updateToggleSelectButtonLabel();
     const savedUser = sessionStorage.getItem("currentUser");
     const year = new Date().getFullYear();
 
@@ -859,12 +923,12 @@ document.addEventListener("DOMContentLoaded", function () {
         // ✅ 관리자 버튼 노출 여부 처리
         const adminBtn = document.getElementById("adminBtn");
         if (window.currentUser?.level === 3 && adminBtn) {
-            adminBtn.style.display = "inline-block";
+            showInlineBlock(adminBtn);
         }
         // ✅ 부서원 신청 관리 버튼 노출 조건
         const teamEditBtn = document.getElementById("teamEditButton");
         if (window.currentUser?.level === 2 && teamEditBtn) {
-        teamEditBtn.style.display = "inline-block";
+        showInlineBlock(teamEditBtn);
         }
        
         if (flag_type !== "직영"){
@@ -916,8 +980,8 @@ fetchHolidayList(`/api/public-holidays?year=${year}`, (holidaysThisYear) => {
       document.getElementById("userId").value = window.currentUser.userId;
       document.getElementById("userName").value = window.currentUser.userName;
 
-      document.getElementById("login-wrapper").style.display = "none";
-      document.getElementById("mainArea").style.display = "block";
+      hideElement(document.getElementById("login-wrapper"));
+      showBlock(document.getElementById("mainArea"));
       document.getElementById("welcome").innerText =
         `${window.currentUser.userName}님 (${window.currentUser.dept} / ${window.currentUser.rank}) 안녕하세요.`;
 
@@ -1299,20 +1363,20 @@ function applyMenuBoardRoleUI() {
   const input = document.getElementById("menuUploadInput");
 
   if (adminBar) {
-    adminBar.style.display = isAdmin ? "flex" : "none";
+    setDisplayClass(adminBar, isAdmin ? "flex" : "none");
   }
 
   if (uploadBtn) {
-    uploadBtn.style.display = isAdmin ? "inline-flex" : "none";
+    setDisplayClass(uploadBtn, isAdmin ? "inline-flex" : "none");
   }
 
   if (deleteBtn) {
-    deleteBtn.style.display = isAdmin ? "inline-flex" : "none";
+    setDisplayClass(deleteBtn, isAdmin ? "inline-flex" : "none");
     if (!isAdmin) deleteBtn.textContent = "삭제";
   }
 
   if (input) {
-    input.style.display = "none";
+    hideElement(input);
     input.value = "";
   }
 }
@@ -1426,4 +1490,67 @@ function initMenuBoard() {
 // 페이지 최초 로드 시 1회 초기화
 document.addEventListener("DOMContentLoaded", () => {
   initMenuBoard();
+});
+
+
+/* ==========================================
+   🎨 색각 보정 모드
+========================================== */
+
+const COLOR_BLIND_STORAGE_KEY = "snsysColorBlindMode";
+const COLOR_BLIND_MODES = ["normal", "protan", "deutan", "tritan", "protan-deutan", "tritan-deutan", "highcontrast"];
+
+function normalizeColorBlindMode(mode) {
+  return COLOR_BLIND_MODES.includes(mode) ? mode : "normal";
+}
+
+function syncColorBlindSelects(mode) {
+  const normalized = normalizeColorBlindMode(mode);
+  const topSelect = document.getElementById("colorBlindMode");
+  const sidebarSelect = document.getElementById("sidebarColorBlindMode");
+
+  if (topSelect) topSelect.value = normalized;
+  if (sidebarSelect) sidebarSelect.value = normalized;
+}
+
+function applyColorBlindMode(mode) {
+  const normalized = normalizeColorBlindMode(mode);
+  document.body.classList.remove(
+    "cb-protan",
+    "cb-deutan",
+    "cb-tritan",
+    "cb-protan-deutan",
+    "cb-tritan-deutan",
+    "cb-highcontrast"
+  );
+
+  if (normalized !== "normal") {
+    document.body.classList.add(`cb-${normalized}`);
+  }
+
+  document.body.setAttribute("data-colorblind-mode", normalized);
+  localStorage.setItem(COLOR_BLIND_STORAGE_KEY, normalized);
+  syncColorBlindSelects(normalized);
+}
+
+function bindColorBlindModeControls() {
+  const topSelect = document.getElementById("colorBlindMode");
+  const sidebarSelect = document.getElementById("sidebarColorBlindMode");
+  const savedMode = normalizeColorBlindMode(
+    localStorage.getItem(COLOR_BLIND_STORAGE_KEY) || "normal"
+  );
+
+  applyColorBlindMode(savedMode);
+
+  [topSelect, sidebarSelect].forEach((select) => {
+    if (!select || select.dataset.boundColorblind === "1") return;
+    select.dataset.boundColorblind = "1";
+    select.addEventListener("change", (event) => {
+      applyColorBlindMode(event.target.value);
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  bindColorBlindModeControls();
 });

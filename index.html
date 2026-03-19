@@ -18,6 +18,7 @@
       </div>
 
       <div class="top-actions">
+        
         <div id="topUserPill" class="pill" title="로그인 후 사용자 정보가 표시됩니다.">
           👤 <span id="topUserText">로그인 필요</span>
         </div>
@@ -79,11 +80,26 @@
                 </nav>
 
                 <div class="erp-sidebar-actions">
-                  <button type="button" class="action-btn visitor-btn erp-side-action" onclick="goToVisitor()">방문자 신청</button>
-                  <button type="button" id="adminBtn" class="action-btn admin-btn erp-side-action hidden" onclick="goToAdminDashboard()">관리자 페이지</button>
-                  <button type="button" id="teamEditButton" class="action-btn team-btn erp-side-action hidden" onclick="goToTeamEdit()">팀 관리</button>
-                  <button type="button" class="action-btn logout-btn erp-side-action" onclick="logout()">로그아웃</button>
+                  <button type="button" class="action-btn visitor-btn erp-side-action" onclick="goToVisitor()">🧾 방문자 신청</button>
+                  <button type="button" id="adminBtn" class="action-btn admin-btn erp-side-action hidden" onclick="goToAdminDashboard()">⚙ 관리자 페이지</button>
+                  <button type="button" id="teamEditButton" class="action-btn team-btn erp-side-action hidden" onclick="goToTeamEdit()">👥 팀 관리</button>
+                  <button type="button" class="action-btn logout-btn erp-side-action" onclick="logout()">↩ 로그아웃</button>
                 </div>
+
+                <section class="accessibility-card" aria-labelledby="accessibilityTitle">
+                  <div class="accessibility-title" id="accessibilityTitle">색각 설정</div>
+                  <div class="accessibility-desc">색각 이상 사용자용 보정 모드를 선택할 수 있습니다.</div>
+                  <label for="sidebarColorBlindMode" class="sr-only">색각 보정 모드</label>
+                  <select id="sidebarColorBlindMode" class="sidebar-colorblind-select">
+                    <option value="normal">기본</option>
+                    <option value="protan">적색 이상 보정</option>
+                    <option value="deutan">녹색 이상 보정</option>
+                    <option value="tritan">청색 이상 보정</option>
+                    <option value="protan-deutan">적녹 혼합 보정</option>
+                    <option value="tritan-deutan">청녹 혼합 보정</option>
+                    <option value="highcontrast">고대비</option>
+                  </select>
+                </section>
               </div>
             </div>
           </aside>
@@ -137,21 +153,23 @@
 
                 <div id="meal-container" class="meal-flex-container">
                   <div class="meal-table-area">
-                    <table id="meal-table">
-                      <thead>
-                        <tr>
-                          <th class="date">날짜</th>
-                          <th class="day">요일</th>
-                          <th class="breakfast">조식</th>
-                          <th class="lunch">중식</th>
-                          <th class="dinner">석식</th>
-                        </tr>
-                      </thead>
-                      <tbody id="meal-body"></tbody>
-                    </table>
+                    <div class="meal-table-scroll">
+                      <table id="meal-table">
+                        <thead>
+                          <tr>
+                            <th class="date">날짜</th>
+                            <th class="day">요일</th>
+                            <th class="breakfast">조식</th>
+                            <th class="lunch">중식</th>
+                            <th class="dinner">석식</th>
+                          </tr>
+                        </thead>
+                        <tbody id="meal-body"></tbody>
+                      </table>
+                    </div>
 
                     <div class="button-row meal-button-row">
-                      <button type="button" class="action-btn save-btn" onclick="saveMeals()">저장</button>
+                      <button type="button" class="action-btn save-btn" onclick="saveMeals()">✔ 저장</button>
                       <button type="button" id="toggleSelectBtn" class="action-btn" onclick="toggleSelectAll()">전체 선택</button>
                     </div>
                   </div>
@@ -164,8 +182,8 @@
                 <div class="menu-board-header">
                   <h2 class="menu-board-title">🖼️ 식단표 게시판</h2>
                   <div id="menuBoardAdminBar" class="menu-admin-inline hidden">
-                    <button type="button" id="menuUploadBtn" class="menu-upload-btn">업로드</button>
-                    <button type="button" id="menuDeleteBtn" class="menu-delete-btn">삭제</button>
+                    <button type="button" id="menuUploadBtn" class="menu-upload-btn">⬆ 업로드</button>
+                    <button type="button" id="menuDeleteBtn" class="menu-delete-btn">🗑 삭제</button>
                     <input id="menuUploadInput" type="file" accept="image/*" class="hidden" />
                   </div>
                 </div>
