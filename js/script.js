@@ -1058,14 +1058,16 @@ function loadSelfCheck(userId, date, callback) {
         sessionStorage.setItem("selfcheckCreatedAtMap", JSON.stringify(window.selfcheckCreatedAtMap));
       }
       checkbox.checked = data.checked === 1;
-
-      // 주차 종료일 이후면 비활성화
+      
+      // 주차 종료일 이후면 비활성화 → 이번 주는 항상 허용
       const currentDate = new Date();
       const weekStart = new Date(date);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 4);
 
-      checkbox.disabled = currentDate > weekEnd;
+      const selectedWeekIsThisWeek = isThisWeek(date);
+
+      checkbox.disabled = !selectedWeekIsThisWeek && currentDate > weekEnd;
       checkbox.title = checkbox.disabled ? "이미 지난 주의 본인 확인은 수정할 수 없습니다." : "";
 
       if (callback) callback();   // 🔥 호출 보장
