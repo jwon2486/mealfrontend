@@ -1321,33 +1321,43 @@ tr:hover{
   }
 
   .weekly-head{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) auto;
+    align-items:center;
     gap:8px;
   }
 
   .weekly-head > div:first-child{
-    flex:0 0 auto;
     min-width:0;
   }
 
   #date-picker-container{
-    justify-content:flex-end !important;
+    display:grid !important;
+    grid-template-columns:auto auto;
+    align-items:center !important;
+    justify-content:end !important;
     gap:6px !important;
-    flex:0 1 auto;
+    margin:0 !important;
+    white-space:nowrap;
   }
 
   #date-picker-container label{
     margin:0;
     font-size:.95rem;
     line-height:1;
-    flex:0 0 auto;
   }
 
   #weekPicker{
     width:auto !important;
     min-width:140px;
     max-width:160px;
-    padding:8px 10px;
-    flex:0 0 auto;
+    height:42px;
+    min-height:42px;
+    padding:0 12px;
+    line-height:42px;
+    box-sizing:border-box;
+    appearance:none;
+    -webkit-appearance:none;
   }
 
   .erp-sidebar-actions{
@@ -1442,10 +1452,12 @@ tr:hover{
   }
 
   #weekPicker{
-    width:auto !important;
     min-width:128px;
     max-width:148px;
-    padding:7px 9px;
+    height:40px;
+    min-height:40px;
+    padding:0 10px;
+    line-height:40px;
   }
 }
 
