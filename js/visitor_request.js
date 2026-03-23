@@ -942,3 +942,404 @@ function goToMain() {
     window.location.href = "index.html";
 }
   
+
+/* ===== bulk weekly visitor input enhancement ===== */
+(function () {
+  const BULK_IDS = {
+    toggle: "bulk-input-toggle-btn",
+    wrapper: "bulk-visit-wrapper",
+    body: "bulk-visit-body",
+    save: "bulk-visit-save-btn",
+    weekDate: "visit-week-date",
+    singleDate: "visit-date"
+  };
+
+  function getUserType() {
+    return sessionStorage.getItem("type") || "방문자";
+  }
+
+  function isCooperator() {
+    return getUserType() === "협력사";
+  }
+
+  function isReasonRequired() {
+    const userType = getUserType();
+    const currentDept = sessionStorage.getItem("dept");
+    const isException = currentDept === "신명전력";
+    return !(userType === "협력사" && !isException);
+  }
+
+  function getActualType() {
+    return getUserType() === "협력사" ? "협력사" : "방문자";
+  }
+
+  function normalizeReason(reason) {
+    const currentDept = sessionStorage.getItem("dept");
+    const isException = currentDept === "신명전력";
+    if (getUserType() === "협력사" && !isException) {
+      return "협력사 신청";
+    }
+    return (reason || "").trim();
+  }
+
+  function sanitizeWeekendDate(dateStr) {
+    if (!dateStr) return dateStr;
+    const picked = new Date(dateStr);
+    if (picked.getDay() === 0 || picked.getDay() === 6) {
+      const adjusted = getNearestWeekday(picked);
+      return adjusted.toISOString().split("T")[0];
+    }
+    return dateStr;
+  }
+
+  function getWeekDatesFromMonday(baseDateStr) {
+    const base = new Date(sanitizeWeekendDate(baseDateStr));
+    const day = base.getDay();
+    const monday = new Date(base);
+    monday.setDate(base.getDate() - ((day + 6) % 7));
+    monday.setHours(9, 0, 0, 0);
+
+    const dates = [];
+    for (let i = 0; i < 5; i += 1) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      dates.push(d.toISOString().split("T")[0]);
+    }
+    return dates;
+  }
+
+  function buildVisitPayload(rawData) {
+    return {
+      applicant_id: sessionStorage.getItem("id"),
+      applicant_name: sessionStorage.getItem("name"),
+      date: rawData.date,
+      reason: normalizeReason(rawData.reason),
+      type: getActualType(),
+      requested_by_admin: false
+    };
+  }
+
+  function postVisitData(data, callbacks = {}) {
+    postData("/visitors", data, () => {
+      if (callbacks.onSuccess) callbacks.onSuccess();
+    }, (err) => {
+      if (callbacks.onError) callbacks.onError(err);
+    });
+  }
+
+  function validateVisitInput(rawData) {
+    const date = rawData.date;
+    const breakfast = Number(rawData.breakfast) || 0;
+    const lunch = Number(rawData.lunch) || 0;
+    const dinner = Number(rawData.dinner) || 0;
+    const reason = normalizeReason(rawData.reason);
+
+    if (!date) {
+      return { ok: false, message: "날짜가 없습니다." };
+    }
+    if (breakfast + lunch + dinner === 0) {
+      return { ok: false, message: `${date}: 식사 수량이 없습니다.` };
+    }
+    if (isReasonRequired() && !reason) {
+      return { ok: false, message: `${date}: 사유를 입력해주세요.` };
+    }
+    if (isNextWeekDeadlinePassed(date)) {
+      return { ok: false, message: `${date}: 다음 주 식사는 이번 주 수요일 이후 신청할 수 없습니다.` };
+    }
+
+    const expiredList = getExpiredMeals(date, { breakfast, lunch, dinner });
+    if (expiredList.length === 3) {
+      return { ok: false, message: `${date}: 모든 식사가 마감되었습니다.` };
+    }
+
+    return {
+      ok: true,
+      payload: buildVisitPayload({ date, reason }),
+      meals: { breakfast, lunch, dinner },
+      expiredList
+    };
+  }
+
+  function saveVisitByData(rawData, callbacks = {}) {
+    const validation = validateVisitInput(rawData);
+    if (!validation.ok) {
+      if (callbacks.onError) callbacks.onError(validation.message);
+      return;
+    }
+
+    const { payload, meals, expiredList } = validation;
+    const date = rawData.date;
+    const checkUrl = `${API_BASE_URL}/visitors/check?date=${date}&id=${sessionStorage.getItem("id")}&type=${payload.type}`;
+
+    getData(`/holidays?year=${date.substring(0, 4)}`, (holidays) => {
+      if ((holidays || []).some(h => h.date === date)) {
+        if (callbacks.onError) callbacks.onError(`${date}: 공휴일이라 신청할 수 없습니다.`);
+        return;
+      }
+
+      getData(checkUrl, (res) => {
+        if (res && res.exists && callbacks.confirmOverwrite) {
+          const shouldProceed = callbacks.confirmOverwrite(date, res);
+          if (!shouldProceed) {
+            if (callbacks.onSkip) callbacks.onSkip(`${date}: 기존 신청 유지`);
+            return;
+          }
+        }
+
+        const visitData = { ...payload };
+        if (!expiredList.includes("breakfast")) visitData.breakfast = meals.breakfast;
+        if (!expiredList.includes("lunch")) visitData.lunch = meals.lunch;
+        if (!expiredList.includes("dinner")) visitData.dinner = meals.dinner;
+
+        postVisitData(visitData, {
+          onSuccess: () => {
+            localStorage.setItem("lastVisitDate", date);
+            localStorage.setItem("lastWeeklyVisitDate", date);
+            localStorage.setItem("flag", "2");
+            lastSubmittedDate = date;
+            if (callbacks.onSuccess) callbacks.onSuccess(date);
+          },
+          onError: (err) => {
+            if (callbacks.onError) callbacks.onError(`${date}: 저장 실패`);
+            console.error("방문객 저장 실패", err);
+          }
+        });
+      }, (err) => {
+        console.error("기존 신청 확인 실패", err);
+        if (callbacks.onError) callbacks.onError(`${date}: 중복 조회 실패`);
+      });
+    }, (err) => {
+      console.error("공휴일 조회 실패", err);
+      if (callbacks.onError) callbacks.onError(`${date}: 공휴일 조회 실패`);
+    });
+  }
+
+  function getBulkWrapper() {
+    return document.getElementById(BULK_IDS.wrapper);
+  }
+
+  function getBulkBody() {
+    return document.getElementById(BULK_IDS.body);
+  }
+
+  function renderBulkVisitRows() {
+    const weekDateInput = document.getElementById(BULK_IDS.weekDate);
+    const tbody = getBulkBody();
+    if (!weekDateInput || !weekDateInput.value || !tbody) return;
+
+    const dates = getWeekDatesFromMonday(weekDateInput.value);
+    const reasonHeader = document.querySelector(".bulk-reason-header");
+    if (reasonHeader) {
+      reasonHeader.style.display = isCooperator() ? "none" : "";
+    }
+
+    tbody.innerHTML = dates.map((date) => {
+      const reasonCellStyle = isCooperator() ? ' style="display:none;"' : "";
+      return `
+        <tr data-date="${date}">
+          <td>${date}</td>
+          <td>${getWeekdayName(date)}</td>
+          <td><input type="number" class="bulk-b-count" min="0" max="50" value="0"></td>
+          <td><input type="number" class="bulk-l-count" min="0" max="50" value="0"></td>
+          <td><input type="number" class="bulk-d-count" min="0" max="50" value="0"></td>
+          <td class="bulk-reason-cell"${reasonCellStyle}><input type="text" class="bulk-reason-input" placeholder="신청 사유"></td>
+        </tr>
+      `;
+    }).join("");
+
+    applyBulkDeadlineState();
+  }
+
+  function applyStateToInput(input, locked, title) {
+    if (!input) return;
+    input.readOnly = !!locked;
+    input.classList.toggle("expired-input", !!locked);
+    input.style.backgroundColor = locked ? "#ffe5e5" : "";
+    input.title = locked ? title : "";
+    if (!locked && input.value === "") {
+      input.value = 0;
+    }
+  }
+
+  function applyBulkDeadlineState() {
+    const rows = document.querySelectorAll(`#${BULK_IDS.body} tr`);
+    rows.forEach((row) => {
+      const date = row.dataset.date;
+      const bInput = row.querySelector(".bulk-b-count");
+      const lInput = row.querySelector(".bulk-l-count");
+      const dInput = row.querySelector(".bulk-d-count");
+
+      applyStateToInput(bInput, false, "");
+      applyStateToInput(lInput, false, "");
+      applyStateToInput(dInput, false, "");
+
+      if (isDeadlinePassed(date, "breakfast", Number(bInput.value) || 0)) {
+        applyStateToInput(bInput, true, "⛔ 조식은 신청 마감되었습니다.");
+      }
+      if (isDeadlinePassed(date, "lunch", Number(lInput.value) || 0)) {
+        applyStateToInput(lInput, true, "⛔ 중식은 신청 마감되었습니다.");
+      }
+      if (isDeadlinePassed(date, "dinner", Number(dInput.value) || 0)) {
+        applyStateToInput(dInput, true, "⛔ 석식은 신청 마감되었습니다.");
+      }
+      if (isNextWeekDeadlinePassed(date)) {
+        applyStateToInput(bInput, true, "⛔ 다음 주 식사는 이번 주 수요일 이후에는 신청할 수 없습니다.");
+        applyStateToInput(lInput, true, "⛔ 다음 주 식사는 이번 주 수요일 이후에는 신청할 수 없습니다.");
+        applyStateToInput(dInput, true, "⛔ 다음 주 식사는 이번 주 수요일 이후에는 신청할 수 없습니다.");
+      }
+    });
+  }
+
+  function toggleBulkVisit() {
+    const wrapper = getBulkWrapper();
+    if (!wrapper) return;
+    const shouldShow = wrapper.style.display === "none" || wrapper.style.display === "";
+    wrapper.style.display = shouldShow ? "block" : "none";
+    if (shouldShow) {
+      renderBulkVisitRows();
+    }
+  }
+
+  function collectBulkRows() {
+    const rows = Array.from(document.querySelectorAll(`#${BULK_IDS.body} tr`));
+    return rows.map((row) => ({
+      date: row.dataset.date,
+      breakfast: Number(row.querySelector(".bulk-b-count")?.value || 0),
+      lunch: Number(row.querySelector(".bulk-l-count")?.value || 0),
+      dinner: Number(row.querySelector(".bulk-d-count")?.value || 0),
+      reason: row.querySelector(".bulk-reason-input")?.value || ""
+    })).filter((row) => row.breakfast + row.lunch + row.dinner > 0);
+  }
+
+  function clearBulkRows() {
+    document.querySelectorAll(`#${BULK_IDS.body} tr`).forEach((row) => {
+      [".bulk-b-count", ".bulk-l-count", ".bulk-d-count"].forEach((selector) => {
+        const input = row.querySelector(selector);
+        if (input && !input.readOnly) input.value = 0;
+      });
+      const reasonInput = row.querySelector(".bulk-reason-input");
+      if (reasonInput) reasonInput.value = "";
+    });
+  }
+
+  function submitBulkVisit() {
+    const targets = collectBulkRows();
+    if (targets.length === 0) {
+      alert("일괄 저장할 식사 수량이 없습니다.");
+      return;
+    }
+
+    const successList = [];
+    const failList = [];
+    const skippedList = [];
+
+    const run = (index) => {
+      if (index >= targets.length) {
+        loadWeeklyVisitData();
+        clearInput();
+        clearBulkRows();
+        renderBulkVisitRows();
+
+        const parts = [
+          `성공: ${successList.length}건`,
+          `실패: ${failList.length}건`
+        ];
+        if (skippedList.length) {
+          parts.push(`건너뜀: ${skippedList.length}건`);
+        }
+
+        let message = `일괄 저장 완료\n\n${parts.join("\n")}`;
+        if (failList.length) {
+          message += `\n\n실패 내역\n- ${failList.join("\n- ")}`;
+        }
+        if (skippedList.length) {
+          message += `\n\n건너뜀\n- ${skippedList.join("\n- ")}`;
+        }
+        alert(message);
+        return;
+      }
+
+      saveVisitByData(targets[index], {
+        confirmOverwrite: (date) => confirm(`📌 ${date}에 이미 신청 내역이 있습니다. 덮어쓰시겠습니까?`),
+        onSuccess: (date) => {
+          successList.push(date);
+          run(index + 1);
+        },
+        onError: (message) => {
+          failList.push(message);
+          run(index + 1);
+        },
+        onSkip: (message) => {
+          skippedList.push(message);
+          run(index + 1);
+        }
+      });
+    };
+
+    run(0);
+  }
+
+  const originalWeekChangeHandler = document.getElementById(BULK_IDS.weekDate);
+  if (originalWeekChangeHandler) {
+    originalWeekChangeHandler.addEventListener("change", () => {
+      const wrapper = getBulkWrapper();
+      if (wrapper && wrapper.style.display === "block") {
+        renderBulkVisitRows();
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.getElementById(BULK_IDS.toggle);
+    const saveBtn = document.getElementById(BULK_IDS.save);
+    const bulkBody = getBulkBody();
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", toggleBulkVisit);
+    }
+    if (saveBtn) {
+      saveBtn.addEventListener("click", submitBulkVisit);
+    }
+    if (bulkBody) {
+      bulkBody.addEventListener("input", (event) => {
+        if (
+          event.target.classList.contains("bulk-b-count") ||
+          event.target.classList.contains("bulk-l-count") ||
+          event.target.classList.contains("bulk-d-count")
+        ) {
+          applyBulkDeadlineState();
+        }
+      });
+    }
+  });
+
+  window.renderBulkVisitRows = renderBulkVisitRows;
+  window.submitBulkVisit = submitBulkVisit;
+
+  window.submitVisit = function submitVisitRefactored() {
+    const date = document.getElementById("visit-date").value;
+    const breakfast = Number(document.getElementById("b-count").value || 0);
+    const lunch = Number(document.getElementById("l-count").value || 0);
+    const dinner = Number(document.getElementById("d-count").value || 0);
+    const reason = document.getElementById("visit-reason")?.value || "";
+
+    saveVisitByData({ date, breakfast, lunch, dinner, reason }, {
+      confirmOverwrite: () => confirm("📌 해당 날짜에 이미 신청한 내역이 있습니다. 수정하시겠습니까?"),
+      onSuccess: () => {
+        showToast("✅ 저장되었습니다.");
+        alert("✅ 저장되었습니다.");
+        clearInput();
+        if (lastSubmittedDate) {
+          document.getElementById("visit-date").value = lastSubmittedDate;
+          document.getElementById("visit-week-date").value = lastSubmittedDate;
+        }
+        updateWeekday();
+        loadWeeklyVisitData();
+      },
+      onError: (message) => {
+        showToast(`❗ ${message}`);
+        alert(`❗ ${message}`);
+      }
+    });
+  };
+})();

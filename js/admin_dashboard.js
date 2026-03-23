@@ -59,6 +59,5 @@ function bindLogoutButton() {
 }
 
 function logoutAndGoToLogin() {
-    sessionStorage.clear();
     window.location.href = "index.html";
 }

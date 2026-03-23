@@ -23,6 +23,7 @@
   <div class="login-container">
     <span id="login-user"></span>
     <button id="page-button" onclick="goToMain()">🔙 로그아웃</button>
+    <button id="bulk-input-toggle-btn" type="button">🗂 일괄입력</button>
     <button id="visit-log-button" style="display:none;">로그 조회</button>
   </div>
 
@@ -36,7 +37,7 @@
         <th class="col-abreakfast">조식</th>
         <th class="col-alunch">중식</th>
         <th class="col-adinner">석식</th>
-        <th class="col-areason">사유</th>
+        <th class="col-areason" id="reason-th">사유</th>
         <th class="col-asave">저장</th>
         </tr>
       </thead>
@@ -54,6 +55,27 @@
     </table>
   </div>
 
+
+  <div id="bulk-visit-wrapper" class="table-container" style="display:none; margin-top:16px;">
+    <h3>주간 일괄 식수 신청</h3>
+    <table class="visitor-form-table bulk-visit-table">
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>요일</th>
+          <th>조식</th>
+          <th>중식</th>
+          <th>석식</th>
+          <th class="bulk-reason-header">사유</th>
+        </tr>
+      </thead>
+      <tbody id="bulk-visit-body"></tbody>
+    </table>
+    <div style="margin-top:10px; text-align:right;">
+      <button id="bulk-visit-save-btn" type="button">💾 일괄 저장</button>
+    </div>
+  </div>
+
   <!-- ✅ 신청 내역 표시 영역 -->
   <div class="table-container" style="margin-top: 30px;">
     <h3>신청 내역 (해당 주)</h3>
@@ -66,7 +88,7 @@
         <th class="col-summary-breakfast">조식</th>
         <th class="col-summary-lunch">중식</th>
         <th class="col-summary-dinner">석식</th>
-        <th class="col-summary-reason">사유</th>
+        <th class="col-summary-reason" id="weekly-reason-th">사유</th>
         <th class="col-summary-dept">부서</th>
         <th class="col-summary-requester">신청자</th>
         <th class="col-summary-edit">수정</th>
