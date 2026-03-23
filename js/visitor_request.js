@@ -85,13 +85,13 @@ document.addEventListener("DOMContentLoaded", () => {
       //const reasonTh = document.getElementById("reason-th");
       //const reasonTd = document.getElementById("visit-reason")?.closest("td");
 
-      //if (reasonTh) reasonTh.style.display = "none";
+      //if (reasonTh) reasonTh.style.display = "";
       //if (reasonTd) reasonTd.style.display = "none";
 
       
-      // ✅ 추가: 주간 테이블 헤드도 숨기기
-      const summaryTh = document.getElementById("weekly-reason-th");   
-      if (summaryTh) summaryTh.style.display = "none";
+      // 직영/협력사 모두 동일하게 사유 컬럼 표시
+      const summaryTh = document.getElementById("weekly-reason-th");
+      if (summaryTh) summaryTh.style.display = "";
 
     }
     else if (userType === "직영") {
@@ -469,7 +469,7 @@ function loadWeeklyVisitData() {
   
         if (!result || result.length === 0) {
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td colspan="8" style="text-align:center; color: gray;">신청 내역이 없습니다.</td>`;
+          tr.innerHTML = `<td colspan="10" style="text-align:center; color: gray;">신청 내역이 없습니다.</td>`;
           tbody.appendChild(tr);
           return;
         }
@@ -537,7 +537,7 @@ function loadWeeklyVisitData() {
           <td class="b-cell ${bExpired ? 'expired-cell' : ''}">${row.breakfast}</td>
           <td class="l-cell ${lExpired ? 'expired-cell' : ''}">${row.lunch}</td>
           <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
-          
+          <td class="r-cell ${isRowClosed ? 'expired-cell' : ''}">${row.reason || "-"}</td>
           <td>${row.dept || "-"}</td>
           <td>${row.applicant_name || "-"}</td>
           <td>
@@ -1130,11 +1130,10 @@ function goToMain() {
     const dates = getWeekDatesFromMonday(weekDateInput.value);
     const reasonHeader = document.querySelector(".bulk-reason-header");
     if (reasonHeader) {
-      reasonHeader.style.display = isCooperator() ? "none" : "";
+      reasonHeader.style.display = "";
     }
 
     tbody.innerHTML = dates.map((date) => {
-      const reasonCellStyle = isCooperator() ? ' style="display:none;"' : "";
       return `
         <tr data-date="${date}">
           <td>${date}</td>
@@ -1142,7 +1141,7 @@ function goToMain() {
           <td><input type="number" class="bulk-b-count" min="0" max="50" value="0"></td>
           <td><input type="number" class="bulk-l-count" min="0" max="50" value="0"></td>
           <td><input type="number" class="bulk-d-count" min="0" max="50" value="0"></td>
-          <td class="bulk-reason-cell"${reasonCellStyle}><input type="text" class="bulk-reason-input" placeholder="신청 사유"></td>
+          <td class="bulk-reason-cell"><input type="text" class="bulk-reason-input" placeholder="신청 사유"></td>
         </tr>
       `;
     }).join("");
