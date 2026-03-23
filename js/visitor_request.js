@@ -537,7 +537,7 @@ function loadWeeklyVisitData() {
           <td class="b-cell ${bExpired ? 'expired-cell' : ''}">${row.breakfast}</td>
           <td class="l-cell ${lExpired ? 'expired-cell' : ''}">${row.lunch}</td>
           <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
-          <td class="r-cell ${isRowClosed ? 'expired-cell' : ''}">${row.reason}</td>
+          
           <td>${row.dept || "-"}</td>
           <td>${row.applicant_name || "-"}</td>
           <td>
@@ -546,7 +546,7 @@ function loadWeeklyVisitData() {
             : `<span style="color:gray;">🔒마감</span>`}
           </td>
           <td>
-          ${(isOwner && !bExpired && !lExpired && !dExpired)
+          ${(isOwner && !(bExpired && lExpired && dExpired))
             ? `<button onclick="deleteVisit('${row.id}')">🗑</button>`
             : `<span style="color:gray;">🔒마감</span>`}
           </td>
