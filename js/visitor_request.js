@@ -757,9 +757,9 @@ function editVisit(id) {
   const d = tr.querySelector(".d-cell").innerText;
   const r = tr.querySelector(".r-cell")?.innerText || "";
 
-  const isBExpired = isDeadlinePassed(date, "breakfast", b);
-  const isLExpired = isDeadlinePassed(date, "lunch", l);
-  const isDExpired = isDeadlinePassed(date, "dinner", d);
+  const isBExpired = isDeadlinePassed(date, "breakfast", Number(b));
+  const isLExpired = isDeadlinePassed(date, "lunch", Number(l));
+  const isDExpired = isDeadlinePassed(date, "dinner", Number(d));
 
   tr.querySelector(".b-cell").innerHTML = isBExpired
     ? `${b}<input type="hidden" value="${b}" data-prev="${b}">`
@@ -774,89 +774,84 @@ function editVisit(id) {
     : `<input type="number" min="0" max="50" value="${d}" data-prev="${d}">`;
 
   if (tr.querySelector(".r-cell")) {
-    tr.querySelector(".r-cell").innerHTML = `<input type="text" value="${r}">`;
+    tr.querySelector(".r-cell").innerHTML = `<input type="text" value="${r}" data-prev="${r}">`;
   }
 
-  // 수정 버튼을 저장 버튼으로 교체
   const editBtn = tr.querySelector("button.edit-btn");
   editBtn.innerText = "💾";
   editBtn.onclick = () => saveVisitEdit(id);
 }
 
 
-// ✅ 2. 저장 버튼 클릭 시 수정 내용 서버로 전송
 function saveVisitEdit(id) {
-  const tr   = document.querySelector(`tr[data-id="${id}"]`);
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
   if (!tr) return;
 
   const date = tr.querySelector(".date-cell").innerText;
 
-  /* ─ 1) 공통 마감·예외 검사 ───────────────────────────── */
   if (isNextWeekDeadlinePassed(date)) {
     alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
     loadWeeklyVisitData();
     return;
   }
 
-  
-  
-  /* ─ 2) 기존 값 & 입력 값 확보 ──────────────────────── */
-  const bPrev = +tr.querySelector(".b-cell input").dataset.prev;
-  const lPrev = +tr.querySelector(".l-cell input").dataset.prev;
-  const dPrev = +tr.querySelector(".d-cell input").dataset.prev;
+  const bInput = tr.querySelector(".b-cell input");
+  const lInput = tr.querySelector(".l-cell input");
+  const dInput = tr.querySelector(".d-cell input");
+  const reasonInput = tr.querySelector(".r-cell input");
+
+  const bPrev = Number(bInput?.dataset.prev ?? 0);
+  const lPrev = Number(lInput?.dataset.prev ?? 0);
+  const dPrev = Number(dInput?.dataset.prev ?? 0);
 
   const isBExpired = isDeadlinePassed(date, "breakfast", bPrev);
   const isLExpired = isDeadlinePassed(date, "lunch", lPrev);
   const isDExpired = isDeadlinePassed(date, "dinner", dPrev);
 
-  const bNew  = +tr.querySelector(".b-cell input").value;
-  const lNew  = +tr.querySelector(".l-cell input").value;
-  const dNew  = +tr.querySelector(".d-cell input").value;
+  const bNew = Number(bInput?.value ?? 0);
+  const lNew = Number(lInput?.value ?? 0);
+  const dNew = Number(dInput?.value ?? 0);
 
-  // **검증용 실제 수량** (마감 시 기존값, 수정 가능 시 입력값)
   const breakfast = isBExpired ? bPrev : bNew;
-  const lunch     = isLExpired ? lPrev : lNew;
-  const dinner    = isDExpired ? dPrev : dNew;
+  const lunch = isLExpired ? lPrev : lNew;
+  const dinner = isDExpired ? dPrev : dNew;
 
-  /* ─ 3) 사유 확인 & 마감시간 재검증 ─────────────────── */
-  const reason = (tr.querySelector(".r-cell input")?.value || "").trim() || "협력사 신청";
-  if (!reason) { alert("❗ 사유를 입력해주세요."); return; }
+  const reason = (reasonInput?.value || "").trim() || "협력사 신청";
+  if (!reason) {
+    alert("❗ 사유를 입력해주세요.");
+    return;
+  }
 
-  // ✅ 마감된 식사는 0 으로 넘겨 검사 통과
   const chkB = isBExpired ? 0 : breakfast;
   const chkL = isLExpired ? 0 : lunch;
   const chkD = isDExpired ? 0 : dinner;
 
   if (!checkTimeLimit(date, chkB, chkL, chkD)) {
-      alert("⚠️ 마감 시간이 지나 수정할 수 없습니다.");
-      loadWeeklyVisitData();
-      return;
+    alert("⚠️ 마감 시간이 지나 수정할 수 없습니다.");
+    loadWeeklyVisitData();
+    return;
   }
 
-  /* ─ 4) 서버 전송용 payload 만들기 ───────────────────── */
-  const data = { reason };  // 기본 필드만 먼저
+  const reasonPrev = (reasonInput?.dataset.prev || "").trim();
+  const hasMealChange =
+    breakfast !== bPrev ||
+    lunch !== lPrev ||
+    dinner !== dPrev;
+  const hasReasonChange = reason !== reasonPrev;
 
-  // ① 마감되지 않았고 ② 실제 값이 바뀐 경우에만 추가
-  // ① 마감되지 않았고 ② 실제 값이 바뀐 경우에만 전송
-  if (!isBExpired && bNew !== bPrev) {
-      data.breakfast = bNew;
-  }
-  if (!isLExpired && lNew !== lPrev) {
-      data.lunch = lNew;
-  }
-  if (!isDExpired && dNew !== dPrev) {
-      data.dinner = dNew;
-  }
-
-  // ③ 변경된 필드가 하나도 없으면 종료
-  if (Object.keys(data).length === 1) {   // reason 하나뿐
+  if (!hasMealChange && !hasReasonChange) {
     alert("변경된 내용이 없습니다.");
     loadWeeklyVisitData();
     return;
   }
 
-  console.log("🔎 전송 payload:", data);   // ← 추가
-  /* ─ 5) 전송 & 후처리 ───────────────────────────────── */
+  const data = { reason };
+  if (!isBExpired) data.breakfast = breakfast;
+  if (!isLExpired) data.lunch = lunch;
+  if (!isDExpired) data.dinner = dinner;
+
+  console.log("🔎 수정 전송 payload:", data);
+
   putData(`${API_BASE_URL}/visitors/${id}`, data, () => {
     showToast("✅ 수정 완료");
     loadWeeklyVisitData();
