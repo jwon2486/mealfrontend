@@ -65,6 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
     //setTodayDefault();       // 날짜 기본값 설정
     updateWeekday();         // 요일 표시
     loadWeeklyVisitData();   // 주간 신청 내역 불러오기
+
+    // ✅ 식단표 게시판 초기화
+    if (typeof initMenuBoard === "function") initMenuBoard();
   
  
     // // 협력사 로그인 시 사유 항목 숨기고 자동 입력
@@ -1133,7 +1136,16 @@ function goToMain() {
       reasonHeader.style.display = "";
     }
 
-    tbody.innerHTML = dates.map((date) => {
+    const rowCount = dates.length;
+    tbody.innerHTML = dates.map((date, index) => {
+      const saveCell = index === 0
+        ? `
+          <td class="bulk-save-cell" rowspan="${rowCount}">
+            <button id="bulk-visit-save-btn" type="button" class="action-btn save-btn visitor-save-btn">💾저장</button>
+          </td>
+        `
+        : "";
+
       return `
         <tr data-date="${date}">
           <td>${date}</td>
@@ -1141,7 +1153,8 @@ function goToMain() {
           <td><input type="number" class="bulk-b-count" min="0" max="50" value="0"></td>
           <td><input type="number" class="bulk-l-count" min="0" max="50" value="0"></td>
           <td><input type="number" class="bulk-d-count" min="0" max="50" value="0"></td>
-          <td class="bulk-reason-cell"><input type="text" class="bulk-reason-input" placeholder="신청 사유"></td>
+          <td class="bulk-reason-cell"><input type="text" class="bulk-reason-input reason-input" placeholder="신청 사유"></td>
+          ${saveCell}
         </tr>
       `;
     }).join("");
@@ -1290,15 +1303,18 @@ function goToMain() {
 
   document.addEventListener("DOMContentLoaded", () => {
     const toggleBtn = document.getElementById(BULK_IDS.toggle);
-    const saveBtn = document.getElementById(BULK_IDS.save);
     const bulkBody = getBulkBody();
 
     if (toggleBtn) {
       toggleBtn.addEventListener("click", toggleBulkVisit);
     }
-    if (saveBtn) {
-      saveBtn.addEventListener("click", submitBulkVisit);
-    }
+
+    document.addEventListener("click", (event) => {
+      if (event.target && event.target.id === BULK_IDS.save) {
+        submitBulkVisit();
+      }
+    });
+
     if (bulkBody) {
       bulkBody.addEventListener("input", (event) => {
         if (

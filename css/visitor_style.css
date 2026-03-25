@@ -1,283 +1,391 @@
-/* visitor_style.css */
 
-/* 기본 설정 */
-body {
-    font-family: 'Noto Sans KR', sans-serif;
-    padding: 20px;
-    margin: 0;
-    background-color: #f9f9f9;
-    color: #333;
-    text-align: center;
-    font-size: 20px;
-  }
-
-  .deadline-info {
-  width: 100%;
-  max-width: 530px;
-  margin: 16px auto;
-  padding: 16px;
-  border: 1px solid #ccc;
-  background: #f9f9f9;
-  font-size: 20px;
-  text-align: left;     /* 또는 center, 필요에 따라 */
-  line-height: 1.6;
-  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-}
-  
-  /* 테이블 영역 */
-  .table-container {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto 20px auto;
-    overflow-x: auto;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-  }
-  
-  th, td {
-    padding: 15px;
-    border: 1px solid #ccc;
-    text-align: center;
-    font-size: 20px;
-  }
-  
-  th {
-    background-color: #007bff;
-    color: #fff;
-  }
-  
-  /* ✅ 테이블 안의 input 요소 정렬 및 크기 조정 */
-  td input[type="number"],
-  td input[type="text"],
-  td select {
-  height: 40px;
-  font-size: clamp(12px, 3.2vw, 20px);  /* ✅ 반응형 폰트 크기 */
-  padding: 0;
-  box-sizing: border-box;
-  width: 100%;
-  text-align: center;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  line-height: normal;
-  appearance: textfield; /* Safari 등에서 기본 화살표 제거 */
+body.visitor-erp-page{
+  overflow:auto;
 }
 
-
-/* 스핀버튼 사이즈 조절 */
-td input[type="number"]::-webkit-inner-spin-button {
-    -webkit-transform: scale(1.4);  /* 원하는 배율 적용 */
-    transform: scale(1.4);
+body.visitor-erp-page #mainArea{
+  display:block;
 }
 
-
-/* ✅ 내부 텍스트가 완전 중앙 정렬되도록 input wrapper도 정렬 */
-td {
-  vertical-align: middle;
-  text-align: center;
-  padding: 4px;
+.visitor-main-area .erp-layout{
+  grid-template-columns: clamp(230px, 18vw, 270px) minmax(0, 1fr);
+  align-items:start;
 }
 
-/* ✅ 테이블 셀 안 요소의 정렬 */
-th, td {
-  vertical-align: middle;
-  text-align: center;
+@media (min-width: 769px){
+  .visitor-sidebar{
+    align-self:start;
+    position:sticky;
+    top:16px;
+    height:fit-content;
+  }
+
+  .visitor-sidebar .erp-sidebar-inner{
+    height:auto;
+  }
 }
-/* 테이블들  칼럼 조정 속성  */
-/* 상단 테이블 열 폭 */
-th.col-adate, td.col-adate { width: 40px;}
-th.col-aday, td.col-aday { width: 20px; }
-th.col-abreakfast, td.col-abreakfast,
-th.col-alunch, td.col-alunch,
-th.col-adinner, td.col-adinner { width: 30px; }
-th.col-areason, td.col-areason { width: 500px; }
-th.col-asave, td.col-asave { width: 40px; }
 
-/* 하단 테이블 열 폭 */
-th.col-summary-date, td.col-summary-date { width: 40px; }
-th.col-summary-day, td.col-summary-day { width: 20px; }
-th.col-summary-breakfast, td.col-summary-breakfast,
-th.col-summary-lunch, td.col-summary-lunch,
-th.col-summary-dinner, td.col-summary-dinner { width: 25px; }
-th.col-summary-reason, td.col-summary-reason { width: 250px; }
-th.col-summary-dept, td.col-summary-dept { width: 80px; }
-th.col-summary-requester, td.col-summary-requester { width: 40px; }
-th.col-summary-edit, td.col-summary-edit { width: 20px; }
-th.col-summary-delete, td.col-summary-delete { width: 20px; }
+.visitor-content{
+  display:flex;
+  flex-direction:column;
+  gap:var(--space-2);
+}
 
-/* 공통 td 높이 지정 */
+.visitor-page-card{
+  width:min(96%, 1320px) !important;
+}
+
+.visitor-page-head{
+  margin-bottom:14px;
+}
+
+.visitor-page-desc{
+  margin-top:6px;
+}
+
+.visitor-summary-card{
+  margin-top:0;
+}
+
+.visitor-summary-row{
+  align-items:stretch;
+}
+
+.visitor-summary-box .sub{
+  line-height:1.6;
+}
+
+.visitor-deadline-box{
+  height:100%;
+}
+
+.visitor-card-block{
+  margin-top:16px;
+}
+
+.visitor-card-header{
+  margin-bottom:12px;
+}
+
+.visitor-table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+.visitor-table-fixed{
+  table-layout:fixed;
+}
+
+.visitor-table-fixed th,
+.visitor-table-fixed td{
+  word-break:keep-all;
+  box-sizing:border-box;
+}
+
+.visitor-table-fixed td{
+  padding:8px !important;
+}
+
+.visitor-table-fixed input[type="date"],
+.visitor-table-fixed input[type="number"],
+.visitor-table-fixed input[type="text"],
+.visitor-table-fixed select,
+.visitor-table-fixed textarea{
+  width:100%;
+  min-height:42px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.96);
+  text-align:center;
+  font-size:.95rem;
+  outline:none;
+  box-sizing:border-box;
+}
+
+.visitor-table-fixed input:focus,
+.visitor-table-fixed select:focus,
+.visitor-table-fixed textarea:focus,
+#visit-week-date:focus{
+  border-color:rgba(37,99,235,.55);
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+
+.reason-input{
+  text-align:left !important;
+}
+
+.date-input{
+  min-width:140px;
+  white-space:nowrap;
+}
+
+#visit-day{
+  font-weight:800;
+}
+
+.visitor-save-btn{
+  width:100%;
+}
+
+.visitor-bulk-action-row{
+  justify-content:flex-end;
+}
+
+.visitor-filter-bar{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.visitor-filter-bar label{
+  font-size:.95rem;
+  color:var(--muted);
+  font-weight:700;
+}
+
+#visit-week-date{
+  min-height:42px;
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.96);
+}
+
+#load-visit-data-btn,
+#load-thisweek-btn{
+  min-width:110px;
+}
+
+#page-button,
+#bulk-input-toggle-btn,
+#visit-log-button{
+  min-height:44px;
+}
+
+#visit-log-button[style*="display:none"]{
+  display:none !important;
+}
+
+#menuBoardAdminBar[style*="display:none"]{
+  display:none !important;
+}
+
+.visitor-side-note{
+  margin-top:0;
+}
+
+/* column tuning - percent based */
+th.col-adate, td.col-adate{ width:14%; }
+th.col-aday, td.col-aday{ width:6%; }
+th.col-abreakfast, td.col-abreakfast{ width:8%; }
+th.col-alunch, td.col-alunch{ width:8%; }
+th.col-adinner, td.col-adinner{ width:8%; }
+th.col-areason, td.col-areason{ width:46%; }
+th.col-asave, td.col-asave{ width:10%; }
+
+th.col-summary-date, td.col-summary-date{ width:14%; }
+th.col-summary-day, td.col-summary-day{ width:5%; }
+th.col-summary-breakfast, td.col-summary-breakfast{ width:7%; }
+th.col-summary-lunch, td.col-summary-lunch{ width:7%; }
+th.col-summary-dinner, td.col-summary-dinner{ width:7%; }
+th.col-summary-reason, td.col-summary-reason{ width:22%; }
+th.col-summary-dept, td.col-summary-dept{ width:10%; }
+th.col-summary-requester, td.col-summary-requester{ width:10%; }
+th.col-summary-edit, td.col-summary-edit{ width:9%; }
+th.col-summary-delete, td.col-summary-delete{ width:9%; }
+
 .visitor-form-table td,
-.visitor-summary-table td {
-  height: 60px;
+.visitor-summary-table td{
+  height:64px;
+  vertical-align:middle;
+}
+
+.visitor-summary-table button,
+.visitor-form-table button{
+  min-height:40px;
+}
+
+.expired-cell,
+.expired-input,
+.expired-row,
+.row-expired td{
+  background-color:#ffe6e6 !important;
+}
+
+@media (max-width: 1024px){
+  .visitor-page-card{
+    width:100% !important;
+  }
+
+  .visitor-filter-bar{
+    justify-content:flex-start;
+    margin-top:10px;
+  }
+
+  .visitor-history-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
+@media (max-width: 768px){
+  .visitor-main-area .erp-layout{
+    grid-template-columns:1fr;
+  }
+
+  .visitor-page-card{
+    width:100% !important;
+    margin-inline:0 !important;
+  }
+
+  .visitor-summary-row{
+    grid-template-columns:1fr;
+  }
+
+  .visitor-table-fixed{
+    min-width:880px;
+  }
+
+  .visitor-table-fixed th,
+  .visitor-table-fixed td{
+    font-size:.88rem !important;
+    padding:6px !important;
+  }
+
+  .visitor-table-fixed input[type="date"],
+  .visitor-table-fixed input[type="number"],
+  .visitor-table-fixed input[type="text"],
+  .visitor-table-fixed select,
+  .visitor-table-fixed textarea{
+    min-height:38px;
+    font-size:.88rem;
+    padding:8px 10px;
+  }
+
+  .visitor-filter-bar{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  #visit-week-date{
+    width:100%;
+  }
+}
+
+@media (max-width: 560px){
+  .visitor-top-actions{
+    justify-content:flex-end;
+  }
+
+  #topVisitorPill{
+    max-width:120px;
+  }
+
+  .visitor-filter-bar{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+
+  .visitor-filter-bar label{
+    grid-column:1 / -1;
+  }
+
+  #visit-week-date{
+    grid-column:1 / -1;
+  }
+
+  #load-visit-data-btn,
+  #load-thisweek-btn{
+    width:100%;
+    min-width:0;
+  }
+}
+.visitor-table-fixed td{
+  text-align: center;
   vertical-align: middle;
 }
+/* 일괄 입력 테이블 전용 */
+.bulk-visit-table th:nth-child(1),
+.bulk-visit-table td:nth-child(1){ width:14%; } /* 날짜 */
 
-/* input과 button 높이 */
-.visitor-form-table td input,
-.visitor-form-table td button,
-.visitor-summary-table td button {
-  height: 45px;
-  font-size: 16px;
+.bulk-visit-table th:nth-child(2),
+.bulk-visit-table td:nth-child(2){ width:6%; } /* 요일 */
+
+.bulk-visit-table th:nth-child(3),
+.bulk-visit-table td:nth-child(3),
+.bulk-visit-table th:nth-child(4),
+.bulk-visit-table td:nth-child(4),
+.bulk-visit-table th:nth-child(5),
+.bulk-visit-table td:nth-child(5){ width:8%; } /* 조/중/석 */
+
+.bulk-visit-table th:nth-child(6),
+.bulk-visit-table td:nth-child(6){ width:46%; } /* 사유 */
+
+.bulk-visit-table th:nth-child(7),
+.bulk-visit-table td:nth-child(7){ width:10%; } /* 저장 */
+
+.bulk-save-cell{
+  text-align:center;
+  vertical-align:middle;
+}
+
+.bulk-save-cell button{
+  width:100%;
+  min-height:44px;
 }
 
 
-td select, td textarea {
-text-align: center;  /* ✅ 입력창 안 글씨도 가운데 정렬 */
-}
-  
-  button {
-    background-color: #007bff;
-    color: #fff;
-    padding: 2px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-block;
-    text-align: center;
-    height: 40px;
-    font-size: 18px;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  #load-thisweek-btn {
-    margin-left: 5px;   /* 이번주 조회 버튼 왼쪽에 간격 (선택사항) */
+/* ===== sidebar compact + stable height fix ===== */
+@media (min-width: 769px){
+  .visitor-sidebar,
+  .visitor-sidebar .erp-sidebar-inner,
+  .visitor-sidebar .erp-sidebar-body{
+    height:auto !important;
+    min-height:0 !important;
   }
 
-  /* 데이터 없음 표시 */
-  td[colspan="8"] {
-    color: gray;
-    font-style: italic;
+  .visitor-sidebar{
+    align-self:start;
+    position:sticky;
+    top:16px;
   }
 
-  /* 기본 테이블 중앙 정렬 */
-.visitor-table th,
-.visitor-table td {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* 저장 테이블 영역 */
-.visitor-form-table input,
-.visitor-form-table select {
-    text-align: center;
-}
-
-.expired-cell {
-    background-color: #ffe6e6 !important;
-}
-
-.expired-input {
-    background-color: #ffe6e6 !important;
+  .visitor-sidebar .erp-sidebar-inner{
+    display:block;
   }
 
-.expired-row {
-    background-color: #ffdddd !important;
+  .visitor-sidebar .erp-sidebar-body{
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start !important;
+    gap:14px;
+    padding-bottom:14px;
   }
 
-.expired-cell {
-    background-color: #ffe5e5;
-}
-  
-.row-expired td {
-    background-color: #ffcccc !important;
+  .visitor-sidebar-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:6px !important;
+  }
+
+  .visitor-sidebar .erp-nav{
+    margin-bottom:0 !important;
+  }
+
+  .visitor-sidebar .erp-nav-link{
+    margin-bottom:0 !important;
+  }
+
+  .visitor-side-note{
+    display:none !important;
+  }
 }
 
-/* 저장 버튼 */
-.save-btn {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* 📌 사유 입력 필드를 넓게 설정 */
-.reason-input {
-  width: 100%;
-  min-width: 30px;
-  text-align: left;
-}
-
-/* 📌 사유 입력 필드를 넓게 설정 */
-.date-input {
-  width: 120px;
-  min-width: 80px;
-  max-width: 140px;
-  padding: 3px;
-  font-size: 14px;
-  box-sizing: border-box;
-  white-space: nowrap;
-}
-  
-  /* ✅ 모바일 반응형 */
-  @media (max-width: 768px) {
-
-  .deadline-info {
-    max-width: 420px;
-    font-size: 16px;
-    padding: 12px;
-    margin: 12px auto;
-  }
-
-  /* 공통 td 높이 지정 */
-  .visitor-form-table td,
-  .visitor-summary-table td {
-    height: 50px;
-    vertical-align: middle;
-  }
-
-  td input[type="number"],
-  td input[type="text"],
-  td select {
-    font-size: clamp(6px, 3.5vw, 13px);
-    padding: 2px;
-    height: 28px;
-  }
-
-  /*크롬에서 스핀 버튼 제거*/
-  td input[type="number"]::-webkit-inner-spin-button,
-  td input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-
-  table, th, td {
-    font-size: clamp(14px, 3vw, 14px);
-    padding: 3px;
-  }
-
-  button {
-    font-size: clamp(11px, 3vw, 14px);
-    vertical-align: middle;
-    padding: 6px 6px;
-  }
-
-  .reason-input {
-    font-size: clamp(10px, 3vw, 13px);
-    padding: 20px;
-    width: 100%;
-  }
-
-  .date-input {
-    font-size: clamp(12px, 2.5vw, 14px);
-    height: 3.5em;
-    line-height: 1.2;
-    width: 120px;
-    padding: 2px;
-    text-align: center;
-    white-space: nowrap;
-  }
+/* bulk panel open/close should not visually affect sidebar size */
+#bulk-visit-wrapper{
+  overflow:visible;
 }

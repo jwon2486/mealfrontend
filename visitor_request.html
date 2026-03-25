@@ -2,111 +2,286 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>식수 신청 시스템</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>방문자 식수 신청</title>
+  <link rel="stylesheet" href="css/style_premium.css" />
   <link rel="stylesheet" href="css/visitor_style.css" />
 </head>
-<body>
-  <h2 id="page-title">방문자 식수 신청</h2>
-  <div id="deadline-info" class="deadline-info">
-        <strong>📌 마감 안내</strong><br />
-        <strong><u>금주 식수</u> 마감 시간:</strong><br />
-        &nbsp;&nbsp;- <strong>조식: 전날 오전 9시</strong>까지<br />
-        &nbsp;&nbsp;- <strong>중식: 당일 오전 10시 30분</strong>까지<br />
-        &nbsp;&nbsp;- <strong>석식: 당일 오후 2시 30분</strong>까지<br />
-        <strong><u>차주 식수</u> 마감 시간:</strong><br />
-        &nbsp;&nbsp;- <strong>금주 수요일 오후 4시</strong>까지 신청/변경 가능<br />
-        &nbsp;&nbsp; <strong>※수요일</strong>이 지나면 </strong><strong>신청이 마감되고 차주에 변경가능</strong>합니다.
+<body class="visitor-erp-page">
+  <div class="app visitor-app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo/SnSYS_logo.png" alt="회사 로고" />
+        <div class="title">
+          <strong>에스엔시스 식수 신청 시스템</strong>
+          <span>Visitor Meal Request</span>
+        </div>
+      </div>
+
+      <div class="top-actions visitor-top-actions">
+        <div id="topVisitorPill" class="pill" title="현재 로그인 사용자">
+           <span id="login-user">방문자 페이지</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <div id="mainArea" class="ui-block visitor-main-area">
+        <div class="erp-layout visitor-erp-layout">
+          <aside class="erp-sidebar visitor-sidebar">
+            <div class="erp-sidebar-inner">
+              <button
+                type="button"
+                class="erp-sidebar-head erp-sidebar-toggle"
+                id="mobileMenuToggle"
+                aria-expanded="false"
+                aria-controls="mobileSidebarBody"
+              >
+                <span class="erp-sidebar-head-text">
+                  <span class="erp-sidebar-title">VISITOR MENU</span>
+                  <span class="erp-sidebar-subtitle">방문자 신청 메뉴</span>
+                </span>
+                <span class="erp-sidebar-toggle-icon" aria-hidden="true"></span>
+              </button>
+
+              <div class="erp-sidebar-body" id="mobileSidebarBody">
+                <nav class="erp-nav" aria-label="방문자 메뉴">
+                  <button type="button" class="erp-nav-link active" data-page="visitorApplySection">방문자 신청</button>
+                  <button type="button" class="erp-nav-link" data-page="visitorHistorySection">신청 내역</button>
+                  <button type="button" class="erp-nav-link" data-page="menuBoardSection">식단표 게시판</button>
+                </nav>
+
+                <div class="erp-sidebar-actions visitor-sidebar-actions">
+                  <button type="button" id="page-button" class="action-btn logout-btn erp-side-action" onclick="goToMain()">🔙 메인으로</button>
+                  <button type="button" id="bulk-input-toggle-btn" class="action-btn visitor-btn erp-side-action">🗂 일괄입력</button>
+                  <button type="button" id="visit-log-button" class="action-btn team-btn erp-side-action ui-hidden">📋 로그 조회</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <section class="erp-content visitor-content">
+            <section id="visitorApplySection" class="card pad erp-page active visitor-page-card">
+              <div class="weekly-head visitor-page-head">
+                <div>
+                  <div id="page-title" class="weekly-title">방문자 식수 신청</div>
+                  <div class="week-range-text visitor-page-desc">방문자 조식·중식·석식 수량과 신청 사유를 입력하세요.</div>
+                </div>
+              </div>
+
+              <div class="card weekly-summary-card visitor-summary-card">
+                <div class="weekly-summary-inner">
+                  <div class="summary-row visitor-summary-row">
+                    <div class="summary visitor-summary-box">
+                      <span class="summary-label">📝 신청 안내</span>
+                      <div class="sub visitor-summary-text">단일 신청과 주간 일괄입력을 같은 화면에서 관리할 수 있습니다.</div>
+                    </div>
+
+                    <div id="deadline-info" class="deadline-mini visitor-deadline-box">
+                      <div class="deadline-title">📌 마감 안내</div>
+                      <div class="deadline-text">
+                        <strong>금주 식수:</strong> 조식 전날 09:00 / 중식 10:30 / 석식 14:30<br>
+                        <strong>차주 식수:</strong> 수요일 16:00 (이후 변경 불가)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card pad visitor-card-block">
+                <div class="meal-header visitor-card-header">
+                  <span class="mealchart">개별 방문자 신청</span>
+                </div>
+
+                <div class="table-container visitor-table-wrap">
+                  <table class="visitor-form-table visitor-table-fixed">
+                    <thead>
+                      <tr>
+                        <th class="col-adate">날짜</th>
+                        <th class="col-aday">요일</th>
+                        <th class="col-abreakfast">조식</th>
+                        <th class="col-alunch">중식</th>
+                        <th class="col-adinner">석식</th>
+                        <th class="col-areason" id="reason-th">사유</th>
+                        <th class="col-asave">저장</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="col-adate"><input type="date" class="date-input" id="visit-date" /></td>
+                        <td class="col-aday" id="visit-day">-</td>
+                        <td class="col-abreakfast"><input type="number" id="b-count" min="0" max="50" value="0" /></td>
+                        <td class="col-alunch"><input type="number" id="l-count" min="0" max="50" value="0" /></td>
+                        <td class="col-adinner"><input type="number" id="d-count" min="0" max="50" value="0" /></td>
+                        <td class="col-areason"><input type="text" id="visit-reason" class="reason-input" placeholder="신청 사유" /></td>
+                        <td class="col-asave"><button id="visit-data-save-btn" class="action-btn save-btn visitor-save-btn" onclick="submitVisit()">💾 저장</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="bulk-visit-wrapper" class="card pad visitor-card-block" style="display:none; margin-top:16px;">
+                <div class="meal-header visitor-card-header">
+                  <span class="mealchart">주간 일괄 식수 신청</span>
+                </div>
+                <div class="table-container visitor-table-wrap">
+                  <table class="visitor-form-table bulk-visit-table visitor-table-fixed">
+                    <thead>
+                      <tr>
+                        <th>날짜</th>
+                        <th>요일</th>
+                        <th>조식</th>
+                        <th>중식</th>
+                        <th>석식</th>
+                        <th class="bulk-reason-header">사유</th>
+                        <th class="bulk-save-header">저장</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bulk-visit-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section id="visitorHistorySection" class="card pad erp-page visitor-page-card">
+              <div class="weekly-head visitor-page-head visitor-history-head">
+                <div>
+                  <div class="weekly-title">신청 내역</div>
+                  <div class="week-range-text visitor-page-desc">선택한 주차의 방문자 신청 내역을 조회하고 수정/삭제할 수 있습니다.</div>
+                </div>
+
+                <div id="visitor-week-filter" class="visitor-filter-bar">
+                  <label for="visit-week-date">조회 날짜</label>
+                  <input type="date" id="visit-week-date" />
+                  <button id="load-visit-data-btn" type="button" class="action-btn">조회</button>
+                  <button id="load-thisweek-btn" type="button" class="action-btn visitor-btn">이번주 조회</button>
+                </div>
+              </div>
+
+              <div class="card pad visitor-card-block">
+                <div class="table-container visitor-table-wrap">
+                  <table class="visitor-summary-table visitor-table-fixed">
+                    <thead>
+                      <tr>
+                        <th class="col-summary-date">날짜</th>
+                        <th class="col-summary-day">요일</th>
+                        <th class="col-summary-breakfast">조식</th>
+                        <th class="col-summary-lunch">중식</th>
+                        <th class="col-summary-dinner">석식</th>
+                        <th class="col-summary-reason" id="weekly-reason-th">사유</th>
+                        <th class="col-summary-dept">부서</th>
+                        <th class="col-summary-requester">신청자</th>
+                        <th class="col-summary-edit">수정</th>
+                        <th class="col-summary-delete">삭제</th>
+                      </tr>
+                    </thead>
+                    <tbody id="visit-summary-body"></tbody>
+                    <tbody id="visit-week-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section id="menuBoardSection" class="card pad erp-page visitor-page-card erp-menu-board-section">
+              <div id="menuBoard">
+                <div class="menu-board-header">
+                  <h2 class="menu-board-title">🖼️ 식단표 게시판</h2>
+                  <div id="menuBoardAdminBar" class="menu-admin-inline ui-hidden">
+                    <button type="button" id="menuUploadBtn" class="menu-upload-btn">⬆ 업로드</button>
+                    <button type="button" id="menuDeleteBtn" class="menu-delete-btn">🗑 삭제</button>
+                    <input id="menuUploadInput" type="file" accept="image/*" class="hidden" />
+                  </div>
+                </div>
+                <p class="menu-board-desc">썸네일을 누르면 큰 이미지로 확인할 수 있습니다.</p>
+                <div class="menu-list" id="menuList"></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </div>
+
+      <div id="toast" class="toast"></div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/visitor_request.js"></script>
+    <script>
+      (function () {
+        const mobileQuery = window.matchMedia("(max-width: 768px)");
+
+        function closeMobileSidebar() {
+          const mainArea = document.getElementById("mainArea");
+          const toggle = document.getElementById("mobileMenuToggle");
+          if (!mainArea || !toggle) return;
+          mainArea.classList.remove("mobile-sidebar-open");
+          toggle.setAttribute("aria-expanded", "false");
+        }
+
+        function syncMobileSidebar() {
+          const mainArea = document.getElementById("mainArea");
+          const toggle = document.getElementById("mobileMenuToggle");
+          if (!mainArea || !toggle) return;
+
+          if (mobileQuery.matches) {
+            mainArea.classList.remove("mobile-sidebar-open");
+            toggle.setAttribute("aria-expanded", "false");
+          } else {
+            mainArea.classList.remove("mobile-sidebar-open");
+            toggle.setAttribute("aria-expanded", "true");
+          }
+        }
+
+        function bindVisitorSidebar() {
+          const links = document.querySelectorAll(".erp-nav-link[data-page]");
+          const pages = document.querySelectorAll(".erp-page");
+          const mainArea = document.getElementById("mainArea");
+          const toggle = document.getElementById("mobileMenuToggle");
+          const sideActions = document.querySelectorAll(".erp-side-action");
+
+          links.forEach((btn) => {
+            btn.addEventListener("click", function () {
+              const targetId = this.dataset.page;
+              if (!targetId) return;
+
+              links.forEach((el) => el.classList.remove("active"));
+              this.classList.add("active");
+
+              pages.forEach((page) => page.classList.remove("active"));
+              const target = document.getElementById(targetId);
+              if (target) target.classList.add("active");
+
+              if (mobileQuery.matches) closeMobileSidebar();
+            });
+          });
+
+          sideActions.forEach((btn) => {
+            btn.addEventListener("click", function () {
+              if (mobileQuery.matches) closeMobileSidebar();
+            });
+          });
+
+          if (toggle && mainArea) {
+            toggle.addEventListener("click", function () {
+              if (!mobileQuery.matches) return;
+              const willOpen = !mainArea.classList.contains("mobile-sidebar-open");
+              mainArea.classList.toggle("mobile-sidebar-open", willOpen);
+              toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+            });
+          }
+
+          syncMobileSidebar();
+          window.addEventListener("resize", syncMobileSidebar);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", bindVisitorSidebar);
+        } else {
+          bindVisitorSidebar();
+        }
+      })();
+    </script>
   </div>
-
-  <!-- ✅ 로그인 사용자 정보 표시 -->
-  <div class="login-container">
-    <span id="login-user"></span>
-    <button id="page-button" onclick="goToMain()">🔙 로그아웃</button>
-    <button id="bulk-input-toggle-btn" type="button">🗂 일괄입력</button>
-    <button id="visit-log-button" style="display:none;">로그 조회</button>
-  </div>
-
-  <!-- ✅ 상단 신청 입력 영역 -->
-  <div class="table-container">
-    <table class="visitor-form-table"> <!-- 상단: 식수 신청 테이블 -->
-      <thead>
-        <tr>
-        <th class="col-adate">날짜</th>
-        <th class="col-aday">요일</th>
-        <th class="col-abreakfast">조식</th>
-        <th class="col-alunch">중식</th>
-        <th class="col-adinner">석식</th>
-        <th class="col-areason" id="reason-th">사유</th>
-        <th class="col-asave">저장</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-        <td class="col-adate"><input type="date" class="date-input" id="visit-date" /></td>
-        <td class="col-aday" id="visit-day">-</td>
-        <td class="col-abreakfast"><input type="number" id="b-count" min="0" max="50" value="0" /></td>
-        <td class="col-alunch"><input type="number" id="l-count" min="0" max="50" value="0" /></td>
-        <td class="col-adinner"><input type="number" id="d-count" min="0" max="50" value="0" /></td>
-        <td class="col-areason"><input type="text" id="visit-reason" class="reason-input" placeholder="신청 사유" /></td>
-        <td class="col-asave"><button id="visit-data-save-btn" onclick="submitVisit()">💾</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-
-  <div id="bulk-visit-wrapper" class="table-container" style="display:none; margin-top:16px;">
-    <h3>주간 일괄 식수 신청</h3>
-    <table class="visitor-form-table bulk-visit-table">
-      <thead>
-        <tr>
-          <th>날짜</th>
-          <th>요일</th>
-          <th>조식</th>
-          <th>중식</th>
-          <th>석식</th>
-          <th class="bulk-reason-header">사유</th>
-        </tr>
-      </thead>
-      <tbody id="bulk-visit-body"></tbody>
-    </table>
-    <div style="margin-top:10px; text-align:right;">
-      <button id="bulk-visit-save-btn" type="button">💾 일괄 저장</button>
-    </div>
-  </div>
-
-  <!-- ✅ 신청 내역 표시 영역 -->
-  <div class="table-container" style="margin-top: 30px;">
-    <h3>신청 내역 (해당 주)</h3>
-    <input type="date" id="visit-week-date"> <button id="load-visit-data-btn">조회</button><button id="load-thisweek-btn">이번주 조회</button>
-    <table class="visitor-summary-table"> <!-- 하단: 신청 내역 테이블 -->
-      <thead>
-        <tr>
-        <th class="col-summary-date">날짜</th>
-        <th class="col-summary-day">요일</th>
-        <th class="col-summary-breakfast">조식</th>
-        <th class="col-summary-lunch">중식</th>
-        <th class="col-summary-dinner">석식</th>
-        <th class="col-summary-reason" id="weekly-reason-th">사유</th>
-        <th class="col-summary-dept">부서</th>
-        <th class="col-summary-requester">신청자</th>
-        <th class="col-summary-edit">수정</th>
-        <th class="col-summary-delete">삭제</th>
-        </tr>
-      </thead>
-      <tbody id="visit-summary-body">
-        <!-- JavaScript에서 동적으로 추가 -->
-      </tbody>
-      <tbody id="visit-week-table-body">
-        <!-- 데이터가 없으면 여기에 <tr><td colspan="7">신청 내역이 없습니다.</td></tr> 추가 -->
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ✅ 공통 스크립트 로딩 -->
-  <script src="js/config.js"></script>
-  <script src="js/util.js"></script>
-  <script src="js/visitor_request.js"></script>
 </body>
 </html>
