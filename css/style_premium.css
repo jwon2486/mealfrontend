@@ -1,8 +1,3 @@
-/* =========================================================
-   SnSYS Meal Request System - UI Refactor
-   - Weekly Summary Card Layout Update (50:50 Split)
-   ========================================================= */
-
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
 :root{
@@ -2562,5 +2557,56 @@ button,
 
   #mainArea .erp-page{
     height:auto !important;
+  }
+}
+
+
+/* ===== desktop sidebar compact + stable height fix ===== */
+@media (min-width: 769px){
+  #mainArea .erp-layout{
+    align-items:start;
+  }
+
+  #mainArea .erp-sidebar,
+  #mainArea .erp-sidebar-inner,
+  .erp-sidebar-body{
+    height:auto !important;
+    min-height:0 !important;
+  }
+
+  #mainArea .erp-sidebar{
+    align-self:start;
+    position:sticky;
+    top:16px;
+  }
+
+  #mainArea .erp-sidebar-inner{
+    display:block;
+    overflow:visible;
+  }
+
+  .erp-sidebar-body{
+    display:flex !important;
+    flex-direction:column;
+    justify-content:flex-start !important;
+    gap:14px;
+    padding-bottom:14px;
+    margin-top:0;
+    flex:none;
+  }
+
+  .erp-nav{
+    margin-bottom:0 !important;
+  }
+
+  .erp-sidebar-actions{
+    margin-top:6px !important;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .accessibility-card{
+    margin-top:6px;
   }
 }
