@@ -123,39 +123,19 @@ document.getElementById("visit-date").addEventListener("change", () => {
     input.value = adjusted.toISOString().split("T")[0];
   }
 
-  
-  
-  // ✅ 날짜 변경 시 주간 테이블 기준일도 자동 갱신
+  // ✅ 날짜 변경 시 주간 테이블 기준일 자동 갱신
   document.getElementById("visit-week-date").value = input.value;
 
-  updateWeekday();
-  loadWeeklyVisitData(); // 날짜 바뀌면 해당 주 신청 내역 갱신
-});
-
-// ✅ 주간 테이블 날짜 변경 시 바로 조회
-document.getElementById("visit-week-date").addEventListener("change", () => {
-    const input = document.getElementById("visit-week-date");
-    const picked = new Date(input.value);
-
-    if (picked.getDay() === 0 || picked.getDay() === 6) {
-      alert("토요일 또는 일요일은 신청할 수 없습니다. 가장 가까운 월요일로 자동 설정됩니다.");
-      const adjusted = getNearestWeekday(picked);
-      input.value = adjusted.toISOString().split("T")[0];
+  // ⭐ [이 코드를 추가하세요] 일괄 입력창이 열려 있다면 테이블을 새로 그립니다.
+  const bulkWrapper = document.getElementById("bulk-visit-wrapper");
+  if (bulkWrapper && bulkWrapper.style.display === "block") {
+    if (typeof renderBulkVisitRows === "function") {
+      renderBulkVisitRows(); 
     }
+  }
 
-    // ✅ 날짜 변경 시 주간 테이블 기준일도 자동 갱신
-    document.getElementById("visit-date").value = input.value;
-
-    updateWeekday();
-    loadWeeklyVisitData(); // 날짜 바뀌면 해당 주 신청 내역 갱신
-});
-
-document.getElementById("visit-data-save-btn").addEventListener("click", () => {
-  loadWeeklyVisitData();  // ✅ 명시적으로 조회 버튼 눌렀을 때 실행
-});
-
-document.getElementById("load-visit-data-btn").addEventListener("click", () => {
-  loadWeeklyVisitData();  // ✅ 명시적으로 조회 버튼 눌렀을 때 실행
+  updateWeekday();
+  loadWeeklyVisitData(); 
 });
 
 
@@ -1120,42 +1100,40 @@ function goToMain() {
     return document.getElementById(BULK_IDS.body);
   }
 
-  function renderBulkVisitRows() {
-    const weekDateInput = document.getElementById(BULK_IDS.weekDate);
-    const tbody = getBulkBody();
-    if (!weekDateInput || !weekDateInput.value || !tbody) return;
+  // renderBulkVisitRows 함수 내부 수정 예시
+function renderBulkVisitRows() {
+  const bulkBody = document.getElementById("bulk-visit-body");
+  if (!bulkBody) return;
 
-    const dates = getWeekDatesFromMonday(weekDateInput.value);
-    const reasonHeader = document.querySelector(".bulk-reason-header");
-    if (reasonHeader) {
-      reasonHeader.style.display = "";
-    }
+  // ✅ [수정] 개별 입력창의 날짜를 기준일로 가져옴
+  const baseDateStr = document.getElementById("visit-date").value;
+  if (!baseDateStr) return;
 
-    const rowCount = dates.length;
-    tbody.innerHTML = dates.map((date, index) => {
-      const saveCell = index === 0
-        ? `
-          <td class="bulk-save-cell" rowspan="${rowCount}">
-            <button id="bulk-visit-save-btn" type="button" class="action-btn save-btn visitor-save-btn">💾저장</button>
-          </td>
-        `
-        : "";
+  // 해당 날짜가 속한 주의 월~금 날짜 배열 생성
+  const dates = getWeekDatesFromMonday(baseDateStr); 
+  
+  bulkBody.innerHTML = "";
 
-      return `
-        <tr data-date="${date}">
-          <td>${date}</td>
-          <td>${getWeekdayName(date)}</td>
-          <td><input type="number" class="bulk-b-count" min="0" max="50" value="0"></td>
-          <td><input type="number" class="bulk-l-count" min="0" max="50" value="0"></td>
-          <td><input type="number" class="bulk-d-count" min="0" max="50" value="0"></td>
-          <td class="bulk-reason-cell"><input type="text" class="bulk-reason-input reason-input" placeholder="신청 사유"></td>
-          ${saveCell}
-        </tr>
-      `;
-    }).join("");
+  dates.forEach((date) => {
+    const row = document.createElement("tr");
+    row.dataset.date = date; // 행에 날짜 정보 저장
+    
+    // 개별 입력과 동일한 마감 정책 적용
+    const isClosed = isDeadlinePassed(date, "lunch", 1); // 예시 체크
 
-    applyBulkDeadlineState();
-  }
+    row.innerHTML = `
+      <td>${date}</td>
+      <td>${getWeekdayName(date)}</td> <td><input type="number" class="bulk-b-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
+      <td><input type="number" class="bulk-l-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
+      <td><input type="number" class="bulk-d-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
+      <td><input type="text" class="bulk-reason-input" data-date="${date}" placeholder="사유" ${isClosed ? 'disabled' : ''}></td>
+    `;
+    bulkBody.appendChild(row);
+  });
+
+  // 마감 색상 및 상태 업데이트 실행
+  applyBulkDeadlineState();
+}
 
   function applyStateToInput(input, locked, title) {
     if (!input) return;
