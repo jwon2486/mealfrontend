@@ -52,13 +52,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================================================
-// UI 상태 제어 헬퍼 함수
+// UI 상태 제어 헬퍼 함수 (💡 표 깨짐 완벽 해결)
 // ============================================================================
-function toggleVisibility(element, show, displayClass = 'ui-block') {
+function toggleVisibility(element, show, displayClass = '') {
   if (!element) return;
+  // 강제로 부여되었던 block, hidden 등을 우선 깔끔하게 제거합니다.
   element.classList.remove('ui-hidden', 'ui-block', 'ui-inline-block', 'ui-flex');
+  
   if (show) {
-    element.classList.add(displayClass);
+    // displayClass가 있으면 넣고, 없으면 고유 속성(table-cell 등)을 자연스럽게 따라가게 둡니다.
+    if (displayClass) {
+        element.classList.add(displayClass);
+    }
   } else {
     element.classList.add('ui-hidden');
   }
@@ -71,17 +76,22 @@ function applyUserTypeUI() {
   
   const reasonTh = document.getElementById("reason-th");
   const reasonInput = document.getElementById("visit-reason");
+  // 💡 핵심: input 창이 아니라, 표의 '칸(td)' 전체를 제어해야 표가 어긋나지 않습니다.
+  const reasonTd = reasonInput ? reasonInput.closest("td") : null;
   const weeklyReasonTh = document.getElementById("weekly-reason-th");
 
   if (userType === "협력사") {
     if (pageTitle) pageTitle.innerText = "식수 신청 시스템";
     if (pageButton) pageButton.innerText = "🔙 로그아웃";
+    toggleVisibility(reasonTh, false);
+    toggleVisibility(reasonTd, false);
     toggleVisibility(weeklyReasonTh, true);
   } else if (userType === "직영") {
     if (pageTitle) pageTitle.innerText = "방문자 식수 신청";
     if (pageButton) pageButton.innerText = "🔙 뒤로가기";
+    // 💡 별도의 displayClass를 주지 않음으로써 table-cell 속성이 유지되어 파란색 배경이 꽉 찹니다.
     toggleVisibility(reasonTh, true);
-    toggleVisibility(reasonInput, true);
+    toggleVisibility(reasonTd, true);
     toggleVisibility(weeklyReasonTh, true);
   }
 }
@@ -235,6 +245,7 @@ function loadLoginInfo() {
     const logButton = document.getElementById("visit-log-button");
     if (logButton) {
       if (user.level === 3 || user.level === 2) {
+        // 버튼은 inline-block 속성을 명시적으로 부여합니다.
         toggleVisibility(logButton, true, 'ui-inline-block');
         logButton.addEventListener("click", () => window.location.href = "visitor_logs.html");
       } else {
