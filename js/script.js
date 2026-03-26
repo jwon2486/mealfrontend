@@ -637,7 +637,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (savedUser) { 
                 hideElement(DOM.loginWrapper); 
                 showBlock(DOM.mainArea); 
-                loadWeekData(); 
+                loadWeekData();
+                if (typeof initMenuBoard === "function") initMenuBoard();
             }
         });
     });

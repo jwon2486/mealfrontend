@@ -389,3 +389,42 @@ th.col-summary-delete, td.col-summary-delete{ width:9%; }
 #bulk-visit-wrapper{
   overflow:visible;
 }
+
+/* =========================================================
+   JS에서 제어하기 위한 유틸리티 및 상태 클래스
+   ========================================================= */
+
+/* 일괄 저장 큼지막한 버튼용 */
+.bulk-save-btn-large {
+  width: 100%;
+  white-space: normal;
+  line-height: 1.6;
+}
+
+/* 데이터가 없을 때 표시하는 행 */
+.empty-row-text {
+  text-align: center;
+  color: var(--muted);
+}
+
+/* 마감된 텍스트 표시 */
+.closed-text {
+  color: var(--muted);
+}
+
+/* 마감된 행 (JS에서 .style.backgroundColor = "#ffe5e5" 대신 클래스로 제어) */
+.expired-row {
+  background-color: #ffe6e6 !important;
+}
+
+/* JS에서 동적으로 생성하는 표 안의 투명한 버튼용 */
+.action-btn-icon {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.action-btn-icon:hover {
+  transform: scale(1.1);
+}

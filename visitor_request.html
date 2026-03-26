@@ -30,13 +30,7 @@
         <div class="erp-layout visitor-erp-layout">
           <aside class="erp-sidebar visitor-sidebar">
             <div class="erp-sidebar-inner">
-              <button
-                type="button"
-                class="erp-sidebar-head erp-sidebar-toggle"
-                id="mobileMenuToggle"
-                aria-expanded="false"
-                aria-controls="mobileSidebarBody"
-              >
+              <button type="button" class="erp-sidebar-head erp-sidebar-toggle" id="mobileMenuToggle" aria-expanded="false" aria-controls="mobileSidebarBody">
                 <span class="erp-sidebar-head-text">
                   <span class="erp-sidebar-title">VISITOR MENU</span>
                   <span class="erp-sidebar-subtitle">방문자 신청 메뉴</span>
@@ -52,7 +46,7 @@
                 </nav>
 
                 <div class="erp-sidebar-actions visitor-sidebar-actions">
-                  <button type="button" id="page-button" class="action-btn logout-btn erp-side-action" onclick="goToMain()">🔙 메인으로</button>
+                  <button type="button" id="page-button" class="action-btn logout-btn erp-side-action">🔙 메인으로</button>
                   <button type="button" id="bulk-input-toggle-btn" class="action-btn visitor-btn erp-side-action">🗂 일괄입력</button>
                   <button type="button" id="visit-log-button" class="action-btn team-btn erp-side-action ui-hidden">📋 로그 조회</button>
                 </div>
@@ -114,34 +108,34 @@
                         <td class="col-alunch"><input type="number" id="l-count" min="0" max="50" value="0" /></td>
                         <td class="col-adinner"><input type="number" id="d-count" min="0" max="50" value="0" /></td>
                         <td class="col-areason"><input type="text" id="visit-reason" class="reason-input" placeholder="신청 사유" /></td>
-                        <td class="col-asave"><button id="visit-data-save-btn" class="action-btn save-btn visitor-save-btn" onclick="submitVisit()">💾 저장</button></td>
+                        <td class="col-asave"><button type="button" id="visit-data-save-btn" class="action-btn save-btn visitor-save-btn">💾 저장</button></td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              <div id="bulk-visit-wrapper" class="card pad visitor-card-block" style="display:none; margin-top:16px;">
-              <div class="meal-header visitor-card-header">
-                <span class="mealchart">주간 일괄 식수 신청</span>
+              <div id="bulk-visit-wrapper" class="card pad visitor-card-block ui-hidden">
+                <div class="meal-header visitor-card-header">
+                  <span class="mealchart">주간 일괄 식수 신청</span>
+                </div>
+                <div class="table-container visitor-table-wrap">
+                  <table class="visitor-form-table bulk-visit-table visitor-table-fixed">
+                    <thead>
+                      <tr>
+                        <th class="col-adate">날짜</th>
+                        <th class="col-aday">요일</th>
+                        <th class="col-abreakfast">조식</th>
+                        <th class="col-alunch">중식</th>
+                        <th class="col-adinner">석식</th>
+                        <th class="col-areason">사유</th>
+                        <th class="col-asave">저장</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bulk-visit-body"></tbody>
+                  </table>
+                </div>
               </div>
-              <div class="table-container visitor-table-wrap">
-                <table class="visitor-form-table bulk-visit-table visitor-table-fixed">
-                  <thead>
-                    <tr>
-                      <th class="col-adate">날짜</th>
-                      <th class="col-aday">요일</th>
-                      <th class="col-abreakfast">조식</th>
-                      <th class="col-alunch">중식</th>
-                      <th class="col-adinner">석식</th>
-                      <th class="col-areason">사유</th>
-                      <th class="col-asave">저장</th>
-                    </tr>
-                  </thead>
-                  <tbody id="bulk-visit-body"></tbody>
-                </table>
-              </div>
-            </div>
             </section>
 
             <section id="visitorHistorySection" class="card pad erp-page visitor-page-card">
@@ -207,81 +201,6 @@
     <script src="js/config.js"></script>
     <script src="js/util.js"></script>
     <script src="js/visitor_request.js"></script>
-    <script>
-      (function () {
-        const mobileQuery = window.matchMedia("(max-width: 768px)");
-
-        function closeMobileSidebar() {
-          const mainArea = document.getElementById("mainArea");
-          const toggle = document.getElementById("mobileMenuToggle");
-          if (!mainArea || !toggle) return;
-          mainArea.classList.remove("mobile-sidebar-open");
-          toggle.setAttribute("aria-expanded", "false");
-        }
-
-        function syncMobileSidebar() {
-          const mainArea = document.getElementById("mainArea");
-          const toggle = document.getElementById("mobileMenuToggle");
-          if (!mainArea || !toggle) return;
-
-          if (mobileQuery.matches) {
-            mainArea.classList.remove("mobile-sidebar-open");
-            toggle.setAttribute("aria-expanded", "false");
-          } else {
-            mainArea.classList.remove("mobile-sidebar-open");
-            toggle.setAttribute("aria-expanded", "true");
-          }
-        }
-
-        function bindVisitorSidebar() {
-          const links = document.querySelectorAll(".erp-nav-link[data-page]");
-          const pages = document.querySelectorAll(".erp-page");
-          const mainArea = document.getElementById("mainArea");
-          const toggle = document.getElementById("mobileMenuToggle");
-          const sideActions = document.querySelectorAll(".erp-side-action");
-
-          links.forEach((btn) => {
-            btn.addEventListener("click", function () {
-              const targetId = this.dataset.page;
-              if (!targetId) return;
-
-              links.forEach((el) => el.classList.remove("active"));
-              this.classList.add("active");
-
-              pages.forEach((page) => page.classList.remove("active"));
-              const target = document.getElementById(targetId);
-              if (target) target.classList.add("active");
-
-              if (mobileQuery.matches) closeMobileSidebar();
-            });
-          });
-
-          sideActions.forEach((btn) => {
-            btn.addEventListener("click", function () {
-              if (mobileQuery.matches) closeMobileSidebar();
-            });
-          });
-
-          if (toggle && mainArea) {
-            toggle.addEventListener("click", function () {
-              if (!mobileQuery.matches) return;
-              const willOpen = !mainArea.classList.contains("mobile-sidebar-open");
-              mainArea.classList.toggle("mobile-sidebar-open", willOpen);
-              toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
-            });
-          }
-
-          syncMobileSidebar();
-          window.addEventListener("resize", syncMobileSidebar);
-        }
-
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", bindVisitorSidebar);
-        } else {
-          bindVisitorSidebar();
-        }
-      })();
-    </script>
   </div>
 </body>
 </html>
