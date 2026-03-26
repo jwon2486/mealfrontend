@@ -1101,39 +1101,49 @@ function goToMain() {
   }
 
   // renderBulkVisitRows 함수 내부 수정 예시
-function renderBulkVisitRows() {
-  const bulkBody = document.getElementById("bulk-visit-body");
-  if (!bulkBody) return;
+// ✅ [수정 완료] HTML 테이블의 7칸 구조(저장 칸 포함)에 맞게 JS를 업데이트했습니다.
+  function renderBulkVisitRows() {
+    const bulkBody = document.getElementById("bulk-visit-body");
+    if (!bulkBody) return;
 
-  // ✅ [수정] 개별 입력창의 날짜를 기준일로 가져옴
-  const baseDateStr = document.getElementById("visit-date").value;
-  if (!baseDateStr) return;
+    const baseDateStr = document.getElementById("visit-date").value;
+    if (!baseDateStr) return;
 
-  // 해당 날짜가 속한 주의 월~금 날짜 배열 생성
-  const dates = getWeekDatesFromMonday(baseDateStr); 
-  
-  bulkBody.innerHTML = "";
+    const dates = getWeekDatesFromMonday(baseDateStr); 
+    bulkBody.innerHTML = "";
 
-  dates.forEach((date) => {
-    const row = document.createElement("tr");
-    row.dataset.date = date; // 행에 날짜 정보 저장
-    
-    // 개별 입력과 동일한 마감 정책 적용
-    const isClosed = isDeadlinePassed(date, "lunch", 1); // 예시 체크
+    dates.forEach((date, index) => {
+      const row = document.createElement("tr");
+      row.dataset.date = date; 
+      
+      const isClosed = isDeadlinePassed(date, "lunch", 1); 
 
-    row.innerHTML = `
-      <td>${date}</td>
-      <td>${getWeekdayName(date)}</td> <td><input type="number" class="bulk-b-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
-      <td><input type="number" class="bulk-l-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
-      <td><input type="number" class="bulk-d-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
-      <td><input type="text" class="bulk-reason-input" data-date="${date}" placeholder="사유" ${isClosed ? 'disabled' : ''}></td>
-    `;
-    bulkBody.appendChild(row);
-  });
+      let html = `
+        <td class="col-adate">${date}</td>
+        <td class="col-aday">${getWeekdayName(date)}</td>
+        <td class="col-abreakfast"><input type="number" class="bulk-b-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
+        <td class="col-alunch"><input type="number" class="bulk-l-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
+        <td class="col-adinner"><input type="number" class="bulk-d-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
+        <td class="col-areason"><input type="text" class="bulk-reason-input" data-date="${date}" placeholder="사유" ${isClosed ? 'disabled' : ''}></td>
+      `;
 
-  // 마감 색상 및 상태 업데이트 실행
-  applyBulkDeadlineState();
-}
+      // 💡 핵심 로직: 첫 번째 줄(월요일)을 그릴 때만 7번째 칸을 만들고 5줄을 하나로 합침(rowspan)
+      if (index === 0) {
+        html += `
+          <td class="col-asave" rowspan="${dates.length}" style="vertical-align: middle;">
+            <button type="button" id="bulk-visit-save-btn" class="action-btn save-btn visitor-save-btn" style="width: 100%; white-space: normal; line-height: 1.6;">
+              💾저장
+            </button>
+          </td>
+        `;
+      }
+
+      row.innerHTML = html;
+      bulkBody.appendChild(row);
+    });
+
+    applyBulkDeadlineState();
+  }
 
   function applyStateToInput(input, locked, title) {
     if (!input) return;
