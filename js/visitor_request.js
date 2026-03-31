@@ -76,7 +76,8 @@ function applyUserTypeUI() {
   
   // --- 1. 선택자 추가 ---
   const applyNavLink = document.querySelector('.erp-nav-link[data-page="visitorApplySection"]');
-  const sidebarSubtitle = document.querySelector('.erp-sidebar-subtitle'); // 사이드바 보조 문구 선택
+  const sidebarSubtitle = document.querySelector('.erp-sidebar-subtitle'); 
+  const sidebarTitle = document.querySelector('.erp-sidebar-title'); // 사이드바 메인 타이틀 선택 추가
   // ----------------------
 
   const reasonTh = document.getElementById("reason-th");
@@ -91,6 +92,7 @@ function applyUserTypeUI() {
     // --- 2. 협력사 문구 변경 ---
     if (applyNavLink) applyNavLink.innerText = "협력사 신청";
     if (sidebarSubtitle) sidebarSubtitle.innerText = "협력사 신청 메뉴";
+    if (sidebarTitle) sidebarTitle.innerText = "PARTNER MENU"; // 협력사일 때 변경
 
     toggleVisibility(reasonTh, false);
     toggleVisibility(reasonTd, false);
@@ -103,6 +105,7 @@ function applyUserTypeUI() {
     // --- 3. 직영(방문자) 문구 변경 ---
     if (applyNavLink) applyNavLink.innerText = "방문자 신청";
     if (sidebarSubtitle) sidebarSubtitle.innerText = "방문자 신청 메뉴";
+    if (sidebarTitle) sidebarTitle.innerText = "VISITOR MENU"; // 직영일 때 유지
 
     toggleVisibility(reasonTh, true);
     toggleVisibility(reasonTd, true);
