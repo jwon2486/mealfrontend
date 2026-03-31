@@ -1,23 +1,23 @@
-/* 관리자 대시보드 전용 스타일 */
+/* 관리자 대시보드 전용 스타일 (컴팩트 버전) */
 
 .admin-dashboard-wrapper {
-    max-width: 1000px;
+    max-width: 850px; /* 전체 너비를 살짝 줄여서 응집력 있게 */
     margin: 0 auto;
-    margin-top: 20px;
+    margin-top: 16px; /* 상단 여백 축소 */
 }
 
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 20px; /* 여백 축소 */
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--line);
 }
 
 /* 섹션 그룹화 스타일 */
 .admin-section {
-    margin-bottom: 36px;
+    margin-bottom: 24px; /* 섹션 간격 축소 (기존 36px -> 24px) */
 }
 
 .admin-section:last-child {
@@ -25,22 +25,23 @@
 }
 
 .admin-section-title {
-    font-size: 1.1rem;
+    font-size: 0.95rem; /* 제목 크기 축소 */
     font-weight: 800;
-    color: var(--brand); /* 브랜드 컬러로 포인트 */
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed var(--line); /* 부드러운 점선 구분선 */
+    color: var(--brand); 
+    margin-bottom: 12px; /* 타이틀 하단 여백 축소 */
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--line);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 /* 타일형 그리드 레이아웃 */
 .admin-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
+    /* 타일 최소 너비를 220px에서 160px로 줄여 한 줄에 더 많이 들어가게 함 */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px; /* 타일 간격 축소 */
 }
 
 .admin-tile {
@@ -48,7 +49,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 30px 20px;
+    padding: 20px 12px; /* 타일 내부 여백 축소 (기존 30px 20px -> 20px 12px) */
     background: var(--surface-strong);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
@@ -59,18 +60,19 @@
 }
 
 .admin-tile:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-hover);
     border-color: var(--brand2);
 }
 
 .admin-tile .icon {
-    font-size: 2.2rem;
-    margin-bottom: 12px;
+    font-size: 1.6rem; /* 아이콘 크기 대폭 축소 (기존 2.2rem -> 1.6rem) */
+    margin-bottom: 8px; /* 아이콘과 글자 사이 간격 축소 */
 }
 
 .admin-tile .title {
-    font-size: 1.05rem;
+    font-size: 0.9rem; /* 메뉴 이름 글자 크기 축소 */
     font-weight: 800;
     color: var(--text);
+    word-break: keep-all; /* 단어 단위로 줄바꿈되도록 설정 */
 }

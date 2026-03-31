@@ -74,22 +74,36 @@ function applyUserTypeUI() {
   const pageTitle = document.getElementById("page-title"); 
   const pageButton = document.getElementById("page-button"); 
   
+  // --- 1. 선택자 추가 ---
+  const applyNavLink = document.querySelector('.erp-nav-link[data-page="visitorApplySection"]');
+  const sidebarSubtitle = document.querySelector('.erp-sidebar-subtitle'); // 사이드바 보조 문구 선택
+  // ----------------------
+
   const reasonTh = document.getElementById("reason-th");
   const reasonInput = document.getElementById("visit-reason");
-  // 💡 핵심: input 창이 아니라, 표의 '칸(td)' 전체를 제어해야 표가 어긋나지 않습니다.
   const reasonTd = reasonInput ? reasonInput.closest("td") : null;
   const weeklyReasonTh = document.getElementById("weekly-reason-th");
 
   if (userType === "협력사") {
     if (pageTitle) pageTitle.innerText = "식수 신청 시스템";
     if (pageButton) pageButton.innerText = "🔙 로그아웃";
+    
+    // --- 2. 협력사 문구 변경 ---
+    if (applyNavLink) applyNavLink.innerText = "협력사 신청";
+    if (sidebarSubtitle) sidebarSubtitle.innerText = "협력사 신청 메뉴";
+
     toggleVisibility(reasonTh, false);
     toggleVisibility(reasonTd, false);
     toggleVisibility(weeklyReasonTh, true);
+
   } else if (userType === "직영") {
     if (pageTitle) pageTitle.innerText = "방문자 식수 신청";
     if (pageButton) pageButton.innerText = "🔙 뒤로가기";
-    // 💡 별도의 displayClass를 주지 않음으로써 table-cell 속성이 유지되어 파란색 배경이 꽉 찹니다.
+
+    // --- 3. 직영(방문자) 문구 변경 ---
+    if (applyNavLink) applyNavLink.innerText = "방문자 신청";
+    if (sidebarSubtitle) sidebarSubtitle.innerText = "방문자 신청 메뉴";
+
     toggleVisibility(reasonTh, true);
     toggleVisibility(reasonTd, true);
     toggleVisibility(weeklyReasonTh, true);
@@ -154,9 +168,7 @@ function setupSidebarAndTabs() {
   window.addEventListener("resize", syncMobileSidebar);
 }
 
-// ============================================================================
-// 날짜 및 캘린더 관련 로직
-// ============================================================================
+// [수정] visitor_request.js의 handleDateChange 함수 내부
 function handleDateChange() {
   const input = document.getElementById("visit-date");
   const picked = new Date(input.value);
@@ -167,7 +179,40 @@ function handleDateChange() {
     input.value = adjusted.toISOString().split("T")[0];
   }
 
-  document.getElementById("visit-week-date").value = input.value;
+  const selectedDate = input.value;
+  document.getElementById("visit-week-date").value = selectedDate;
+
+  // --- 수정된 데이터 불러오기 로직 ---
+  const user = JSON.parse(sessionStorage.getItem("currentUser"));
+  const actualType = sessionStorage.getItem("type") === "직영" ? "방문자" : "협력사";
+  
+  // app.py의 /visitors/check 엔드포인트 호출
+  const checkUrl = `${API_BASE_URL}/visitors/check?date=${selectedDate}&id=${user.userId}&type=${actualType}`;
+
+  getData(checkUrl, (res) => {
+    // HTML에 정의된 ID: b-count, l-count, d-count
+    const bCount = document.getElementById("b-count");
+    const lCount = document.getElementById("l-count");
+    const dCount = document.getElementById("d-count");
+    const reasonInput = document.getElementById("visit-reason");
+
+    // 서버 응답 구조가 res.record 이므로 수정
+    if (res && res.exists && res.record) {
+      if (bCount) bCount.value = res.record.breakfast || 0;
+      if (lCount) lCount.value = res.record.lunch || 0;
+      if (dCount) dCount.value = res.record.dinner || 0;
+      if (reasonInput) reasonInput.value = res.record.reason || "";
+    } else {
+      // 데이터가 없으면 0으로 초기화
+      if (bCount) bCount.value = 0;
+      if (lCount) lCount.value = 0;
+      if (dCount) dCount.value = 0;
+      if (reasonInput) reasonInput.value = "";
+    }
+    // 마감 상태에 따른 입력창 활성/비활성 업데이트
+    updateDeadlineColors(); 
+  });
+  // --------------------------------
 
   const bulkWrapper = document.getElementById("bulk-visit-wrapper");
   if (bulkWrapper && !bulkWrapper.classList.contains("ui-hidden")) {
@@ -210,6 +255,7 @@ function setTodayDefault() {
   if (!weekField.value) weekField.value = dateStr;
 
   updateWeekday();
+  handleDateChange();
 }
   
 function updateWeekday() {
@@ -780,16 +826,31 @@ function updateDeadlineColors() {
   }
 
   function renderBulkVisitRows() {
-    const bulkBody = document.getElementById(BULK_IDS.body);
-    if (!bulkBody) return;
+  const bulkBody = document.getElementById(BULK_IDS.body);
+  if (!bulkBody) return;
 
-    const baseDateStr = document.getElementById(BULK_IDS.singleDate).value;
-    if (!baseDateStr) return;
+  const baseDateStr = document.getElementById(BULK_IDS.singleDate).value;
+  if (!baseDateStr) return;
 
-    const dates = getWeekDatesFromMonday(baseDateStr); 
+  const dates = getWeekDatesFromMonday(baseDateStr);
+  const { start, end } = getWeekStartAndEnd(baseDateStr);
+  
+  // --- 추가된 로직: 해당 주차의 내 신청 데이터 미리 가져오기 ---
+  const user = JSON.parse(sessionStorage.getItem("currentUser"));
+  getData(`${API_BASE_URL}/visitors/weekly?start=${start}&end=${end}`, (allData) => {
+    // 내 데이터만 필터링 (직영/협력사 구분 및 본인 아이디 확인)
+    const myDataMap = {};
+    const actualType = sessionStorage.getItem("type") === "직영" ? "방문자" : "협력사";
+    
+    (allData || []).forEach(item => {
+      if (item.applicant_id === user.userId && item.type === actualType) {
+        myDataMap[item.date] = item;
+      }
+    });
+
     bulkBody.innerHTML = "";
-
     dates.forEach((date, index) => {
+      const rowData = myDataMap[date] || { breakfast: 0, lunch: 0, dinner: 0, reason: "" };
       const row = document.createElement("tr");
       row.dataset.date = date; 
       
@@ -798,10 +859,10 @@ function updateDeadlineColors() {
       let html = `
         <td class="col-adate">${date}</td>
         <td class="col-aday">${getWeekdayName(date)}</td>
-        <td class="col-abreakfast"><input type="number" class="bulk-b-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
-        <td class="col-alunch"><input type="number" class="bulk-l-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
-        <td class="col-adinner"><input type="number" class="bulk-d-count" data-date="${date}" value="0" min="0" ${isClosed ? 'disabled' : ''}></td>
-        <td class="col-areason"><input type="text" class="bulk-reason-input" data-date="${date}" placeholder="사유" ${isClosed ? 'disabled' : ''}></td>
+        <td class="col-abreakfast"><input type="number" class="bulk-b-count" data-date="${date}" value="${rowData.breakfast}" min="0" ${isClosed ? 'disabled' : ''}></td>
+        <td class="col-alunch"><input type="number" class="bulk-l-count" data-date="${date}" value="${rowData.lunch}" min="0" ${isClosed ? 'disabled' : ''}></td>
+        <td class="col-adinner"><input type="number" class="bulk-d-count" data-date="${date}" value="${rowData.dinner}" min="0" ${isClosed ? 'disabled' : ''}></td>
+        <td class="col-areason"><input type="text" class="bulk-reason-input" data-date="${date}" value="${rowData.reason}" placeholder="사유" ${isClosed ? 'disabled' : ''}></td>
       `;
 
       if (index === 0) {
@@ -813,13 +874,12 @@ function updateDeadlineColors() {
           </td>
         `;
       }
-
       row.innerHTML = html;
       bulkBody.appendChild(row);
     });
-
     applyBulkDeadlineState();
-  }
+  });
+}
 
   function applyStateToInput(input, locked, title) {
     if (!input) return;
