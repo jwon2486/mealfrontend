@@ -74,6 +74,7 @@ body.visitor-erp-page #mainArea{
 
 .visitor-table-fixed{
   table-layout:fixed;
+  width: 100%;
 }
 
 .visitor-table-fixed th,
