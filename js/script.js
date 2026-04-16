@@ -267,9 +267,8 @@ function isDeadlinePassed(dateStr, mealType) {
     const mealDate = new Date(dateStr);
     mealDate.setHours(0, 0, 0, 0);
 
-    // 이번 주 식수 신청인 경우 (매일 마감)
     if (isThisWeek(dateStr)) {
-        // 에코센터 본인확인 페널티 로직
+        // 수정: 테크센터 사용자는 본인확인 페널티(isSelfcheckLate)를 체크하지 않음
         if (window.currentUser?.region === "에코센터") {
             const thisMondayStr = ymdKST(mondayOf(mealDate));
             const createdAtStr = window.selfcheckCreatedAtMap[thisMondayStr];
@@ -282,7 +281,7 @@ function isDeadlinePassed(dateStr, mealType) {
             }
         }
         
-        // 일일 마감시간 세팅
+        // 이 부분은 모든 사용자에게 공통 적용되는 "식사별 제한 시간"입니다
         let deadline = new Date(mealDate);
         if (mealType === "조식") {
             deadline.setDate(deadline.getDate() - 1);
@@ -300,6 +299,10 @@ function isDeadlinePassed(dateStr, mealType) {
     const wednesdayDeadline = new Date(thisMon);
     wednesdayDeadline.setDate(thisMon.getDate() + 2);
     wednesdayDeadline.setHours(16, 0, 0, 0);
+    // 테크센터는 수요일 16시 일괄 마감 룰에서 제외하려면 아래 조건 추가
+    if (window.currentUser?.region !== "에코센터") {
+        return false; // 테크센터는 마감 아님 처리
+    }
     return now > wednesdayDeadline;
 }
 
