@@ -261,6 +261,11 @@ function logout() {
 
 // 💡 리팩토링: 매우 깔끔해진 마감 시간 판별 로직
 function isDeadlinePassed(dateStr, mealType) {
+
+    // 💡 추가: 에코센터가 아닌 경우 무조건 마감 처리 (임시 차단)
+    if (window.currentUser?.region !== "에코센터") {
+        return true; 
+    }
     const now = getKSTNow();
     if (isTwoWeeksLaterOrMore(dateStr)) return false;
     
