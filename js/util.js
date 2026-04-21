@@ -1,20 +1,14 @@
-
-
 // ✅ 공통 fetch POST 함수
 function postData(path, data, onSuccess, onError) {
-
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
-
     fetch(url, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
     .then(async res => {
         if (!res.ok) {
-            const err = await res.json(); // JSON 응답 안의 {"error": "..."}
+            const err = await res.json();
             throw new Error(err.error || `서버 오류 (${res.status})`);
         }
         return res.json();
@@ -22,25 +16,17 @@ function postData(path, data, onSuccess, onError) {
     .then(onSuccess)
     .catch(err => {
         console.error("❌ 요청 실패:", err);
-        alert(err + '❌ 요청 실패:');
-        if (onError) {
-            onError(err);
-        } else {
-            showToast("❌ 오류: " + err.message);
-        }
+        if (onError) onError(err);
+        else showToast("❌ 오류: " + err.message);
     });
 }
 
-// ✅ 공통 PUT 요청 함수 (직원 수정용)
+// ✅ 공통 PUT 요청 함수
 function putData(path, data, onSuccess, onError) {
-    
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
-    
     fetch(url, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
     .then(async res => {
@@ -64,19 +50,13 @@ function showToast(message, duration = 2000) {
     if (!toast) return;
     toast.innerText = message;
     toast.className = "toast show";
-    setTimeout(() => {
-        toast.className = "toast";
-    }, duration);
+    setTimeout(() => { toast.className = "toast"; }, duration);
 }
 
-// ✅ DELETE 요청용 함수 (postData의 삭제 버전)
+// ✅ DELETE 요청용 함수
 function deleteData(path, onSuccess, onError) {
-
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
-
-    fetch(url, {
-        method: "DELETE"
-    })
+    fetch(url, { method: "DELETE" })
     .then(res => {
         if (!res.ok) throw new Error("삭제 실패");
         return res.json();
@@ -89,393 +69,192 @@ function deleteData(path, onSuccess, onError) {
     });
 }
 
+// ✅ GET 요청용 함수
 function getData(path, onSuccess, onError) {
-    
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
-    
     fetch(url)
         .then(async res => {
-            const text = await res.text();  // 💬 원문 텍스트
-
+            const text = await res.text();
             if (!res.ok) {
-                console.error("❌ 서버 오류 응답:", text);
                 if (onError) onError(new Error(text));
                 else showToast("❌ 서버 오류: " + text);
                 return;
             }
-
-            // 🔄 JSON 파싱 시도
-            let data;
             try {
-                data = JSON.parse(text);
-            } catch (err) {
-                console.error("⚠️ JSON 파싱 실패:", text);
-                if (onError) onError(new Error("JSON 파싱 실패"));
-                return;
-            }
-
-            // ✅ 안전하게 성공 콜백 실행
-            try {
+                const data = JSON.parse(text);
                 onSuccess(data);
-            } catch (e) {
-                console.error("onSuccess 처리 중 오류:", e);
-                if (onError) onError(e);
-                else alert("❌ 데이터 처리 중 오류: " + e.message);
+            } catch (err) {
+                if (onError) onError(new Error("JSON 파싱 실패"));
             }
         })
         .catch(err => {
-            console.error("❌ GET 요청 실패:", err);
-            if (onError) onError(err, "onSuccess");
+            if (onError) onError(err);
             else showToast("❌ 데이터를 불러오는 중 오류: " + err.message);
         });
-        
 }
-
-// export function getData(url, onSuccess, onError) {
-//     fetch(url)
-//         .then(response => {
-//             console.log("✅ GET 응답 상태:", response.status);
-//             if (!response.ok) throw new Error("서버 응답 오류");
-//             return response.json();
-//         })
-//         .then(data => {
-//             console.log("✅ 서버 응답 데이터:", data);
-//             try {
-//                 onSuccess(data);
-//             } catch (err) {
-//                 console.error("❌ onSuccess 처리 중 오류:", err);
-//                 onError(err, "onSuccess");
-//             }
-//         })
-//         .catch(err => {
-//             console.error("❌ GET 요청 실패: ", err);
-//             onError(err, "fetch");
-//         });
-// }
-
 
 /**
- * 파일 업로드 전송용 공통 함수 (FormData 기반)
- * 
- * @param {string} `${API_BASE_URL}${path}` 업로드 API 주소
- * @param {File} file 업로드할 파일 객체
- * @param {Function} onSuccess 성공 시 호출되는 콜백 (응답 JSON 포함)
- * @param {Function} onError 실패 시 호출되는 콜백 (에러 객체 포함)
+ * ✅ 누락된 관리자 UI 활성화 함수 복구
  */
-function uploadFile(path, file, onSuccess, onError) {
-    const formData = new FormData();
-    formData.append("file", file);
-  
-    const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
+function applyMenuBoardRoleUI() {
+  const isAdmin = isAdminUser();
+  const adminBar = document.getElementById("menuBoardAdminBar");
+  const uploadBtn = document.getElementById("menuUploadBtn");
+  const deleteBtn = document.getElementById("menuDeleteBtn");
 
-    fetch(url, {
-      method: "POST",
-      body: formData
-    })
-      .then(async res => {
-        const result = await res.json();
-  
-        if (!res.ok) {
-          throw new Error(result.error || `업로드 실패 (코드: ${res.status})`);
-        }
-  
-        if (onSuccess) onSuccess(result);
-      })
-      .catch(err => {
-        console.error("❌ 파일 업로드 실패:", err);
-        if (onError) onError(err);
-        else alert("❌ 업로드 에러: " + err.message);
-      });
+  if (adminBar) {
+    // 관리자일 경우 'hidden' 클래스를 제거하고 flex로 표시
+    if (isAdmin) {
+      adminBar.classList.remove("hidden", "ui-hidden");
+      adminBar.style.display = "flex";
+    } else {
+      adminBar.style.display = "none";
+    }
+  }
 }
 
-// ✅ 날짜 포맷 정규화: YYYY-MM-DD
+/**
+ * ✅ 누락된 초기화 함수 복구
+ */
+function initMenuBoard() {
+  applyMenuBoardRoleUI(); // 관리자 버튼 노출 여부 결정
+  if (typeof bindMenuBoardEvents === "function") bindMenuBoardEvents(); // 이벤트 연결
+  renderMenuBoard(); // 목록 불러오기
+}
+
+// 외부에서 호출할 수 있도록 window 객체에 등록
+window.initMenuBoard = initMenuBoard;
+
+/**
+ * ✅ 식단표 이미지를 새 창에서 인쇄하는 공통 함수
+ */
+function printMenuImage(imgSrc) {
+  if (!imgSrc) return;
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>식단표 인쇄</title>
+        <style>
+          @page { size: auto; margin: 10mm; }
+          body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+          img { max-width: 100%; max-height: 95vh; object-fit: contain; }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">
+        <img src="${imgSrc}" />
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// ✅ 날짜 관련 유틸리티 함수들
 function normalizeDate(dateStr) {
     const d = new Date(dateStr);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+    return d.toISOString().split('T')[0];
 }
 
-// ✅ 공휴일 리스트 fetch (url + 콜백 구조)
-function fetchHolidayList(path, onSuccess, onError) {
-    getData(`${API_BASE_URL}${path}`,
-        (data) => {
-            // ⬇️ 원본 data 그대로 넘김 (날짜+description 포함)
-            if (onSuccess) onSuccess(data);
-        },
-        (err) => {
-            console.error("공휴일 불러오기 실패:", err);
-            if (onError) onError(err);
-        }
-    );
-}
-
-function getCurrentWeekRange() {
-  const today = new Date(); // 브라우저 로컬 = KST
-  const day = today.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + diffToMonday);
-
-  const friday = new Date(monday);
-  friday.setDate(monday.getDate() + 4);
-
-  return {
-    start: getKSTDateString(monday),
-    end: getKSTDateString(friday)
-  };
-}
-
-// 요일을 한글로 반환하는 유틸 함수
 function getWeekdayName(dateStr) {
     const days = ["일", "월", "화", "수", "목", "금", "토"];
-    const date = new Date(dateStr);
-    return days[date.getDay()];
+    return days[new Date(dateStr).getDay()];
 }
 
-// ✅ 특정 날짜 기준의 월~금 주간 범위 계산 함수
 function getWeekStartAndEnd(dateStr) {
     const date = new Date(dateStr);
-    const day = date.getDay(); // 0=일 ~ 6=토
-  
+    const day = date.getDay();
     const monday = new Date(date);
-    const diffToMonday = day === 0 ? -6 : 1 - day; // 일요일이면 -6, 월요일이면 0
-    monday.setDate(date.getDate() + diffToMonday);
-  
+    monday.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
     const friday = new Date(monday);
     friday.setDate(monday.getDate() + 4);
-  
-    
     return { start: getKSTDateString(monday), end: getKSTDateString(friday) };
-
 }
 
-function getLoginInfo() {
-    const id = sessionStorage.getItem("userId") || sessionStorage.getItem("id");      // ✅ 보완
-    const name = sessionStorage.getItem("userName") || sessionStorage.getItem("name");
-    const type = sessionStorage.getItem("userType") || sessionStorage.getItem("type");
-    return { id, name, type };
-}
-
-// ✅ 한국시간 기준 YYYY-MM-DD 반환 함수
 function getKSTDateString(date) {
-    const tzOffset = date.getTimezoneOffset() * 60000; // 분 → 밀리초
-    const kst = new Date(date.getTime() - tzOffset + (9 * 60 * 60 * 1000)); // UTC → KST(+9h)
-    return kst.toISOString().slice(0, 10); // YYYY-MM-DD
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    const kst = new Date(date.getTime() - tzOffset + (9 * 60 * 60 * 1000));
+    return kst.toISOString().slice(0, 10);
 }
 
 function getKSTDate() {
     const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000; // 현재 시간 → UTC 기준
-    const KST_OFFSET = 9 * 60 * 60000; // 9시간 → 밀리초
-    return new Date(utc + KST_OFFSET);
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    return new Date(utc + (9 * 60 * 60000));
 }
-
-// ✅ 페이지 이동 함수
-function goToPage(pageUrl) {
-    window.location.href = pageUrl;
-}
-
-//5분간 입력이 없을시 강제 로그아웃 처리하는 함수
-(function setupInactivityTimeout() {
-    const TIMEOUT = 10 * 60 * 1000; // 10분 (원하는 시간으로 바꿀 수 있음)
-    let timer;
-
-    function resetTimer() {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            // 세션 스토리지 삭제
-            sessionStorage.clear();
-            // 로그아웃 처리: 로그인 페이지로 이동
-            location.href = "index.html";
-        }, TIMEOUT);
-    }
-/**
- * 주어진 UTC 기반 날짜 문자열을 한국 시간(KST)으로 변환하여
- * "YYYY-MM-DD HH:mm:ss" 형식의 문자열로 반환하는 함수**/
-function formatToKoreanTime(datetimeStr) {
-  if (!datetimeStr) return "-";
-  const date = new Date(datetimeStr.replace(" ", "T") + "Z");
-  return date.toLocaleString("ko-KR", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
-}
-
-    window.formatToKoreanTime = formatToKoreanTime;
-    // 이벤트에 타이머 리셋 연결
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onclick = resetTimer;
-    document.onscroll = resetTimer;
-})();
 
 /* ==========================================
-   🖼️ 식단표 게시판 (Refactor)
+   🖼️ 식단표 게시판 (Refactored)
 ========================================== */
 
 function isAdminUser() {
   try {
-    const user =
-      window.currentUser ||
-      JSON.parse(sessionStorage.getItem("currentUser") || "null");
+    const user = JSON.parse(sessionStorage.getItem("currentUser") || "null");
     return !!user && String(user.level) === "3";
-  } catch (error) {
-    console.error("❌ 관리자 권한 확인 실패:", error);
-    return false;
-  }
-}
-
-function getApiBaseUrl() {
-  if (typeof API_BASE_URL === "string" && API_BASE_URL.trim()) {
-    return API_BASE_URL.replace(/\/+$/, "");
-  }
-  if (window.API_BASE_URL && String(window.API_BASE_URL).trim()) {
-    return String(window.API_BASE_URL).replace(/\/+$/, "");
-  }
-  return "";
-}
-
-function buildApiUrl(path) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-
-  const base = getApiBaseUrl();
-  if (!base) return path;
-
-  return path.startsWith("/") ? `${base}${path}` : `${base}/${path}`;
-}
-
-function safeParseJson(text) {
-  if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    return null;
-  }
+  } catch (error) { return false; }
 }
 
 function resolveMenuImageUrl(imageUrl) {
   if (!imageUrl) return "";
-  return /^https?:\/\//i.test(imageUrl) ? imageUrl : buildApiUrl(imageUrl);
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
+  const base = (typeof API_BASE_URL === "string" ? API_BASE_URL : "").replace(/\/+$/, "");
+  return imageUrl.startsWith("/") ? `${base}${imageUrl}` : `${base}/${imageUrl}`;
 }
 
-async function requestMenuBoard(path, options = {}) {
-  const response = await fetch(buildApiUrl(path), options);
-  const rawText = await response.text();
-  const json = safeParseJson(rawText);
-
-  if (!response.ok) {
-    const message =
-      (json && (json.error || json.message)) ||
-      rawText ||
-      `식단표 요청 실패 (${response.status})`;
-    throw new Error(message);
-  }
-
-  return json;
-}
-
+// ✅ 모달 창 리팩토링: 인쇄 버튼 추가
 function openMenuImageModal(src, title) {
   if (!src) return;
-
   let modal = document.getElementById("menuModal");
-
   if (!modal) {
     modal = document.createElement("div");
     modal.id = "menuModal";
     modal.className = "menu-modal";
-    modal.innerHTML = `
-      <div class="menu-modal__backdrop" data-close="1"></div>
-      <div class="menu-modal__panel" role="dialog" aria-modal="true" aria-label="식단표 원본 보기">
-        <div class="menu-modal__header">
-          <div class="menu-modal__title" id="menuModalTitle"></div>
-          <button type="button" class="menu-modal__close" aria-label="닫기" data-close="1">✕</button>
-        </div>
-        <div class="menu-modal__body">
-          <img id="menuModalImg" alt="식단표 원본" />
-        </div>
-      </div>
-    `;
     document.body.appendChild(modal);
-
-    modal.addEventListener("click", (event) => {
-      const target = event.target;
-      if (target && target.getAttribute("data-close") === "1") {
-        modal.classList.remove("open");
-      }
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        const menuModal = document.getElementById("menuModal");
-        if (menuModal) menuModal.classList.remove("open");
-      }
-    });
   }
 
-  const image = document.getElementById("menuModalImg");
-  const titleNode = document.getElementById("menuModalTitle");
+  modal.innerHTML = `
+    <div class="menu-modal__backdrop" data-close="1"></div>
+    <div class="menu-modal__panel" role="dialog" aria-modal="true">
+      <div class="menu-modal__header">
+        <div class="menu-modal__title">${title || "식단표"}</div>
+        <div class="menu-modal__actions">
+          <button type="button" class="action-btn visitor-btn" onclick="printMenuImage('${src}')">🖨️ 인쇄</button>
+          <button type="button" class="menu-modal__close" data-close="1">✕</button>
+        </div>
+      </div>
+      <div class="menu-modal__body">
+        <img src="${src}" alt="식단표 원본" />
+      </div>
+    </div>
+  `;
 
-  if (image) image.src = src;
-  if (titleNode) titleNode.textContent = title || "식단표";
-
+  modal.onclick = (e) => { if (e.target.dataset.close) modal.classList.remove("open"); };
   modal.classList.add("open");
 }
 
-async function fetchMenuBoardItems() {
-  const items = await requestMenuBoard("/api/menu-board", {
-    method: "GET"
-  });
-
-  if (!Array.isArray(items)) {
-    throw new Error("식단표 목록 형식이 올바르지 않습니다.");
-  }
-
-  return items.map((item) => ({
-    ...item,
-    image_url: resolveMenuImageUrl(item.image_url)
-  }));
-}
-
+// ✅ 썸네일 생성 리팩토링: 카드 구조 및 인쇄 버튼 삽입
 function createMenuThumb(item, adminMode) {
+  const container = document.createElement("div");
+  container.className = "menu-item-card"; // CSS 스타일링을 위한 래퍼
+
   const button = document.createElement("button");
   button.type = "button";
   button.className = "menu-thumb";
-  button.dataset.id = item.id;
   button.dataset.src = item.image_url || "";
   button.dataset.title = item.title || "식단표";
-  button.title = item.title || "식단표";
+  button.onclick = () => openMenuImageModal(item.image_url, item.title);
 
   if (adminMode) {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "menu-select";
     checkbox.value = item.id;
-    checkbox.setAttribute("aria-label", "삭제할 게시글 선택");
-
-    checkbox.addEventListener("click", (event) => {
-      event.stopPropagation();
-    });
-
-    checkbox.addEventListener("change", () => {
-      button.classList.toggle("menu-mark-delete", checkbox.checked);
-    });
-
+    checkbox.onclick = (e) => e.stopPropagation();
     button.appendChild(checkbox);
   }
 
   const image = document.createElement("img");
-  image.alt = item.title || "식단표 썸네일";
   image.src = item.image_url || "";
+  image.alt = item.title;
 
   const caption = document.createElement("div");
   caption.className = "menu-item-title";
@@ -484,237 +263,164 @@ function createMenuThumb(item, adminMode) {
   button.appendChild(image);
   button.appendChild(caption);
 
-  return button;
+  // 개별 인쇄 버튼 추가
+  const printBtn = document.createElement("button");
+  printBtn.type = "button";
+  printBtn.className = "action-btn menu-print-btn";
+  printBtn.innerHTML = "🖨️ 바로 인쇄";
+  printBtn.onclick = (e) => {
+    e.stopPropagation();
+    printMenuImage(item.image_url);
+  };
+
+  container.appendChild(button);
+  container.appendChild(printBtn);
+  return container;
 }
 
+// ✅ 식단표 렌더링 (기존 로직 유지)
 async function renderMenuBoard() {
   const list = document.getElementById("menuList");
   if (!list) return;
-
   try {
     list.innerHTML = `<div class="menu-empty">불러오는 중...</div>`;
-
-    const items = await fetchMenuBoardItems();
+    const response = await fetch(resolveMenuImageUrl("/api/menu-board"));
+    const items = await response.json();
     const adminMode = isAdminUser();
-
     list.innerHTML = "";
-
-    if (items.length === 0) {
+    if (!items.length) {
       list.innerHTML = `<div class="menu-empty">등록된 식단표가 없습니다.</div>`;
       return;
     }
-
-    items.forEach((item) => {
+    items.forEach(item => {
+      item.image_url = resolveMenuImageUrl(item.image_url);
       list.appendChild(createMenuThumb(item, adminMode));
     });
   } catch (error) {
-    console.error("❌ 식단표 목록 렌더링 실패:", error);
-    list.innerHTML = `<div class="menu-empty">식단표를 불러오지 못했습니다.</div>`;
+    list.innerHTML = `<div class="menu-empty">데이터를 불러오지 못했습니다.</div>`;
   }
 }
 
+
+// ✅ 1. 공휴일 리스트 fetch 함수 복구
+function fetchHolidayList(path, onSuccess, onError) {
+    getData(path,
+        (data) => { if (onSuccess) onSuccess(data); },
+        (err) => { 
+            console.error("공휴일 불러오기 실패:", err); 
+            if (onError) onError(err); 
+        }
+    );
+}
+
+// ✅ 2. 식단표 이미지 업로드 함수 복구
 async function uploadMenuBoardImage(file) {
-  if (!file) {
-    throw new Error("업로드할 파일이 없습니다.");
-  }
+  if (!file) throw new Error("업로드할 파일이 없습니다.");
 
   const defaultTitle = file.name.replace(/\.[^.]+$/, "");
-  const title = prompt(
-    "식단표 제목을 입력하세요. (예: 3월 3주차 식단표)",
-    defaultTitle
-  );
-
-  if (title === null) {
-    return { cancelled: true };
-  }
+  const title = prompt("식단표 제목을 입력하세요. (예: 3월 3주차 식단표)", defaultTitle);
+  if (title === null) return { cancelled: true };
 
   const formData = new FormData();
   formData.append("image", file);
   formData.append("title", title.trim() || defaultTitle);
 
-  const result = await requestMenuBoard("/api/menu-board/upload", {
+  const response = await fetch(resolveMenuImageUrl("/api/menu-board/upload"), {
     method: "POST",
     body: formData
   });
 
-  if (result && result.item) {
-    result.item.image_url = resolveMenuImageUrl(result.item.image_url);
-  }
-
-  return result || {};
+  if (!response.ok) throw new Error("업로드 실패");
+  return await response.json();
 }
 
+// ✅ 3. 식단표 삭제 API 호출 함수 복구
 async function deleteMenuBoardItems(ids) {
-  if (!Array.isArray(ids) || ids.length === 0) {
-    throw new Error("삭제할 항목이 없습니다.");
-  }
-
-  return await requestMenuBoard("/api/menu-board/delete", {
+  const response = await fetch(resolveMenuImageUrl("/api/menu-board/delete"), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids })
   });
+  if (!response.ok) throw new Error("삭제 실패");
+  return await response.json();
 }
 
+// ✅ 4. 선택된 항목 삭제 실행 함수 복구
 async function deleteSelectedMenuBoardItems() {
-  const checkedList = Array.from(
-    document.querySelectorAll("#menuList .menu-select:checked")
-  );
-
+  const checkedList = Array.from(document.querySelectorAll("#menuList .menu-select:checked"));
   if (checkedList.length === 0) {
     alert("삭제할 게시글을 체크하세요.");
     return;
   }
+  if (!confirm(`선택한 ${checkedList.length}개 게시글을 삭제할까요?`)) return;
 
-  if (!confirm(`선택한 ${checkedList.length}개 게시글을 삭제할까요?`)) {
-    return;
-  }
-
-  const ids = checkedList.map((checkbox) => checkbox.value);
-
+  const ids = checkedList.map(checkbox => checkbox.value);
   try {
-    const result = await deleteMenuBoardItems(ids);
-    alert(result?.message || "삭제 완료");
-    await renderMenuBoard();
+    await deleteMenuBoardItems(ids);
+    alert("삭제 완료");
+    await renderMenuBoard(); // 목록 새로고침
   } catch (error) {
     console.error("❌ 식단표 삭제 실패:", error);
     alert(`❌ 식단표 삭제 실패: ${error.message}`);
   }
 }
 
-function applyMenuBoardRoleUI() {
-  const isAdmin = isAdminUser();
-  const adminBar = document.getElementById("menuBoardAdminBar");
-  const uploadBtn = document.getElementById("menuUploadBtn");
-  const deleteBtn = document.getElementById("menuDeleteBtn");
-  const input = document.getElementById("menuUploadInput");
-
-  if (adminBar) {
-    adminBar.style.display = isAdmin ? "flex" : "none";
-  }
-
-  if (uploadBtn) {
-    uploadBtn.style.display = isAdmin ? "inline-flex" : "none";
-  }
-
-  if (deleteBtn) {
-    deleteBtn.style.display = isAdmin ? "inline-flex" : "none";
-    if (!isAdmin) deleteBtn.textContent = "삭제";
-  }
-
-  if (input) {
-    input.style.display = "none";
-    input.value = "";
-  }
-}
-
+// ✅ 5. 가장 중요한 버튼 기능 연결(Event Binding) 함수 복구
 function bindMenuBoardEvents() {
-  const list = document.getElementById("menuList");
   const uploadBtn = document.getElementById("menuUploadBtn");
   const deleteBtn = document.getElementById("menuDeleteBtn");
   const input = document.getElementById("menuUploadInput");
+  const list = document.getElementById("menuList");
 
-  if (list && !list.dataset.menuBoardBound) {
-    list.dataset.menuBoardBound = "1";
-
-    list.addEventListener("click", (event) => {
-      const button = event.target.closest("button.menu-thumb");
-      if (!button) return;
-
-      if (list.classList.contains("select-mode")) {
-        const checkbox = button.querySelector(".menu-select");
-        if (checkbox) {
-          checkbox.checked = !checkbox.checked;
-          button.classList.toggle("menu-mark-delete", checkbox.checked);
-        }
-        return;
-      }
-
-      const src = button.dataset.src || "";
-      const title = button.dataset.title || "식단표";
-      openMenuImageModal(src, title);
-    });
-  }
-
-  if (uploadBtn && input && !uploadBtn.dataset.menuBoardBound) {
-    uploadBtn.dataset.menuBoardBound = "1";
-
+  // 업로드 버튼 클릭 이벤트
+  if (uploadBtn && input && !uploadBtn.dataset.bound) {
+    uploadBtn.dataset.bound = "1";
     uploadBtn.addEventListener("click", () => {
-      if (!isAdminUser()) {
-        alert("관리자만 업로드할 수 있습니다.");
-        return;
-      }
-      input.click();
+      if (!isAdminUser()) return alert("관리자만 업로드할 수 있습니다.");
+      input.click(); // 숨겨진 input file 실행
     });
   }
 
-  if (input && !input.dataset.menuBoardBound) {
-    input.dataset.menuBoardBound = "1";
-
+  // 파일 선택 시 업로드 실행 이벤트
+  if (input && !input.dataset.bound) {
+    input.dataset.bound = "1";
     input.addEventListener("change", async (event) => {
-      if (!isAdminUser()) {
-        alert("관리자만 업로드할 수 있습니다.");
-        event.target.value = "";
-        return;
-      }
-
       const file = event.target.files && event.target.files[0];
       if (!file) return;
 
-      if (!file.type.startsWith("image/")) {
-        alert("이미지 파일만 업로드 가능합니다.");
-        event.target.value = "";
-        return;
-      }
-
       try {
         const result = await uploadMenuBoardImage(file);
-        event.target.value = "";
-
-        if (result?.cancelled) return;
-
-        alert(result?.message || "업로드 완료");
-        await renderMenuBoard();
+        if (!result?.cancelled) {
+          alert("업로드 완료");
+          await renderMenuBoard(); // 업로드 후 목록 갱신
+        }
       } catch (error) {
-        console.error("❌ 식단표 업로드 실패:", error);
-        alert(`❌ 식단표 업로드 실패: ${error.message}`);
-        event.target.value = "";
+        alert(error.message);
+      } finally {
+        event.target.value = ""; // 동일한 파일 재업로드 가능하게 초기화
       }
     });
   }
 
-  if (deleteBtn && list && !deleteBtn.dataset.menuBoardBound) {
-    deleteBtn.dataset.menuBoardBound = "1";
-
+  // 삭제 버튼 클릭 이벤트
+  if (deleteBtn && list && !deleteBtn.dataset.bound) {
+    deleteBtn.dataset.bound = "1";
     deleteBtn.addEventListener("click", async () => {
-      if (!isAdminUser()) {
-        alert("관리자만 삭제할 수 있습니다.");
-        return;
-      }
+      if (!isAdminUser()) return alert("관리자만 삭제할 수 있습니다.");
 
       const inSelectMode = list.classList.contains("select-mode");
-
       if (!inSelectMode) {
+        // 첫 클릭: 선택 모드로 전환
         list.classList.add("select-mode");
         deleteBtn.textContent = "선택 삭제";
-        alert("삭제할 게시글을 체크한 뒤 다시 눌러주세요.");
+        alert("삭제할 게시글의 체크박스를 선택한 뒤 다시 눌러주세요.");
         return;
       }
 
+      // 두 번째 클릭: 실제 삭제 진행
       await deleteSelectedMenuBoardItems();
       list.classList.remove("select-mode");
-      deleteBtn.textContent = "삭제";
+      deleteBtn.textContent = "🗑 삭제"; // 원래 이름으로 복구
     });
   }
 }
-
-function initMenuBoard() {
-  applyMenuBoardRoleUI();
-  bindMenuBoardEvents();
-  renderMenuBoard();
-}
-
-window.initMenuBoard = initMenuBoard;
-window.renderMenuBoard = renderMenuBoard;

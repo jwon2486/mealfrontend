@@ -1067,3 +1067,29 @@ function updateDeadlineColors() {
 
   window.renderBulkVisitRows = renderBulkVisitRows;
 })();
+
+/**
+ * 식단표 이미지를 새 창에서 인쇄하는 함수
+ * @param {string} imgSrc - 인쇄할 이미지의 URL
+ */
+function printMenuImage(imgSrc) {
+  if (!imgSrc) return;
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>식단표 인쇄</title>
+        <style>
+          @page { size: auto; margin: 5mm; }
+          body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+          img { max-width: 100%; height: auto; object-fit: contain; }
+        </style>
+      </head>
+      <body onload="window.print(); window.close();">
+        <img src="${imgSrc}" />
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}

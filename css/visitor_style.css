@@ -87,6 +87,32 @@ body.visitor-erp-page #mainArea{
   padding:8px !important;
 }
 
+@media print {
+  /* 사이드바, 탑바, 버튼 등 인쇄 불필요 요소 제거 */
+  .topbar, 
+  .erp-sidebar, 
+  .top-actions, 
+  .action-btn, 
+  #deadline-info,
+  .visitor-filter-bar {
+    display: none !important;
+  }
+
+  /* 인쇄 시 레이아웃 조정 */
+  .shell, .erp-content, .visitor-page-card {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  /* 식단표 이미지가 잘리지 않도록 설정 */
+  .menu-list img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+}
+
 .visitor-table-fixed input[type="date"],
 .visitor-table-fixed input[type="number"],
 .visitor-table-fixed input[type="text"],

@@ -446,3 +446,24 @@ body.cb-highcontrast .meal-btn{ border-width:2px !important; box-shadow: inset 0
   .erp-sidebar-actions{ margin-top:6px !important; display:flex; flex-direction:column; gap:10px; }
   .accessibility-card{ margin-top:6px; }
 }
+
+/* 식단표 카드 컨테이너 */
+.menu-item-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 내부 요소들을 가로 중앙으로 정렬 */
+  gap: 10px;           /* 썸네일과 버튼 사이 간격 */
+  width: 100%;
+}
+
+/* 바로 인쇄 버튼 스타일 */
+.menu-print-btn {
+  width: 60% !important;   /* 버튼 너비를 약간 줄임 (선택사항) */
+  margin: 0 auto !important; /* 가로 중앙 여백 강제 적용 */
+  justify-content: center !important;
+}
+
+/* 썸네일 버튼 자체도 중앙 정렬 확인 */
+.menu-thumb {
+  margin: 0 auto;
+}
