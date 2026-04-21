@@ -424,3 +424,21 @@ function bindMenuBoardEvents() {
     });
   }
 }
+
+function getCurrentWeekRange() {
+    const now = new Date();
+    const day = now.getDay(); // 0(일) ~ 6(토)
+    
+    // 월요일 구하기 (KST 기준)
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+    
+    // 금요일 구하기
+    const friday = new Date(monday);
+    friday.setDate(monday.getDate() + 4);
+    
+    return {
+        start: monday.toISOString().split('T')[0],
+        end: friday.toISOString().split('T')[0]
+    };
+}
