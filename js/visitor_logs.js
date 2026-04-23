@@ -50,3 +50,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadDeptVisitorLogs();
 });
+
+/**
+ * ISO 형식의 날짜 문자열을 한국 시간 형식(YYYY-MM-DD HH:mm:ss)으로 변환하는 함수
+ */
+function formatToKoreanTime(dateStr) {
+    if (!dateStr) return "-";
+    
+    const date = new Date(dateStr);
+    
+    // 유효하지 않은 날짜인 경우 처리
+    if (isNaN(date.getTime())) return "-"; 
+
+    return date.toLocaleString("ko-KR", { 
+        timeZone: "Asia/Seoul",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false // 24시간제로 표시하려면 false, 오전/오후로 표시하려면 true
+    });
+}

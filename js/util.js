@@ -426,19 +426,55 @@ function bindMenuBoardEvents() {
 }
 
 function getCurrentWeekRange() {
+    // 1. 현재 시간의 순수 UTC 타임스탬프(ms) 추출 (로컬 설정 무시)
     const now = new Date();
-    const day = now.getDay(); // 0(일) ~ 6(토)
+    const utcTimestamp = now.getTime(); 
     
-    // 월요일 구하기 (KST 기준)
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+    // 2. 한국 시간(KST) 보정: UTC 타임스탬프 + 9시간
+    const KST_OFFSET = 9 * 60 * 60 * 1000;
+    const kstTimestamp = utcTimestamp + KST_OFFSET;
     
-    // 금요일 구하기
-    const friday = new Date(monday);
-    friday.setDate(monday.getDate() + 4);
+    // 3. 보정된 타임스탬프를 기준으로 요일 추출
+    // 🚨 이미 한국시간으로 9시간을 밀어두었으므로, 로컬의 영향을 받지 않는 getUTCDay()를 사용해야 합니다.
+    const kstDate = new Date(kstTimestamp);
+    const day = kstDate.getUTCDay(); // 0(일) ~ 6(토)
     
+    // 4. 월요일로 가기 위한 날짜(ms) 차이 계산
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    
+    // 5. 한국 시간 기준 월요일과 금요일의 타임스탬프 계산
+    const mondayTimestamp = kstTimestamp + (diffToMonday * ONE_DAY);
+    const fridayTimestamp = mondayTimestamp + (4 * ONE_DAY);
+    
+    // 6. 결과 반환
+    // 이미 내부 시간이 KST로 +9시간 맞춰져 있으므로, 
+    // 무조건 UTC 기준으로 문자를 내뱉는 toISOString()을 사용하면 정확히 KST 날짜가 출력됩니다.
     return {
-        start: monday.toISOString().split('T')[0],
-        end: friday.toISOString().split('T')[0]
+        start: new Date(mondayTimestamp).toISOString().split('T')[0],
+        end: new Date(fridayTimestamp).toISOString().split('T')[0]
     };
+}
+
+/**
+ * ISO 형식의 날짜 문자열을 한국 시간 형식(YYYY-MM-DD HH:mm:ss)으로 변환하는 함수
+ */
+function formatToKoreanTime(dateStr) {
+    if (!dateStr) return "-";
+    
+    const date = new Date(dateStr);
+    
+    // 유효하지 않은 날짜인 경우 처리
+    if (isNaN(date.getTime())) return "-"; 
+
+    return date.toLocaleString("ko-KR", { 
+        timeZone: "Asia/Seoul",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false // 24시간제로 표시하려면 false, 오전/오후로 표시하려면 true
+    });
 }
