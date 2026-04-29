@@ -1,117 +1,120 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>직원 관리</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>에스엔시스 - 직원 관리 Admin</title>
   <link rel="stylesheet" href="css/employees.css" />
-<script>
-  const savedUser = sessionStorage.getItem("currentUser");
-  if (!savedUser) {
-    location.href = "index.html";  // 로그인 안 되어 있음
-  } else {
-    const user = JSON.parse(savedUser);
-    if (user.level !== 3) {
-      alert("관리자만 접근 가능합니다.");
-      location.href = "index.html"; // 관리자 권한 아님
-    }
-  }
-</script>
 </head>
 <body>
-  
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo/SnSYS_logo.png" alt="회사 로고" />
+        <div class="title">
+          <strong>에스엔시스 인력 관리</strong>
+          <span>Employee Management</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="pill">👤 관리자 모드</div>
+      </div>
+    </header>
 
+    <main class="shell">
+      <div class="erp-layout">
+        <aside class="erp-sidebar">
+          <nav class="erp-nav">
+            <button class="nav-item active">👥 직원 관리</button>
+            <button class="nav-item" onclick="location.href='admin_dashboard.html'">📊 대시보드</button>
+            <button class="nav-item" onclick="location.href='index.html'">🏠 메인화면</button>
+          </nav>
+          <div class="erp-sidebar-actions" style="margin-top: 1.25rem; padding: 0 0.625rem;">
+            <button class="btn btn-secondary" style="width:100%; margin-bottom:0.625rem;" onclick="downloadEmployeeTemplate()">📄 양식 다운로드</button>
+            <div class="upload-box" style="background: rgba(255,255,255,0.1); padding: 0.625rem; border-radius: 0.5rem;">
+                <label style="font-size: 0.75rem; color: #cbd5e1;">엑셀 일괄 업로드</label>
+                <input type="file" id="uploadFile" style="font-size: 0.6875rem; margin: 0.3125rem 0;">
+                <button class="btn btn-primary" style="width:100%; font-size: 0.75rem;" onclick="uploadEmployeeFile()">업로드 실행</button>
+            </div>
+          </div>
+        </aside>
 
-  
-  
-  <div class="search_employees">
-    <h2>📋 직원 관리</h2>
-    <!-- 조회 버튼 -->
-    <button onclick="loadEmployees()">전체 조회</button>
-    <button onclick="window.location.href='admin_dashboard.html'">← 관리자 대시보드</button>
-    </br></br>
-    <div class="search-container">
-  <div class="search-block">
-    <h3>🔍 직원 검색</h3>
-    <input type="text" id="filterRegion" placeholder="지역 검색" />
-    <input type="text" id="filterDept" placeholder="부서 검색" />
-    <input type="text" id="filterName" placeholder="이름 검색" />
-    <button onclick="filterEmployees()">검색</button>
-    <button onclick="resetFilter()">전체보기</button>
-  </div>
+        <div class="erp-content">
+          <section class="card filter-card">
+            <div class="search-flex">
+              <div class="input-box">
+                <label>지역</label>
+                <input type="text" id="filterRegion" placeholder="지역 검색" onkeyup="filterEmployees()">
+              </div>
+              <div class="input-box">
+                <label>부서</label>
+                <input type="text" id="filterDept" placeholder="부서 검색" onkeyup="filterEmployees()">
+              </div>
+              <div class="input-box">
+                <label>성명</label>
+                <input type="text" id="filterName" placeholder="이름 검색" onkeyup="filterEmployees()">
+              </div>
+              <button class="btn btn-primary" onclick="filterEmployees()">🔍 검색</button>
+              <button class="btn btn-secondary" onclick="resetFilter()">🔄 초기화</button>
+              <button class="btn btn-primary" style="background: #166534;" onclick="openAddModal()">+ 신규 등록</button>
+            </div>
+          </section>
 
-  <div class="search-block">
-    <h3>📤 직원 목록 업로드</h3>
-    <input type="file" id="uploadFile" accept=".csv,.xlsx" />
-    <button onclick="uploadEmployeeFile()">파일 업로드</button>
-  </div>
+          <section class="card table-card">
+            <div class="table-container">
+              <table id="emp-table">
+                <thead>
+                  <tr>
+                    <th>사번</th>
+                    <th>성명</th>
+                    <th>지역</th>
+                    <th>부서</th>
+                    <th>구분</th>
+                    <th>직급</th>
+                    <th>권한</th>
+                    <th colspan="2">관리</th>
+                  </tr>
+                </thead>
+                <tbody id="emp-body"></tbody>
+              </table>
+            </div>
+            <div id="pagination" class="pagination-container"></div>
+          </section>
+        </div>
+      </div>
+    </main>
 
-  <div class="search-block">
-    <h3>📥 템플릿 다운로드</h3>
-    <button onclick="downloadEmployeeTemplate()">엑셀 템플릿 다운로드</button>
+    <div id="editModal" class="modal-overlay">
+      <div class="modal-window">
+        <div class="modal-header" id="modalTitle">직원 정보 설정</div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field"><label>사번</label><input type="text" id="empId"></div>
+            <div class="field"><label>성명</label><input type="text" id="empName"></div>
+            <div class="field"><label>지역</label><input type="text" id="empRegion" placeholder="에코센터/테크센터"></div>
+            <div class="field"><label>부서</label><input type="text" id="empDept"></div>
+            <div class="field"><label>구분</label><input type="text" id="empType" placeholder="직영/협력사"></div>
+            <div class="field"><label>직급</label><input type="text" id="empRank"></div>
+            <div class="field full">
+              <label>권한 설정</label>
+              <select id="empLevel">
+                <option value="1">1 (일반)</option>
+                <option value="2">2 (담당자)</option>
+                <option value="3">3 (관리자)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="saveBtn" class="btn btn-primary" onclick="saveEmployee()">저장하기</button>
+          <button class="btn btn-secondary" onclick="closeModal()">취소</button>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-  </div>
-  </br>  
-  <!-- 직원 목록 테이블 -->
-  <div class="table-container scrollable-table">
-    <table id="emp-table" border="1">
-      <thead>
-        <tr>
-          <th>사번</th>
-          <th>이름</th>
-          <th>지역</th> <!-- ✅ 추가 -->
-          <th>부서</th>
-          <th>타입</th> <!-- ✅ 추가 -->
-          <th>직급</th> <!-- ✅ 추가 -->
-          <th>권한</th>
-          <th>수정</th>
-          <th>삭제</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-<!-- ➕ 입력폼 -->
-<div class="form-section">
-  <h3>➕ 직원 추가 / 수정</h3>
-  <div class="form-grid">
-    <input type="text" id="empId" placeholder="사번" />
-    <input type="text" id="empName" placeholder="이름" />
-    <select id="empRegion" style="height: 32px; width: 160px;"> 
-      <option value="에코센터">에코센터</option>
-      <option value="테크센터">테크센터</option>
-      <option value="기타">기타</option>
-    </select>
-    <input type="text" id="empDept" placeholder="부서" />
-    <select id="empType" style="height: 32px; width: 160px;"> 
-      <option value="직영">직영</option>
-      <option value="협력사">협력사</option>
-      <option value="방문자">방문자</option>
-    </select>
-    <input type="text" id="empRank" placeholder="직급" />
-    <!-- ✅ 신규: 권한 레벨 -->
-    <select id="empLevel" style="height: 32px; width: 120px;">
-    <option value="1" selected>1 (일반)</option>
-    <option value="2">2 (담당자)</option>
-    <option value="3">3 (관리자)</option>
-    </select>
-  </div>
-  </br>
-  <div class="form-buttons">
-    <button class="add" onclick="addEmployee()">직원 추가</button>
-    <button class="edit" onclick="updateEmployee()">직원 수정</button>
-    <button onclick="clearForm()">신규 등록</button>
-  </div>
-</div>
-  
-
-  
 
   <script src="js/config.js"></script>
   <script src="js/util.js"></script>
   <script src="js/admin_employees.js"></script>
-  <script src="js/auth.js"></script>
 </body>
 </html>
