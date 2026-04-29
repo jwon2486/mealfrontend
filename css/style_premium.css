@@ -239,8 +239,28 @@ tr:hover{ background-color: rgba(37,99,235,.06) !important; transition:.2s; }
 .menu-upload-btn:hover{ box-shadow: 0 10px 22px rgba(2,6,23,.10); background: rgba(34,197,94,.28); }
 .menu-delete-btn{ border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.10); color:#991b1b; }
 .menu-delete-btn:hover{ box-shadow: 0 10px 22px rgba(2,6,23,.10); }
-.menu-select{ position:absolute; top:10px; left:10px; width:18px; height:18px; display:none; cursor:pointer; accent-color: var(--theme-checkbox-accent); z-index:2; }
-#menuList.select-mode .menu-select{ display:block; }
+.menu-select {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--theme-checkbox-accent);
+  z-index: 10;
+  border: 1px solid #fff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  
+  /* 기본적으로는 숨김 (Level 1, 2 사용자에게는 안 보임) */
+  display: none; 
+}
+
+/* 2. 관리자(Level 3) 바가 보일 때만 체크박스를 노출 */
+/* #menuBoardAdminBar에 .hidden 클래스가 없을 때(=관리자일 때)만 체크박스 표시 */
+#menuBoardAdminBar:not(.hidden) ~ .menu-list .menu-select,
+#menuBoardAdminBar:not(.hidden) ~ #menuList .menu-select {
+  display: block !important;
+}
 .menu-thumb.menu-mark-delete{ outline:3px solid rgba(239,68,68,.55); }
 .menu-thumb.menu-mark-delete img{ filter: brightness(.9); }
 .menu-modal{ position:fixed; inset:0; display:none; z-index:2000; }
@@ -466,4 +486,40 @@ body.cb-highcontrast .meal-btn{ border-width:2px !important; box-shadow: inset 0
 /* 썸네일 버튼 자체도 중앙 정렬 확인 */
 .menu-thumb {
   margin: 0 auto;
+}
+
+/* [수정] 관리자 바가 hidden이 아닐 때 체크박스를 강제로 표시 */
+#menuBoardAdminBar:not(.hidden) ~ .menu-list .menu-select,
+#menuBoardAdminBar:not(.hidden) + .menu-board-desc + .menu-list .menu-select,
+#menuBoardAdminBar:not(.hidden) ~ #menuList .menu-select {
+  display: block !important; /* display: none을 강제로 무시 */
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* 추가 보안: 이미지 위에서 체크박스가 잘 보이도록 위치 보정 */
+.menu-select {
+  position: absolute !important;
+  top: 15px !important;
+  left: 15px !important;
+  z-index: 999 !important; /* 이미지보다 훨씬 위에 배치 */
+}
+
+/* ✅ 특정 구조에 상관없이 관리자가 로그인 상태라면 무조건 체크박스 표시 */
+body:has(#menuBoardAdminBar:not(.hidden)) .menu-select {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* ✅ 체크박스 위치 및 디자인 강제 고정 */
+.menu-select {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  width: 22px !important;
+  height: 22px !important;
+  z-index: 999 !important;
+  cursor: pointer !important;
 }

@@ -99,15 +99,14 @@ function getData(path, onSuccess, onError) {
 function applyMenuBoardRoleUI() {
   const isAdmin = isAdminUser();
   const adminBar = document.getElementById("menuBoardAdminBar");
-  const uploadBtn = document.getElementById("menuUploadBtn");
-  const deleteBtn = document.getElementById("menuDeleteBtn");
 
   if (adminBar) {
-    // 관리자일 경우 'hidden' 클래스를 제거하고 flex로 표시
     if (isAdmin) {
-      adminBar.classList.remove("hidden", "ui-hidden");
-      adminBar.style.display = "flex";
+      // hidden과 ui-hidden을 모두 제거하여 CSS 선택자가 작동하게 함
+      adminBar.classList.remove("hidden", "ui-hidden"); 
+      adminBar.style.setProperty("display", "flex", "important");
     } else {
+      adminBar.classList.add("hidden");
       adminBar.style.display = "none";
     }
   }
@@ -402,27 +401,25 @@ function bindMenuBoardEvents() {
     });
   }
 
-  // 삭제 버튼 클릭 이벤트
-  if (deleteBtn && list && !deleteBtn.dataset.bound) {
-    deleteBtn.dataset.bound = "1";
-    deleteBtn.addEventListener("click", async () => {
-      if (!isAdminUser()) return alert("관리자만 삭제할 수 있습니다.");
+  // ✅ 삭제 버튼 클릭 이벤트 수정 (즉시 삭제 방식)
+if (deleteBtn && list && !deleteBtn.dataset.bound) {
+  deleteBtn.dataset.bound = "1";
+  deleteBtn.addEventListener("click", async () => {
+    // 1. 권한 체크
+    if (!isAdminUser()) return alert("관리자만 삭제할 수 있습니다.");
 
-      const inSelectMode = list.classList.contains("select-mode");
-      if (!inSelectMode) {
-        // 첫 클릭: 선택 모드로 전환
-        list.classList.add("select-mode");
-        deleteBtn.textContent = "선택 삭제";
-        alert("삭제할 게시글의 체크박스를 선택한 뒤 다시 눌러주세요.");
-        return;
-      }
+    // 2. 체크박스 선택 여부 즉시 확인
+    const checkedList = Array.from(document.querySelectorAll("#menuList .menu-select:checked"));
+    
+    if (checkedList.length === 0) {
+      alert("삭제할 식단표를 먼저 체크해 주세요.");
+      return;
+    }
 
-      // 두 번째 클릭: 실제 삭제 진행
-      await deleteSelectedMenuBoardItems();
-      list.classList.remove("select-mode");
-      deleteBtn.textContent = "🗑 삭제"; // 원래 이름으로 복구
-    });
-  }
+    // 3. 체크된 항목이 있다면 바로 삭제 프로세스 진행
+    await deleteSelectedMenuBoardItems();
+  });
+}
 }
 
 function getCurrentWeekRange() {
