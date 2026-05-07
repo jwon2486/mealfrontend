@@ -1,450 +1,139 @@
+@charset "utf-8";
 
-body.visitor-erp-page{
-  overflow:auto;
+/* =========================================================
+   1. 기본 레이아웃 및 컨테이너
+   ========================================================= */
+body.visitor-erp-page {
+  overflow: auto;
 }
 
-body.visitor-erp-page #mainArea{
-  display:block;
+body.visitor-erp-page #mainArea {
+  display: block;
 }
 
-.visitor-main-area .erp-layout{
-  grid-template-columns: clamp(230px, 18vw, 270px) minmax(0, 1fr);
-  align-items:start;
+.visitor-main-area .erp-layout {
+  /* clamp를 통해 최소, 권장(vw), 최대 폭을 유연하게 제어 */
+  grid-template-columns: clamp(14.375rem, 18vw, 16.875rem) minmax(0, 1fr);
+  align-items: start;
 }
 
-@media (min-width: 769px){
-  .visitor-sidebar{
-    align-self:start;
-    position:sticky;
-    top:16px;
-    height:fit-content;
-  }
-
-  .visitor-sidebar .erp-sidebar-inner{
-    height:auto;
-  }
+.visitor-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 1rem); /* 16px -> 1rem */
 }
 
-.visitor-content{
-  display:flex;
-  flex-direction:column;
-  gap:var(--space-2);
+.visitor-page-card {
+  width: min(96%, 82.5rem) !important; /* 1320px -> 82.5rem */
 }
 
-.visitor-page-card{
-  width:min(96%, 1320px) !important;
+/* =========================================================
+   2. 페이지 헤더 및 요약 카드
+   ========================================================= */
+.visitor-page-head { margin-bottom: 0.875rem; } /* 14px */
+.visitor-page-desc { margin-top: 0.375rem; } /* 6px */
+.visitor-summary-card { margin-top: 0; }
+.visitor-summary-row { align-items: stretch; }
+.visitor-summary-box .sub { line-height: 1.6; }
+.visitor-deadline-box { height: 100%; }
+.visitor-card-block { margin-top: 1rem; } /* 16px */
+.visitor-card-header { margin-bottom: 0.75rem; } /* 12px */
+.visitor-side-note { margin-top: 0; }
+
+/* =========================================================
+   3. 테이블 공통 및 구조
+   ========================================================= */
+.visitor-table-wrap {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.visitor-page-head{
-  margin-bottom:14px;
-}
-
-.visitor-page-desc{
-  margin-top:6px;
-}
-
-.visitor-summary-card{
-  margin-top:0;
-}
-
-.visitor-summary-row{
-  align-items:stretch;
-}
-
-.visitor-summary-box .sub{
-  line-height:1.6;
-}
-
-.visitor-deadline-box{
-  height:100%;
-}
-
-.visitor-card-block{
-  margin-top:16px;
-}
-
-.visitor-card-header{
-  margin-bottom:12px;
-}
-
-.visitor-table-wrap{
-  width:100%;
-  overflow-x:auto;
-}
-
-.visitor-table-fixed{
-  table-layout:fixed;
+.visitor-table-fixed {
+  table-layout: fixed;
   width: 100%;
 }
 
 .visitor-table-fixed th,
-.visitor-table-fixed td{
-  word-break:keep-all;
-  box-sizing:border-box;
+.visitor-table-fixed td {
+  word-break: keep-all;
+  box-sizing: border-box;
+  text-align: center;
+  vertical-align: middle;
 }
 
-.visitor-table-fixed td{
-  padding:8px !important;
+.visitor-table-fixed td {
+  padding: 0.5rem !important; /* 8px */
 }
 
-@media print {
-  /* 사이드바, 탑바, 버튼 등 인쇄 불필요 요소 제거 */
-  .topbar, 
-  .erp-sidebar, 
-  .top-actions, 
-  .action-btn, 
-  #deadline-info,
-  .visitor-filter-bar {
-    display: none !important;
-  }
-
-  /* 인쇄 시 레이아웃 조정 */
-  .shell, .erp-content, .visitor-page-card {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    box-shadow: none !important;
-  }
-
-  /* 식단표 이미지가 잘리지 않도록 설정 */
-  .menu-list img {
-    max-width: 100%;
-    page-break-inside: avoid;
-  }
+.visitor-form-table td,
+.visitor-summary-table td {
+  height: 4rem; /* 64px */
 }
 
+/* 데이터 없음 표시 */
+.empty-row-text {
+  padding: 2.5rem !important; /* 40px */
+  color: #888;
+  font-style: italic;
+  text-align: center;
+}
+
+/* 마감/에러 상태 공통 처리 (중복 최소화) */
+.expired-cell,
+.expired-input,
+.expired-row,
+.row-expired td {
+  background-color: #ffe6e6 !important;
+}
+
+.closed-text {
+  font-size: 0.8rem;
+  color: #cc0000;
+}
+
+/* =========================================================
+   4. 입력 폼 및 버튼 (Inputs & Buttons)
+   ========================================================= */
 .visitor-table-fixed input[type="date"],
 .visitor-table-fixed input[type="number"],
 .visitor-table-fixed input[type="text"],
 .visitor-table-fixed select,
-.visitor-table-fixed textarea{
-  width:100%;
-  min-height:42px;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.96);
-  text-align:center;
-  font-size:.95rem;
-  outline:none;
-  box-sizing:border-box;
+.visitor-table-fixed textarea,
+#visit-week-date {
+  width: 100%;
+  min-height: 2.625rem; /* 42px */
+  padding: 0.625rem 0.75rem; /* 10px 12px */
+  border-radius: 0.75rem; /* 12px */
+  border: 1px solid var(--line, #e5e7eb);
+  background: rgba(255, 255, 255, 0.96);
+  text-align: center;
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
 }
 
 .visitor-table-fixed input:focus,
 .visitor-table-fixed select:focus,
 .visitor-table-fixed textarea:focus,
-#visit-week-date:focus{
-  border-color:rgba(37,99,235,.55);
-  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+#visit-week-date:focus {
+  border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.12); /* 4px */
 }
 
-.reason-input{
-  text-align:left !important;
-}
+.reason-input { text-align: left !important; }
+.date-input { min-width: 8.75rem; white-space: nowrap; } /* 140px */
+#visit-day { font-weight: 800; }
 
-.date-input{
-  min-width:140px;
-  white-space:nowrap;
-}
-
-#visit-day{
-  font-weight:800;
-}
-
-.visitor-save-btn{
-  width:100%;
-}
-
-.visitor-bulk-action-row{
-  justify-content:flex-end;
-}
-
-.visitor-filter-bar{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.visitor-filter-bar label{
-  font-size:.95rem;
-  color:var(--muted);
-  font-weight:700;
-}
-
-#visit-week-date{
-  min-height:42px;
-  padding:0 12px;
-  border-radius:12px;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.96);
-}
-
-#load-visit-data-btn,
-#load-thisweek-btn{
-  min-width:110px;
-}
-
+/* 버튼 공통 너비/높이 제어 */
+.visitor-summary-table button,
+.visitor-form-table button { min-height: 2.5rem; } /* 40px */
+.visitor-save-btn { width: 100%; }
 #page-button,
 #bulk-input-toggle-btn,
-#visit-log-button{
-  min-height:44px;
-}
+#visit-log-button { min-height: 2.75rem; } /* 44px */
+#load-visit-data-btn,
+#load-thisweek-btn { min-width: 6.875rem; } /* 110px */
 
-#visit-log-button[style*="display:none"]{
-  display:none !important;
-}
-
-#menuBoardAdminBar[style*="display:none"]{
-  display:none !important;
-}
-
-.visitor-side-note{
-  margin-top:0;
-}
-
-/* column tuning - percent based */
-th.col-adate, td.col-adate{ width:14%; }
-th.col-aday, td.col-aday{ width:6%; }
-th.col-abreakfast, td.col-abreakfast{ width:8%; }
-th.col-alunch, td.col-alunch{ width:8%; }
-th.col-adinner, td.col-adinner{ width:8%; }
-th.col-areason, td.col-areason{ width:46%; }
-th.col-asave, td.col-asave{ width:10%; }
-
-th.col-summary-date, td.col-summary-date{ width:14%; }
-th.col-summary-day, td.col-summary-day{ width:5%; }
-th.col-summary-breakfast, td.col-summary-breakfast{ width:7%; }
-th.col-summary-lunch, td.col-summary-lunch{ width:7%; }
-th.col-summary-dinner, td.col-summary-dinner{ width:7%; }
-th.col-summary-reason, td.col-summary-reason{ width:22%; }
-th.col-summary-dept, td.col-summary-dept{ width:10%; }
-th.col-summary-requester, td.col-summary-requester{ width:10%; }
-th.col-summary-edit, td.col-summary-edit{ width:9%; }
-th.col-summary-delete, td.col-summary-delete{ width:9%; }
-
-.visitor-form-table td,
-.visitor-summary-table td{
-  height:64px;
-  vertical-align:middle;
-}
-
-.visitor-summary-table button,
-.visitor-form-table button{
-  min-height:40px;
-}
-
-.expired-cell,
-.expired-input,
-.expired-row,
-.row-expired td{
-  background-color:#ffe6e6 !important;
-}
-
-@media (max-width: 1024px){
-  .visitor-page-card{
-    width:100% !important;
-  }
-
-  .visitor-filter-bar{
-    justify-content:flex-start;
-    margin-top:10px;
-  }
-
-  .visitor-history-head{
-    flex-direction:column;
-    align-items:flex-start;
-  }
-}
-
-@media (max-width: 768px){
-  .visitor-main-area .erp-layout{
-    grid-template-columns:1fr;
-  }
-
-  .visitor-page-card{
-    width:100% !important;
-    margin-inline:0 !important;
-  }
-
-  .visitor-summary-row{
-    grid-template-columns:1fr;
-  }
-
-  .visitor-table-fixed{
-    min-width:880px;
-  }
-
-  .visitor-table-fixed th,
-  .visitor-table-fixed td{
-    font-size:.88rem !important;
-    padding:6px !important;
-  }
-
-  .visitor-table-fixed input[type="date"],
-  .visitor-table-fixed input[type="number"],
-  .visitor-table-fixed input[type="text"],
-  .visitor-table-fixed select,
-  .visitor-table-fixed textarea{
-    min-height:38px;
-    font-size:.88rem;
-    padding:8px 10px;
-  }
-
-  .visitor-filter-bar{
-    width:100%;
-    justify-content:flex-start;
-  }
-
-  #visit-week-date{
-    width:100%;
-  }
-}
-
-@media (max-width: 560px){
-  .visitor-top-actions{
-    justify-content:flex-end;
-  }
-
-  #topVisitorPill{
-    max-width:120px;
-  }
-
-  .visitor-filter-bar{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-  }
-
-  .visitor-filter-bar label{
-    grid-column:1 / -1;
-  }
-
-  #visit-week-date{
-    grid-column:1 / -1;
-  }
-
-  #load-visit-data-btn,
-  #load-thisweek-btn{
-    width:100%;
-    min-width:0;
-  }
-}
-.visitor-table-fixed td{
-  text-align: center;
-  vertical-align: middle;
-}
-/* 일괄 입력 테이블 전용 */
-.bulk-visit-table th:nth-child(1),
-.bulk-visit-table td:nth-child(1){ width:14%; } /* 날짜 */
-
-.bulk-visit-table th:nth-child(2),
-.bulk-visit-table td:nth-child(2){ width:6%; } /* 요일 */
-
-.bulk-visit-table th:nth-child(3),
-.bulk-visit-table td:nth-child(3),
-.bulk-visit-table th:nth-child(4),
-.bulk-visit-table td:nth-child(4),
-.bulk-visit-table th:nth-child(5),
-.bulk-visit-table td:nth-child(5){ width:8%; } /* 조/중/석 */
-
-.bulk-visit-table th:nth-child(6),
-.bulk-visit-table td:nth-child(6){ width:46%; } /* 사유 */
-
-.bulk-visit-table th:nth-child(7),
-.bulk-visit-table td:nth-child(7){ width:10%; } /* 저장 */
-
-.bulk-save-cell{
-  text-align:center;
-  vertical-align:middle;
-}
-
-.bulk-save-cell button{
-  width:100%;
-  min-height:44px;
-}
-
-
-/* ===== sidebar compact + stable height fix ===== */
-@media (min-width: 769px){
-  .visitor-sidebar,
-  .visitor-sidebar .erp-sidebar-inner,
-  .visitor-sidebar .erp-sidebar-body{
-    height:auto !important;
-    min-height:0 !important;
-  }
-
-  .visitor-sidebar{
-    align-self:start;
-    position:sticky;
-    top:16px;
-  }
-
-  .visitor-sidebar .erp-sidebar-inner{
-    display:block;
-  }
-
-  .visitor-sidebar .erp-sidebar-body{
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-start !important;
-    gap:14px;
-    padding-bottom:14px;
-  }
-
-  .visitor-sidebar-actions{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin-top:6px !important;
-  }
-
-  .visitor-sidebar .erp-nav{
-    margin-bottom:0 !important;
-  }
-
-  .visitor-sidebar .erp-nav-link{
-    margin-bottom:0 !important;
-  }
-
-  .visitor-side-note{
-    display:none !important;
-  }
-}
-
-/* bulk panel open/close should not visually affect sidebar size */
-#bulk-visit-wrapper{
-  overflow:visible;
-}
-
-/* =========================================================
-   JS에서 제어하기 위한 유틸리티 및 상태 클래스
-   ========================================================= */
-
-/* 일괄 저장 큼지막한 버튼용 */
-.bulk-save-btn-large {
-  width: 100%;
-  white-space: normal;
-  line-height: 1.6;
-}
-
-/* 데이터가 없을 때 표시하는 행 */
-.empty-row-text {
-  text-align: center;
-  color: var(--muted);
-}
-
-/* 마감된 텍스트 표시 */
-.closed-text {
-  color: var(--muted);
-}
-
-/* 마감된 행 (JS에서 .style.backgroundColor = "#ffe5e5" 대신 클래스로 제어) */
-.expired-row {
-  background-color: #ffe6e6 !important;
-}
-
-/* JS에서 동적으로 생성하는 표 안의 투명한 버튼용 */
 .action-btn-icon {
   background: transparent;
   border: none;
@@ -452,6 +141,242 @@ th.col-summary-delete, td.col-summary-delete{ width:9%; }
   cursor: pointer;
   transition: transform 0.1s ease;
 }
-.action-btn-icon:hover {
-  transform: scale(1.1);
+.action-btn-icon:hover { transform: scale(1.1); }
+
+/* =========================================================
+   5. 상단 필터 바 및 검색 영역
+   ========================================================= */
+.visitor-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem; /* 8px */
+  flex-wrap: wrap;
+}
+
+.visitor-filter-bar label {
+  font-size: 0.95rem;
+  color: var(--muted, #6b7280);
+  font-weight: 700;
+}
+
+.visitor-bulk-action-row {
+  justify-content: flex-end;
+}
+
+/* =========================================================
+   6. 특정 섹션 전용 스타일 (로그, 일괄입력)
+   ========================================================= */
+/* 일괄 입력 전용 */
+.bulk-save-cell { text-align: center; vertical-align: middle; }
+.bulk-save-cell button { width: 100%; min-height: 2.75rem; } /* 44px */
+.bulk-save-btn-large { white-space: normal; line-height: 1.6; }
+#bulk-visit-wrapper { overflow: visible; }
+
+/* 로그 섹션 전용 */
+#visitorLogSection .visitor-filter-bar { gap: 0.625rem; } /* 10px */
+#visitorLogSection input[type="date"],
+#visitorLogSection input[type="text"] { height: 2.5rem; } /* 40px */
+.log-name-input { width: 7.5rem; } /* 120px */
+
+#dept-log-body td { font-size: 0.95rem; }
+.log-name-cell { font-weight: bold; }
+.log-before-cell { color: #666; }
+.log-after-cell { font-weight: bold; }
+.log-after-cell.changed { color: #2563eb; }
+.log-after-cell.unchanged { color: #28a745; }
+.log-time-cell { 
+  font-size: 0.75rem; 
+  color: #888; 
+  white-space: nowrap;
+  letter-spacing: -0.03125rem; /* -0.5px */
+}
+
+.erp-nav-link[data-page="visitorLogSection"].active {
+  background-color: var(--primary-light, #eff6ff);
+  color: var(--primary, #2563eb);
+  font-weight: bold;
+}
+
+/* =========================================================
+   7. 테이블 컬럼 너비 설정 (퍼센트로 반응형 완벽 대응)
+   ========================================================= */
+/* 방문자 폼 */
+th.col-adate, td.col-adate { width: 14%; }
+th.col-aday, td.col-aday { width: 6%; }
+th.col-abreakfast, td.col-abreakfast,
+th.col-alunch, td.col-alunch,
+th.col-adinner, td.col-adinner { width: 8%; }
+th.col-areason, td.col-areason { width: 46%; }
+th.col-asave, td.col-asave { width: 10%; }
+
+/* 일괄 입력 */
+.bulk-visit-table th:nth-child(1), .bulk-visit-table td:nth-child(1) { width: 14%; }
+.bulk-visit-table th:nth-child(2), .bulk-visit-table td:nth-child(2) { width: 6%; }
+.bulk-visit-table th:nth-child(3), .bulk-visit-table td:nth-child(3),
+.bulk-visit-table th:nth-child(4), .bulk-visit-table td:nth-child(4),
+.bulk-visit-table th:nth-child(5), .bulk-visit-table td:nth-child(5) { width: 8%; }
+.bulk-visit-table th:nth-child(6), .bulk-visit-table td:nth-child(6) { width: 46%; }
+.bulk-visit-table th:nth-child(7), .bulk-visit-table td:nth-child(7) { width: 10%; }
+
+/* 주간 요약 */
+th.col-summary-date, td.col-summary-date { width: 14%; }
+th.col-summary-day, td.col-summary-day { width: 5%; }
+th.col-summary-breakfast, td.col-summary-breakfast,
+th.col-summary-lunch, td.col-summary-lunch,
+th.col-summary-dinner, td.col-summary-dinner { width: 7%; }
+th.col-summary-reason, td.col-summary-reason { width: 22%; }
+th.col-summary-dept, td.col-summary-dept { width: 10%; }
+th.col-summary-requester, td.col-summary-requester { width: 10%; }
+th.col-summary-edit, td.col-summary-edit,
+th.col-summary-delete, td.col-summary-delete { width: 9%; }
+
+/* 로그 조회 */
+th.col-log-date, td.col-log-date { width: 15%; }
+th.col-log-dept, td.col-log-dept { width: 10%; }
+th.col-log-name, td.col-log-name { width: 12%; }
+th.col-log-before, td.col-log-before { width: 23%; }
+th.col-log-after, td.col-log-after { width: 23%; }
+th.col-log-time, td.col-log-time { width: 17%; }
+
+/* =========================================================
+   8. 프린트(인쇄) 전용
+   ========================================================= */
+@media print {
+  .topbar, 
+  .erp-sidebar, 
+  .top-actions, 
+  .action-btn, 
+  #deadline-info,
+  .visitor-filter-bar { display: none !important; }
+
+  .shell, .erp-content, .visitor-page-card {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  .menu-list img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+}
+
+/* =========================================================
+   9. 반응형 미디어 쿼리 (모바일 최적화)
+   ========================================================= */
+
+/* 데스크탑 및 태블릿 가로 (사이드바 고정) */
+@media (min-width: 48.0625rem) { /* 769px */
+  .visitor-sidebar,
+  .visitor-sidebar .erp-sidebar-inner,
+  .visitor-sidebar .erp-sidebar-body { height: auto !important; min-height: 0 !important; }
+  .visitor-sidebar { align-self: start; position: sticky; top: 1rem; } /* 16px */
+  .visitor-sidebar .erp-sidebar-inner { display: block; }
+  .visitor-sidebar .erp-sidebar-body {
+    display: flex; flex-direction: column; justify-content: flex-start !important; gap: 0.875rem; padding-bottom: 0.875rem;
+  }
+  .visitor-sidebar-actions { display: flex; flex-direction: column; gap: 0.625rem; margin-top: 0.375rem !important; }
+  .visitor-sidebar .erp-nav,
+  .visitor-sidebar .erp-nav-link { margin-bottom: 0 !important; }
+  .visitor-side-note { display: none !important; }
+}
+
+/* 태블릿 세로 및 작은 모니터 */
+@media (max-width: 64rem) { /* 1024px */
+  .visitor-page-card { width: 100% !important; }
+  .visitor-filter-bar { justify-content: flex-start; margin-top: 0.625rem; }
+  .visitor-history-head { flex-direction: column; align-items: flex-start; }
+}
+
+/* 모바일 기본 (표 깨짐 방지 및 콤팩트 UI) */
+@media (max-width: 48rem) { /* 768px */
+  /* 💡 모바일 화면에서 부제목(설명 멘트) 숨기기 */
+  .visitor-page-desc {
+    display: none !important;
+  }
+  .visitor-main-area .erp-layout { grid-template-columns: 1fr; }
+  .visitor-page-card { width: 100% !important; margin-inline: 0 !important; }
+  .visitor-summary-row { grid-template-columns: 1fr; }
+
+  .visitor-table-wrap {
+    -webkit-overflow-scrolling: touch; 
+    padding-bottom: 0.3125rem; /* 5px */
+  }
+
+  .visitor-table-fixed {
+    min-width: 53.125rem; /* 850px */
+    table-layout: auto !important; 
+  }
+
+  .visitor-table-fixed th,
+  .visitor-table-fixed td {
+    font-size: 0.85rem !important;
+    padding: 0.5rem 0.375rem !important; /* 8px 6px */
+    white-space: nowrap !important;
+  }
+
+  th.col-log-time, td.col-log-time { min-width: 8.75rem; } /* 140px */
+
+  .visitor-table-fixed input[type="date"],
+  .visitor-table-fixed input[type="number"],
+  .visitor-table-fixed input[type="text"],
+  .visitor-table-fixed select,
+  .visitor-table-fixed textarea {
+    min-height: 2.25rem; /* 36px */
+    font-size: 0.85rem;
+    padding: 0.375rem; /* 6px */
+  }
+
+  /* 💡 모바일에서 날짜선택, 이름, 버튼 크기 대폭 축소 */
+  .visitor-filter-bar { width: 80%; justify-content: flex-start; }
+  
+  .visitor-filter-bar input[type="date"],
+  .visitor-filter-bar input[type="text"] {
+    height: 2.125rem !important; /* 34px (기존 40px에서 축소) */
+    min-height: 2.125rem !important;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem; /* 곡률도 비율에 맞춰 축소 */
+  }
+
+  .visitor-filter-bar .action-btn {
+    height: 2.125rem !important; /* 버튼 높이도 인풋과 통일 */
+    min-height: 2.125rem !important;
+    font-size: 0.8rem;
+    padding: 0 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .log-name-input { width: 100% !important; } /* 모바일에서는 고정폭 해제하고 비율 따름 */
+  #visit-week-date { width: 100%; }
+}
+
+/* 소형 모바일 (UI 정렬) */
+@media (max-width: 35rem) { /* 560px */
+  .visitor-top-actions { justify-content: flex-end; }
+  
+  #topVisitorPill { 
+    max-width: 30vw; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* 💡 로그 조회 섹션의 4개 요소(날짜2개, 이름, 버튼)를 2x2 그리드로 예쁘게 배치 */
+  .visitor-filter-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.375rem; /* 6px */
+  }
+  
+  .visitor-filter-bar label,
+  #visit-week-date { grid-column: 1 / -1; }
+
+  #load-visit-data-btn,
+  #load-thisweek-btn,
+  .visitor-filter-bar .action-btn {
+    width: 100%; min-width: 0; padding: 0.25rem 0;
+  }
 }

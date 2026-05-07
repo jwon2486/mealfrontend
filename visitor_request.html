@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>방문자 식수 신청</title>
+  <title>방문자 식수 신청 시스템</title>
   <link rel="stylesheet" href="css/style_premium.css" />
   <link rel="stylesheet" href="css/visitor_style.css" />
 </head>
@@ -28,6 +28,7 @@
     <main class="shell">
       <div id="mainArea" class="ui-block visitor-main-area">
         <div class="erp-layout visitor-erp-layout">
+          
           <aside class="erp-sidebar visitor-sidebar">
             <div class="erp-sidebar-inner">
               <button type="button" class="erp-sidebar-head erp-sidebar-toggle" id="mobileMenuToggle" aria-expanded="false" aria-controls="mobileSidebarBody">
@@ -43,18 +44,19 @@
                   <button type="button" class="erp-nav-link active" data-page="visitorApplySection">방문자 신청</button>
                   <button type="button" class="erp-nav-link" data-page="visitorHistorySection">신청 내역</button>
                   <button type="button" class="erp-nav-link" data-page="menuBoardSection">식단표 게시판</button>
+                  <button type="button" id="visit-log-button" class="erp-nav-link erp-side-action ui-hidden" data-page="visitorLogSection">📋 로그 조회</button>
                 </nav>
 
                 <div class="erp-sidebar-actions visitor-sidebar-actions">
                   <button type="button" id="page-button" class="action-btn logout-btn erp-side-action">🔙 메인으로</button>
                   <button type="button" id="bulk-input-toggle-btn" class="action-btn visitor-btn erp-side-action">🗂 일괄입력</button>
-                  <button type="button" id="visit-log-button" class="action-btn team-btn erp-side-action ui-hidden">📋 로그 조회</button>
                 </div>
               </div>
             </div>
           </aside>
 
           <section class="erp-content visitor-content">
+            
             <section id="visitorApplySection" class="card pad erp-page active visitor-page-card">
               <div class="weekly-head visitor-page-head">
                 <div>
@@ -70,7 +72,6 @@
                       <span class="summary-label">📝 신청 안내</span>
                       <div class="sub visitor-summary-text">단일 신청과 주간 일괄입력을 같은 화면에서 관리할 수 있습니다.</div>
                     </div>
-
                     <div id="deadline-info" class="deadline-mini visitor-deadline-box">
                       <div class="deadline-title">📌 마감 안내</div>
                       <div class="deadline-text">
@@ -86,7 +87,6 @@
                 <div class="meal-header visitor-card-header">
                   <span class="mealchart">개별 식수 신청</span>
                 </div>
-
                 <div class="table-container visitor-table-wrap">
                   <table class="visitor-form-table visitor-table-fixed">
                     <thead>
@@ -142,17 +142,18 @@
               <div class="weekly-head visitor-page-head visitor-history-head">
                 <div>
                   <div class="weekly-title">신청 내역</div>
-                  <div class="week-range-text visitor-page-desc">선택한 주차의 방문자 신청 내역을 조회하고 수정/삭제할 수 있습니다.</div>
+                  <div class="week-range-text visitor-page-desc">선택한 주차의 방문자 신청 내역을 조회합니다.</div>
                 </div>
-
                 <div id="visitor-week-filter" class="visitor-filter-bar">
-                  <label for="visit-week-date">조회 날짜</label>
-                  <input type="date" id="visit-week-date" />
-                  <button id="load-visit-data-btn" type="button" class="action-btn">조회</button>
-                  <button id="load-thisweek-btn" type="button" class="action-btn visitor-btn">이번주 조회</button>
-                </div>
+                <label for="visit-week-date">조회 날짜</label>
+                <input type="date" id="visit-week-date" />
+                <button id="load-visit-data-btn" type="button" class="action-btn">조회</button>
+                <button id="load-thisweek-btn" type="button" class="action-btn visitor-btn">이번주 조회</button>
+                
+                <button id="history-bulk-edit-btn" type="button" class="action-btn visitor-btn" style="background-color: #6366f1;">✏️ 일괄 편집</button>
+                <button id="history-bulk-save-btn" type="button" class="action-btn save-btn ui-hidden">💾 일괄 저장</button>
               </div>
-
+              </div>
               <div class="card pad visitor-card-block">
                 <div class="table-container visitor-table-wrap">
                   <table class="visitor-summary-table visitor-table-fixed">
@@ -171,7 +172,6 @@
                       </tr>
                     </thead>
                     <tbody id="visit-summary-body"></tbody>
-                    <tbody id="visit-week-table-body"></tbody>
                   </table>
                 </div>
               </div>
@@ -191,10 +191,44 @@
                 <div class="menu-list" id="menuList"></div>
               </div>
             </section>
-          </section>
+
+            <section id="visitorLogSection" class="card pad erp-page visitor-page-card">
+              <div class="weekly-head visitor-page-head visitor-history-head">
+                <div>
+                  <div class="weekly-title">식수 변경 로그</div>
+                  <div class="week-range-text visitor-page-desc">부서 방문자/협력사 식수 변경 이력을 조회합니다.</div>
+                </div>
+                <div class="visitor-filter-bar">
+                  <input type="date" id="logStartDate" />
+                  <input type="date" id="logEndDate" />
+                  <input type="text" id="logName" placeholder="이름 (선택)" class="log-name-input" />
+                  <button type="button" class="action-btn visitor-btn" onclick="loadDeptVisitorLogs()">🔍 조회</button>
+                </div>
+              </div>
+              <div class="card pad visitor-card-block">
+                <div class="table-container visitor-table-wrap">
+                  <table class="visitor-summary-table visitor-table-fixed">
+                    <thead>
+                      <tr>
+                        <th class="col-log-date">날짜</th>
+                        <th class="col-log-dept">부서</th>
+                        <th class="col-log-name">신청자</th>
+                        <th class="col-log-before">이전 </th>
+                        <th class="col-log-after">변경 </th>
+                        <th class="col-log-time">변경시각</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dept-log-body">
+                      <tr><td colspan="6" class="empty-row-text">데이터를 불러오는 중입니다...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+          </section> 
         </div>
       </div>
-
       <div id="toast" class="toast"></div>
     </main>
 

@@ -3,10 +3,8 @@
 let lastSubmittedDate = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. 네비게이션 및 사이드바 이벤트 바인딩
     setupSidebarAndTabs();
 
-    // 2. 정적 버튼 이벤트 리스너 바인딩 (HTML에서 onclick 제거됨)
     const pageBtn = document.getElementById("page-button");
     if (pageBtn) pageBtn.addEventListener("click", goToMain);
 
@@ -22,11 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const visitDateInput = document.getElementById("visit-date");
     if (visitDateInput) visitDateInput.addEventListener("change", handleDateChange);
     
-    // 3. 동적 테이블 이벤트 위임 (수정, 삭제, 저장 버튼 클릭 처리)
     const visitSummaryBody = document.getElementById("visit-summary-body");
     if (visitSummaryBody) visitSummaryBody.addEventListener("click", handleTableActions);
 
-    // 4. 초기 날짜 데이터 로드
     const storedDate = sessionStorage.getItem("lastVisitDate");
     if (storedDate) {
       const todayStr = getKSTDate().toISOString().split("T")[0];
@@ -40,27 +36,19 @@ document.addEventListener("DOMContentLoaded", () => {
       setTodayDefault();
     }
 
-    // 5. 로그인 정보 및 기본 UI 세팅
     loadLoginInfo();
     updateWeekday();
     loadWeeklyVisitData();
 
     if (typeof initMenuBoard === "function") initMenuBoard();
     
-    // 6. 직영/협력사 권한별 UI 분기 처리
     applyUserTypeUI();
 });
 
-// ============================================================================
-// UI 상태 제어 헬퍼 함수 (💡 표 깨짐 완벽 해결)
-// ============================================================================
 function toggleVisibility(element, show, displayClass = '') {
   if (!element) return;
-  // 강제로 부여되었던 block, hidden 등을 우선 깔끔하게 제거합니다.
   element.classList.remove('ui-hidden', 'ui-block', 'ui-inline-block', 'ui-flex');
-  
   if (show) {
-    // displayClass가 있으면 넣고, 없으면 고유 속성(table-cell 등)을 자연스럽게 따라가게 둡니다.
     if (displayClass) {
         element.classList.add(displayClass);
     }
@@ -74,11 +62,9 @@ function applyUserTypeUI() {
   const pageTitle = document.getElementById("page-title"); 
   const pageButton = document.getElementById("page-button"); 
   
-  // --- 1. 선택자 추가 ---
   const applyNavLink = document.querySelector('.erp-nav-link[data-page="visitorApplySection"]');
   const sidebarSubtitle = document.querySelector('.erp-sidebar-subtitle'); 
-  const sidebarTitle = document.querySelector('.erp-sidebar-title'); // 사이드바 메인 타이틀 선택 추가
-  // ----------------------
+  const sidebarTitle = document.querySelector('.erp-sidebar-title'); 
 
   const reasonTh = document.getElementById("reason-th");
   const reasonInput = document.getElementById("visit-reason");
@@ -89,10 +75,9 @@ function applyUserTypeUI() {
     if (pageTitle) pageTitle.innerText = "식수 신청 시스템";
     if (pageButton) pageButton.innerText = "🔙 로그아웃";
     
-    // --- 2. 협력사 문구 변경 ---
     if (applyNavLink) applyNavLink.innerText = "협력사 신청";
     if (sidebarSubtitle) sidebarSubtitle.innerText = "협력사 신청 메뉴";
-    if (sidebarTitle) sidebarTitle.innerText = "PARTNER MENU"; // 협력사일 때 변경
+    if (sidebarTitle) sidebarTitle.innerText = "PARTNER MENU"; 
 
     toggleVisibility(reasonTh, false);
     toggleVisibility(reasonTd, false);
@@ -102,10 +87,9 @@ function applyUserTypeUI() {
     if (pageTitle) pageTitle.innerText = "방문자 식수 신청";
     if (pageButton) pageButton.innerText = "🔙 뒤로가기";
 
-    // --- 3. 직영(방문자) 문구 변경 ---
     if (applyNavLink) applyNavLink.innerText = "방문자 신청";
     if (sidebarSubtitle) sidebarSubtitle.innerText = "방문자 신청 메뉴";
-    if (sidebarTitle) sidebarTitle.innerText = "VISITOR MENU"; // 직영일 때 유지
+    if (sidebarTitle) sidebarTitle.innerText = "VISITOR MENU"; 
 
     toggleVisibility(reasonTh, true);
     toggleVisibility(reasonTd, true);
@@ -113,9 +97,6 @@ function applyUserTypeUI() {
   }
 }
 
-// ============================================================================
-// 사이드바 및 탭 제어 로직 (HTML 스크립트에서 이관)
-// ============================================================================
 function setupSidebarAndTabs() {
   const mobileQuery = window.matchMedia("(max-width: 768px)");
   const mainArea = document.getElementById("mainArea");
@@ -148,6 +129,17 @@ function setupSidebarAndTabs() {
       const target = document.getElementById(targetId);
       if (target) target.classList.add("active");
 
+      if (targetId === "visitorLogSection") {
+        const startInput = document.getElementById("logStartDate");
+        const endInput = document.getElementById("logEndDate");
+        if (startInput && !startInput.value) {
+            const { start, end } = getCurrentWeekRange();
+            startInput.value = start;
+            if (endInput) endInput.value = end;
+        }
+        loadDeptVisitorLogs(); 
+      }
+
       if (mobileQuery.matches) closeMobileSidebar();
     });
   });
@@ -171,7 +163,6 @@ function setupSidebarAndTabs() {
   window.addEventListener("resize", syncMobileSidebar);
 }
 
-// [수정] visitor_request.js의 handleDateChange 함수 내부
 function handleDateChange() {
   const input = document.getElementById("visit-date");
   const picked = new Date(input.value);
@@ -185,37 +176,30 @@ function handleDateChange() {
   const selectedDate = input.value;
   document.getElementById("visit-week-date").value = selectedDate;
 
-  // --- 수정된 데이터 불러오기 로직 ---
   const user = JSON.parse(sessionStorage.getItem("currentUser"));
   const actualType = sessionStorage.getItem("type") === "직영" ? "방문자" : "협력사";
   
-  // app.py의 /visitors/check 엔드포인트 호출
   const checkUrl = `${API_BASE_URL}/visitors/check?date=${selectedDate}&id=${user.userId}&type=${actualType}`;
 
   getData(checkUrl, (res) => {
-    // HTML에 정의된 ID: b-count, l-count, d-count
     const bCount = document.getElementById("b-count");
     const lCount = document.getElementById("l-count");
     const dCount = document.getElementById("d-count");
     const reasonInput = document.getElementById("visit-reason");
 
-    // 서버 응답 구조가 res.record 이므로 수정
     if (res && res.exists && res.record) {
       if (bCount) bCount.value = res.record.breakfast || 0;
       if (lCount) lCount.value = res.record.lunch || 0;
       if (dCount) dCount.value = res.record.dinner || 0;
       if (reasonInput) reasonInput.value = res.record.reason || "";
     } else {
-      // 데이터가 없으면 0으로 초기화
       if (bCount) bCount.value = 0;
       if (lCount) lCount.value = 0;
       if (dCount) dCount.value = 0;
       if (reasonInput) reasonInput.value = "";
     }
-    // 마감 상태에 따른 입력창 활성/비활성 업데이트
     updateDeadlineColors(); 
   });
-  // --------------------------------
 
   const bulkWrapper = document.getElementById("bulk-visit-wrapper");
   if (bulkWrapper && !bulkWrapper.classList.contains("ui-hidden")) {
@@ -275,13 +259,10 @@ function getNearestWeekday(dateObj) {
   return dateObj;
 }
 
-// ============================================================================
-// 로그인 정보 및 세션
-// ============================================================================
 function loadLoginInfo() {
   const user = JSON.parse(sessionStorage.getItem("currentUser"));
   if (user && user.userName) {
-    document.getElementById("login-user").innerText = `👤 ${user.userName} (${user.dept})`;
+    document.getElementById("login-user").innerText = `${user.userName} (${user.dept})`;
     sessionStorage.setItem("id", user.userId);
     sessionStorage.setItem("name", user.userName);
     sessionStorage.setItem("type", user.type);
@@ -294,9 +275,7 @@ function loadLoginInfo() {
     const logButton = document.getElementById("visit-log-button");
     if (logButton) {
       if (user.level === 3 || user.level === 2) {
-        // 버튼은 inline-block 속성을 명시적으로 부여합니다.
         toggleVisibility(logButton, true, 'ui-inline-block');
-        logButton.addEventListener("click", () => window.location.href = "visitor_logs.html");
       } else {
         toggleVisibility(logButton, false);
       }
@@ -323,9 +302,6 @@ function clearInput() {
     if (reasonInput) reasonInput.value = "";
 }
 
-// ============================================================================
-// 테이블 액션 위임 (수정, 삭제, 저장)
-// ============================================================================
 function handleTableActions(event) {
   const editBtn = event.target.closest('.action-edit');
   const deleteBtn = event.target.closest('.action-delete');
@@ -340,9 +316,6 @@ function handleTableActions(event) {
   }
 }
 
-// ============================================================================
-// 데이터 로드 및 렌더링
-// ============================================================================
 function loadWeeklyVisitData() {
     const dateInput = document.getElementById("visit-week-date");
     if (!dateInput || !dateInput.value) return;
@@ -414,9 +387,6 @@ function loadWeeklyVisitData() {
     );
 }
 
-// ============================================================================
-// 데이터 저장, 수정, 삭제 로직
-// ============================================================================
 function submitVisit() {
     const date = document.getElementById("visit-date").value;
     const breakfast = +document.getElementById("b-count").value;
@@ -634,9 +604,6 @@ function saveVisitEdit(id) {
   localStorage.setItem("flag", 3);
 }
 
-// ============================================================================
-// 마감 처리(Deadline) 및 검증 로직
-// ============================================================================
 function isNextWeekDeadlinePassed(selectedDate) {
   const now = getKSTDate();
   const mealDate = new Date(selectedDate);
@@ -762,9 +729,6 @@ function updateDeadlineColors() {
   }
 }
 
-// ============================================================================
-// 일괄 주간 신청(Bulk Visit) 모듈
-// ============================================================================
 (function () {
   const BULK_IDS = {
     toggle: "bulk-input-toggle-btn",
@@ -838,10 +802,8 @@ function updateDeadlineColors() {
   const dates = getWeekDatesFromMonday(baseDateStr);
   const { start, end } = getWeekStartAndEnd(baseDateStr);
   
-  // --- 추가된 로직: 해당 주차의 내 신청 데이터 미리 가져오기 ---
   const user = JSON.parse(sessionStorage.getItem("currentUser"));
   getData(`${API_BASE_URL}/visitors/weekly?start=${start}&end=${end}`, (allData) => {
-    // 내 데이터만 필터링 (직영/협력사 구분 및 본인 아이디 확인)
     const myDataMap = {};
     const actualType = sessionStorage.getItem("type") === "직영" ? "방문자" : "협력사";
     
@@ -1047,7 +1009,6 @@ function updateDeadlineColors() {
     const toggleBtn = document.getElementById(BULK_IDS.toggle);
     if (toggleBtn) toggleBtn.addEventListener("click", toggleBulkVisit);
 
-    // 일괄 저장 버튼 이벤트 위임 (동적 생성되므로 document에 위임)
     document.addEventListener("click", (event) => {
       const btn = event.target.closest(`#${BULK_IDS.save}`);
       if (btn) submitBulkVisit();
@@ -1068,10 +1029,200 @@ function updateDeadlineColors() {
   window.renderBulkVisitRows = renderBulkVisitRows;
 })();
 
-/**
- * 식단표 이미지를 새 창에서 인쇄하는 함수
- * @param {string} imgSrc - 인쇄할 이미지의 URL
- */
+function loadDeptVisitorLogs() {
+  const user = JSON.parse(sessionStorage.getItem("currentUser"));
+  if (!user) return;
+  const dept = user.dept;
+  
+  const nameInput = document.getElementById("logName");
+  const startInput = document.getElementById("logStartDate");
+  const endInput = document.getElementById("logEndDate");
+  const container = document.getElementById("dept-log-body");
+
+  if (!startInput || !endInput || !container) return;
+
+  const name = nameInput ? nameInput.value.trim() : "";
+  let start = startInput.value;
+  let end = endInput.value;
+
+  if (!start || !end) {
+    if (typeof getCurrentWeekRange === "function") {
+        const week = getCurrentWeekRange();
+        start = week.start;
+        end = week.end;
+        startInput.value = start;
+        endInput.value = end;
+    }
+  }
+
+  container.innerHTML = `<tr><td colspan="6" class="empty-row-text">데이터를 불러오는 중입니다...</td></tr>`;
+
+  const url = `/admin/visitor_logs?start=${start}&end=${end}&dept=${dept}&name=${name}`;
+  
+  getData(url, (logs) => {
+    if (!logs || logs.length === 0) {
+      container.innerHTML = `<tr><td colspan="6" class="empty-row-text">📭 해당 기간에 식수 변경 로그가 없습니다.</td></tr>`;
+      return;
+    }
+
+    container.innerHTML = "";
+    logs.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+    logs.forEach(row => {
+      const beforeB = row.before_breakfast || 0;
+      const beforeL = row.before_lunch || 0;
+      const beforeD = row.before_dinner || 0;
+      const afterB = row.breakfast || 0;
+      const afterL = row.lunch || 0;
+      const afterD = row.dinner || 0;
+
+      const beforeStr = `조(${beforeB}), 중(${beforeL}), 석(${beforeD})`;
+      const afterStr = `조(${afterB}), 중(${afterL}), 석(${afterD})`;
+
+      const isChanged = (beforeB !== afterB) || (beforeL !== afterL) || (beforeD !== afterD);
+      const changedClass = isChanged ? "changed" : "unchanged";
+
+      const tr = document.createElement("tr");
+      const timeStr = typeof formatToKoreanTime === "function" ? formatToKoreanTime(row.updated_at) : row.updated_at;
+
+      tr.innerHTML = `
+        <td>${row.date}</td>
+        <td>${row.dept || "-"}</td>
+        <td class="log-name-cell">${row.applicant_name}</td>
+        <td class="log-before-cell">${beforeStr}</td>
+        <td class="log-after-cell ${changedClass}">${afterStr}</td>
+        <td class="log-time-cell">${timeStr}</td>
+      `;
+      container.appendChild(tr);
+    });
+  });
+}
+
+// 1. 이벤트 리스너 등록 (DOMContentLoaded 내부나 하단에 추가)
+document.getElementById("history-bulk-edit-btn").addEventListener("click", toggleHistoryBulkEdit);
+document.getElementById("history-bulk-save-btn").addEventListener("click", submitHistoryBulkUpdate);
+
+// 2. 일괄 편집 모드 토글 함수
+function toggleHistoryBulkEdit() {
+    const tbody = document.getElementById("visit-summary-body");
+    const rows = tbody.querySelectorAll("tr:not(.empty-row-text):not(.expired-row)");
+    const saveBtn = document.getElementById("history-bulk-save-btn");
+    const editBtn = document.getElementById("history-bulk-edit-btn");
+
+    if (rows.length === 0) {
+        alert("수정 가능한 내역이 없습니다.");
+        return;
+    }
+
+    const isEditing = editBtn.innerText.includes("취소");
+
+    if (!isEditing) {
+        // 편집 모드 시작
+        rows.forEach(row => {
+            const id = row.getAttribute("data-id");
+            // 기존 editVisit(id) 로직을 활용하되 UI만 변경
+            renderRowToEditMode(row);
+        });
+        editBtn.innerText = "❌ 편집 취소";
+        editBtn.style.backgroundColor = "#ef4444";
+        saveBtn.classList.remove("ui-hidden");
+    } else {
+        // 편집 모드 취소 (새로고침으로 복구)
+        loadWeeklyVisitData();
+        editBtn.innerText = "✏️ 일괄 편집";
+        editBtn.style.backgroundColor = "#6366f1";
+        saveBtn.classList.add("ui-hidden");
+    }
+}
+
+// 3. 특정 행을 입력 필드로 전환 (기존 editVisit 로직 커스텀)
+function renderRowToEditMode(tr) {
+  // 이미 편집 모드라면 중복 실행 방지
+  if (tr.querySelector("input")) return;
+
+  const date = tr.querySelector(".date-cell").innerText;
+  const b = tr.querySelector(".b-cell").innerText;
+  const l = tr.querySelector(".l-cell").innerText;
+  const d = tr.querySelector(".d-cell").innerText;
+  const r = tr.querySelector(".r-cell")?.innerText || "";
+
+  // 1. 마감 여부 확인 (기존 로직 동일 적용)
+  const isBExpired = isDeadlinePassed(date, "breakfast", Number(b));
+  const isLExpired = isDeadlinePassed(date, "lunch", Number(l));
+  const isDExpired = isDeadlinePassed(date, "dinner", Number(d));
+
+  // 2. 수량 칸을 기존 editVisit과 동일한 형태로 변환
+  // 기존 코드의 핵심인 'data-prev' 속성을 반드시 넣어야 나중에 변경 여부 감지가 가능합니다.
+  tr.querySelector(".b-cell").innerHTML = isBExpired
+    ? `${b}<input type="hidden" class="edit-b" value="${b}" data-prev="${b}">`
+    : `<input type="number" class="edit-b" min="0" max="50" value="${b}" data-prev="${b}">`;
+
+  tr.querySelector(".l-cell").innerHTML = isLExpired
+    ? `${l}<input type="hidden" class="edit-l" value="${l}" data-prev="${l}">`
+    : `<input type="number" class="edit-l" min="0" max="50" value="${l}" data-prev="${l}">`;
+
+  tr.querySelector(".d-cell").innerHTML = isDExpired
+    ? `${d}<input type="hidden" class="edit-d" value="${d}" data-prev="${d}">`
+    : `<input type="number" class="edit-d" min="0" max="50" value="${d}" data-prev="${d}">`;
+
+  // 3. 사유 칸 변환
+  if (tr.querySelector(".r-cell")) {
+    tr.querySelector(".r-cell").innerHTML = `<input type="text" class="edit-r" value="${r}" data-prev="${r}">`;
+  }
+
+  // 4. 개별 행의 수정 버튼 상태 변경 (시각적 통일성)
+  const editBtn = tr.querySelector("button.action-edit");
+  if (editBtn) {
+    editBtn.innerText = "💾";
+    editBtn.classList.replace("action-edit", "action-save-edit");
+  }
+}
+
+// 4. 일괄 저장 실행 함수
+function submitHistoryBulkUpdate() {
+    const tbody = document.getElementById("visit-summary-body");
+    const rows = tbody.querySelectorAll("tr[data-id]");
+    const updateData = [];
+
+    rows.forEach(row => {
+        const bInput = row.querySelector(".edit-b");
+        if (!bInput) return; // 편집 모드가 아닌 행 제외
+
+        updateData.push({
+            id: row.getAttribute("data-id"),
+            date: row.querySelector(".date-cell").innerText,
+            breakfast: Number(bInput.value),
+            lunch: Number(row.querySelector(".edit-l").value),
+            dinner: Number(row.querySelector(".edit-d").value),
+            reason: row.querySelector(".edit-r")?.value.trim() || "협력사 신청"
+        });
+    });
+
+    if (updateData.length === 0) return;
+    if (!confirm(`총 ${updateData.length}건의 내역을 수정하시겠습니까?`)) return;
+
+    // 순차적 업데이트 실행
+    let successCount = 0;
+    const runUpdate = (index) => {
+        if (index >= updateData.length) {
+            alert(`✅ 일괄 수정 완료 (${successCount}건)`);
+            location.reload(); // 화면 갱신
+            return;
+        }
+
+        const item = updateData[index];
+        putData(`${API_BASE_URL}/visitors/${item.id}`, item, () => {
+            successCount++;
+            runUpdate(index + 1);
+        }, () => {
+            console.error(`${item.date} 수정 실패`);
+            runUpdate(index + 1);
+        });
+    };
+
+    runUpdate(0);
+}
+
 function printMenuImage(imgSrc) {
   if (!imgSrc) return;
 
