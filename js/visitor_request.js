@@ -1186,27 +1186,52 @@ function submitHistoryBulkUpdate() {
 
     rows.forEach(row => {
         const bInput = row.querySelector(".edit-b");
+        const lInput = row.querySelector(".edit-l");
+        const dInput = row.querySelector(".edit-d");
+        const rInput = row.querySelector(".edit-r");
+
         if (!bInput) return; // 편집 모드가 아닌 행 제외
 
-        updateData.push({
-            id: row.getAttribute("data-id"),
-            date: row.querySelector(".date-cell").innerText,
-            breakfast: Number(bInput.value),
-            lunch: Number(row.querySelector(".edit-l").value),
-            dinner: Number(row.querySelector(".edit-d").value),
-            reason: row.querySelector(".edit-r")?.value.trim() || "협력사 신청"
-        });
+        // 1. 현재 값과 이전 값(data-prev) 비교
+        const bNew = Number(bInput.value);
+        const lNew = Number(lInput.value);
+        const dNew = Number(dInput.value);
+        const rNew = rInput?.value.trim() || "협력사 신청";
+
+        const bPrev = Number(bInput.dataset.prev);
+        const lPrev = Number(lInput.dataset.prev);
+        const dPrev = Number(dInput.dataset.prev);
+        const rPrev = (rInput?.dataset.prev || "").trim();
+
+        const isChanged = (bNew !== bPrev) || (lNew !== lPrev) || (dNew !== dPrev) || (rNew !== rPrev);
+
+        // 2. 변경된 데이터만 배열에 담기
+        if (isChanged) {
+            updateData.push({
+                id: row.getAttribute("data-id"),
+                date: row.querySelector(".date-cell").innerText,
+                breakfast: bNew,
+                lunch: lNew,
+                dinner: dNew,
+                reason: rNew
+            });
+        }
     });
 
-    if (updateData.length === 0) return;
-    if (!confirm(`총 ${updateData.length}건의 내역을 수정하시겠습니까?`)) return;
+    // 3. 변경된 내용이 없는 경우 처리
+    if (updateData.length === 0) {
+        alert("변경된 내용이 없습니다.");
+        return;
+    }
 
-    // 순차적 업데이트 실행
+    if (!confirm(`변경된 내역 총 ${updateData.length}건을 저장하시겠습니까?`)) return;
+
+    // 순차적 업데이트 실행 (기존 로직 유지)
     let successCount = 0;
     const runUpdate = (index) => {
         if (index >= updateData.length) {
             alert(`✅ 일괄 수정 완료 (${successCount}건)`);
-            location.reload(); // 화면 갱신
+            location.reload(); 
             return;
         }
 
