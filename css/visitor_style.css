@@ -79,11 +79,11 @@ body.visitor-erp-page #mainArea {
 }
 
 /* 마감/에러 상태 공통 처리 (중복 최소화) */
+
 .expired-cell,
-.expired-input,
-.expired-row,
-.row-expired td {
+.expired-input {
   background-color: #ffe6e6 !important;
+  color: #000000 !important; /* 글자색 검정 강제 */
 }
 
 .closed-text {

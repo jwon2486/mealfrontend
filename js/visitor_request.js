@@ -371,7 +371,7 @@ function loadWeeklyVisitData() {
           <td class="b-cell ${bExpired ? 'expired-cell' : ''}">${row.breakfast}</td>
           <td class="l-cell ${lExpired ? 'expired-cell' : ''}">${row.lunch}</td>
           <td class="d-cell ${dExpired ? 'expired-cell' : ''}">${row.dinner}</td>
-          <td class="r-cell ${isRowClosed ? 'expired-cell' : ''}">${row.reason || "-"}</td>
+          <td class="r-cell">${row.reason || "-"}</td>
           <td>${row.dept || "-"}</td>
           <td>${row.applicant_name || "-"}</td>
           <td>${editButtonHTML}</td>
