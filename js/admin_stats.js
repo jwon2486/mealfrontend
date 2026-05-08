@@ -931,3 +931,40 @@ function downloadPivotStyleExcel() {
   updateDayToggleButtonLabel(); // 라벨 동기화
 }
 
+async function runAutoCompare() {
+    const fileInput = document.getElementById("actualFileOnly");
+    if (!fileInput.files[0]) {
+        alert("실적 엑셀 파일을 선택해주세요.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("actual", fileInput.files[0]);
+
+    showToast("🔄 DB 데이터와 대조 분석 중입니다...");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/stats/compare-auto`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `식사_자동비교_결과_${new Date().getTime()}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showToast("✅ 분석 완료 및 다운로드 시작!");
+        } else {
+            const err = await response.json();
+            alert("분석 실패: " + err.error);
+        }
+    } catch (error) {
+        alert("서버 통신 오류가 발생했습니다.");
+    }
+}
+

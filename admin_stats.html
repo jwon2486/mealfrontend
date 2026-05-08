@@ -102,6 +102,14 @@
       </table>
     </div>
   </div>
+  <div class="table-section" style="margin-top: 30px; border: 1px solid #ddd; padding: 20px;">
+    <h3>🔎 식사 데이터 자동 대조</h3>
+    <p>식당에서 받은 <b>실적 엑셀</b>을 업로드하세요. DB의 신청 내역과 대조하여 노쇼/미신청 리스트를 추출합니다.</p>
+    <div class="stat-action-buttons">
+        <input type="file" id="actualFileOnly" accept=".xlsx, .xls" />
+        <button onclick="runAutoCompare()" style="background-color: #2ecc71; color: white;">📊 자동 분석 및 결과 다운로드</button>
+    </div>
+</div>
   
   <div id="toast" class="toast"></div>
 
