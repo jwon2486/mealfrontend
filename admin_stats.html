@@ -48,17 +48,56 @@
       </table>
     </div>
   
-    <div class="graph-section">
-      <div class="graph-control">
-        <button onclick="loadGraphData()">📈 그래프 조회</button>
-      </div> 
-      <div class="graph-grid">
-        <canvas id="graph-week-current"></canvas>
-        <canvas id="graph-week-next"></canvas>
-        <canvas id="graph-dow-average"></canvas>
-        <canvas id="graph-weekly-trend"></canvas>
+    <div class="graph-section" id="auto-compare-section">
+      <h3>🔎 식사 데이터 자동 분석기</h3>
+      <p class="section-desc">실적 엑셀을 업로드하여 DB와 대조 분석합니다. (조직/부서 열 자동 인식)</p>
+      
+      <div class="analysis-upload-box">
+        <input type="file" id="actualFileOnly" accept=".xlsx, .xls" />
+        <button onclick="runAutoCompare()" class="btn-analyze">📊 분석 및 엑셀 다운로드</button>
       </div>
-    </div> 
+
+      <div id="compare-status" class="status-msg">
+        🔄 데이터를 대조 중입니다. 잠시만 기다려 주세요...
+      </div>
+
+      <div id="analysis-result-dashboard" class="analysis-dashboard">
+        <h4 id="analysis-period-title"></h4>
+        
+        <div class="analysis-cards">
+          <div class="analysis-card no-show">
+            <h4>노쇼(No-Show)</h4>
+            <span id="res-no-show" class="count">0</span>
+          </div>
+          <div class="analysis-card unreg">
+            <h4>미신청 식사</h4>
+            <span id="res-unreg" class="count">0</span>
+          </div>
+          <div class="analysis-card partner">
+            <h4>협력사 식수</h4>
+            <span id="res-partner" class="count">0</span>
+          </div>
+    </div>
+
+    <div class="analysis-detail-section">
+      <div class="detail-header">
+        <h4>📋 상세 명단 확인</h4>
+        <select id="detailTypeSelect" onchange="switchDetailTable()">
+          <option value="no-show">노쇼 명단</option>
+          <option value="unreg">미신청 식사 명단</option>
+          <option value="partner">협력사 식사 현황</option>
+          
+        </select>
+      </div>
+      <div class="detail-table-container">
+        <table class="detail-table">
+          <thead id="detail-thead"></thead>
+          <tbody id="detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 
   </br>
@@ -102,15 +141,7 @@
       </table>
     </div>
   </div>
-  <div class="table-section" style="margin-top: 30px; border: 1px solid #ddd; padding: 20px;">
-    <h3>🔎 식사 데이터 자동 대조</h3>
-    <p>식당에서 받은 <b>실적 엑셀</b>을 업로드하세요. DB의 신청 내역과 대조하여 노쇼/미신청 리스트를 추출합니다.</p>
-    <div class="stat-action-buttons">
-        <input type="file" id="actualFileOnly" accept=".xlsx, .xls" />
-        <button onclick="runAutoCompare()" style="background-color: #2ecc71; color: white;">📊 자동 분석 및 결과 다운로드</button>
-    </div>
-</div>
-  
+ 
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

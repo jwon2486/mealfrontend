@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     setDefaultDateRange();
     loadStats();
-    loadGraphData(); // ✅ 그래프 데이터를 요청
+    //loadGraphData(); // ✅ 그래프 데이터를 요청
     loadDeptStats();
     setDefaultWeeklyDate(); 
     loadWeeklyDeptStats();
@@ -931,17 +931,22 @@ function downloadPivotStyleExcel() {
   updateDayToggleButtonLabel(); // 라벨 동기화
 }
 
+let lastAnalysisData = null; // 상세 내역 전환을 위해 데이터를 전역 보관
+
 async function runAutoCompare() {
     const fileInput = document.getElementById("actualFileOnly");
-    if (!fileInput.files[0]) {
-        alert("실적 엑셀 파일을 선택해주세요.");
+    const statusText = document.getElementById("analysis-status"); // HTML에 상태 메시지용 엘리먼트가 있다면
+    const dashboard = document.getElementById("analysis-result-dashboard");
+
+    if (!fileInput || !fileInput.files[0]) {
+        alert("분석할 실적 엑셀 파일을 선택해주세요.");
         return;
     }
 
     const formData = new FormData();
     formData.append("actual", fileInput.files[0]);
 
-    //showToast("🔄 DB 데이터와 대조 분석 중입니다...");
+    if (statusText) statusText.style.display = "block";
 
     try {
         const response = await fetch(`${API_BASE_URL}/admin/stats/compare-auto`, {
@@ -949,22 +954,115 @@ async function runAutoCompare() {
             body: formData
         });
 
-        if (response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `식사_자동비교_결과_${new Date().getTime()}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            //showToast("✅ 분석 완료 및 다운로드 시작!");
-        } else {
-            const err = await response.json();
-            alert("분석 실패: " + err.error);
+        // ✅ 1. 응답을 JSON으로 받습니다.
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "분석 중 오류가 발생했습니다.");
         }
-    } catch (error) {
-        alert("서버 통신 오류가 발생했습니다.");
+
+        // ✅ 2. GUI 대시보드 데이터 업데이트
+        lastAnalysisData = result.summary; 
+        
+        // 상단 카드 수치 업데이트
+        if (document.getElementById("res-no-show")) 
+            document.getElementById("res-no-show").innerText = lastAnalysisData.no_show_count;
+        if (document.getElementById("res-unreg")) 
+            document.getElementById("res-unreg").innerText = lastAnalysisData.unreg_count;
+        if (document.getElementById("res-partner")) {
+            // result.summary.partner_count 값을 res-partner 요소의 텍스트로 삽입
+            document.getElementById("res-partner").innerText = lastAnalysisData.partner_count;
+        }
+        
+        // 기간 제목 업데이트
+        const periodTitle = document.getElementById("res-period");
+        if (periodTitle) {
+            periodTitle.innerText = `${lastAnalysisData.start_date} ~ ${lastAnalysisData.end_date}`;
+        }
+
+        // ✅ 3. 대시보드 화면에 표시 및 상세 테이블 렌더링
+        if (dashboard) dashboard.style.display = "block";
+        switchDetailTable(); // 명단 표 그리기
+
+        // ✅ 4. 엑셀 파일 다운로드 처리 (Base64 디코딩)
+        const byteCharacters = atob(result.excel_file); // 서버에서 보낸 문자를 바이너리로 변환
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        // 다운로드 링크 생성 및 실행
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.file_name || "식사_분석결과.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        alert("✅ 분석이 완료되었습니다. 화면에서 요약을 확인하세요.");
+
+    } catch (err) {
+        console.error("❌ 분석 중 오류 발생:", err);
+        alert("분석 오류: " + err.message);
+    } finally {
+        if (statusText) statusText.style.display = "none";
     }
 }
 
+// 명단 전환 함수 (노쇼 <-> 미신청)
+function switchDetailTable() {
+    if (!lastAnalysisData) return;
+    
+    const type = document.getElementById("detailTypeSelect").value;
+    const thead = document.getElementById("detail-thead");
+    const tbody = document.getElementById("detail-tbody");
+    
+    let list = [];
+    let headerHtml = "";
+
+    // 1. 데이터 및 헤더 설정
+    if (type === 'no-show') {
+        list = lastAnalysisData.no_show_list;
+        headerHtml = `<tr><th>날짜</th><th>이름</th><th>부서</th><th>식사구분</th></tr>`;
+    } else if (type === 'unreg') {
+        list = lastAnalysisData.unreg_list;
+        headerHtml = `<tr><th>날짜</th><th>이름</th><th>부서</th><th>식사구분</th></tr>`;
+    } else if (type === 'partner') {
+        // ✅ 협력사 리스트 처리 추가
+        list = lastAnalysisData.partner_list || [];
+        headerHtml = `<tr><th>날짜</th><th>부서</th><th>식사구분</th><th>인원수</th></tr>`;
+    }
+
+    thead.innerHTML = headerHtml;
+    
+    // 2. 본문(데이터) 생성
+    if (list && list.length > 0) {
+        if (type === 'partner') {
+            // 협력사 전용 (이름 대신 인원수 출력)
+            tbody.innerHTML = list.map(item => `
+                <tr>
+                    <td>${item.식사일자}</td>
+                    <td>${item.부서}</td>
+                    <td>${item.식사구분}</td>
+                    <td><b>${item.인원수}</b></td>
+                </tr>
+            `).join('');
+        } else {
+            // 노쇼/미신청 (일반 명단)
+            tbody.innerHTML = list.map(item => `
+                <tr>
+                    <td>${item.식사일자}</td>
+                    <td>${item.이름}</td>
+                    <td>${item.부서 || '-'}</td>
+                    <td>${item.식사구분}</td>
+                </tr>
+            `).join('');
+        }
+    } else {
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:20px;">해당 내역이 없습니다.</td></tr>`;
+    }
+}

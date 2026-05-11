@@ -1,51 +1,49 @@
-/* 기본 배경 및 텍스트 */
+/* --- 1. 기본 배경 및 텍스트 --- */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f6f8fa;
     margin: 0;
     padding: 20px;
-  }
-  
-  
+}
+
 /* ✅ 공휴일 셀 배경 (본문용) */
 td.holiday-cell {
-  background-color: #ffcaca !important;  /* 엷은 붉은색 */
-  color: black !important;
+    background-color: #ffcaca !important;
+    color: black !important;
 }
 
 /* ✅ 공휴일 날짜 (헤더용) */
 th.holiday-header {
-  color: red !important;
+    color: red !important;
 }
 
-  /* 상단 날짜 선택 */
-  .date-range {
+/* 상단 날짜 선택 */
+.date-range {
     text-align: center;
     margin-bottom: 16px;
-  }
-  .date-range label {
+}
+.date-range label {
     margin: 0 6px;
     font-size: 14px;
-  }
-  .date-range input {
+}
+.date-range input {
     padding: 4px 6px;
     font-size: 13px;
     width: 100px;
     height: 15px;
-  }
-  
-  /* 레이아웃 구조 */
-  .stats-wrapper {
+}
+
+/* --- 2. 레이아웃 구조 --- */
+.stats-wrapper {
     display: flex;
     gap: 20px;
     align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
-  }
+}
 
-  
-  /* 테이블 영역 */
-  .table-section {
+/* 테이블 영역 (공통) */
+.table-section {
     flex: 1;
     max-width: 520px;
     background: white;
@@ -54,91 +52,56 @@ th.holiday-header {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     overflow-y: auto;
     max-height: 550px;
-  }
-  .table-section table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .table-section th {
-    background-color: #007bff;
-    color: white;
-    padding: 8px;
-    border: 1px solid #ccc;
-  }
-  .table-section td {
-    border: 1px solid #ddd;
-    text-align: center;
-    padding: 6px;
-  }
-  /* .table-section tr:nth-child(even) {
-    background-color: #f9f9f9;
-  } */
-
-  .table-section tr:hover {
-    background-color: #ffd2ac;
-  }
-
-.table-section tr {
-    background-color: #ffffff !important;  /* 일반 행 흰색 */
 }
 
-.table-section tr.subtotal-row {
-    background-color: #d5d7d8 !important; /* 소계: 연회색 */
-    font-weight: 600;
-}
-
-.table-section tr.total-row {
-    background-color: #b4b5b6 !important; /* 총계: 진회색 */
-    font-weight: 700;
-}
-
+/* ---------------------------------------------------------
+   ✅ [업데이트] .graph-section (기존 그래프 제거 후 분석기 최적화)
+   기존 대시보드 규격(flex: 2, height: 550px)을 유지합니다.
+------------------------------------------------------------ */
 .graph-section {
     flex: 2;
     display: flex;
     flex-direction: column;
-    gap: 12px;
     background-color: #ffffff;
-    height: 550px;
-    padding: 10px;
-}
-
-.graph-control {
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-  .graph-box {
-    width: 48%;
-    height: 280px;
-    background: white;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-  }
-
-  .graph-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    grid-template-rows: auto auto;
-    
-  }
-  
-  .graph-grid canvas {
-    width: 100% !important;
-    height: 230px !important;  /* 원하는 그래프 높이 */
-    background-color: #fff;
-    border: 1px solid #ccc;
+    height: 550px; /* 기존 규격 유지 */
+    padding: 15px;
     border-radius: 8px;
-    padding: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     box-sizing: border-box;
-    
-  }
+    overflow-y: auto; /* 내용이 많아지면 스크롤 */
+}
 
- 
-  /* 버튼 스타일 */
-  button {
+/* 분석기 설명 텍스트 */
+.graph-section p {
+    font-size: 0.9em;
+    color: #666;
+    margin: 5px 0 15px 0;
+}
+
+/* --- 3. 테이블 및 버튼 공통 스타일 --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+th {
+    background-color: #007bff;
+    color: white;
+    padding: 8px;
+    border: 1px solid #ccc;
+}
+td {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 6px;
+}
+tr:hover { background-color: #ffd2ac; }
+tr { background-color: #ffffff !important; }
+
+tr.subtotal-row { background-color: #d5d7d8 !important; font-weight: 600; }
+tr.total-row { background-color: #b4b5b6 !important; font-weight: 700; }
+
+button {
     background-color: #007bff;
     color: white;
     border: none;
@@ -146,72 +109,117 @@ th.holiday-header {
     border-radius: 4px;
     cursor: pointer;
     font-size: 13px;
-  }
-  button:hover {
-    background-color: #0056b3;
-  }
-  .stat-action-buttons {
+}
+button:hover { background-color: #0056b3; }
+
+.stat-action-buttons {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
-  }
-/* 기본 체크박스 커스텀 */
-.day-checkbox {
-  accent-color: #28a745; /* ✅ 최신 브라우저 지원: 체크마크만 초록색 */
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
+    align-items: center;
 }
 
+/* ---------------------------------------------------------
+   ✅ [신규] 자동 분석기 전용 내부 스타일
+------------------------------------------------------------ */
+/* 결과 대시보드 요약 카드 */
+.analysis-cards {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.analysis-card {
+    flex: 1;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+.analysis-card h4 { margin: 0; font-size: 0.85em; color: #555; }
+.analysis-card .count {
+    font-size: 1.4rem;
+    font-weight: bold;
+    display: block;
+    margin-top: 5px;
+}
 
+/* 카드별 포인트 컬러 */
+.analysis-card.no-show { background-color: #fff5f5; border-color: #feb2b2; }
+.analysis-card.no-show .count { color: #c53030; }
 
-/* 부서별 신청현황 (dept-section) - 기존보다 넓이를 stats-table과 맞춤 */
+.analysis-card.unreg { background-color: #fffaf0; border-color: #fbd38d; }
+.analysis-card.unreg .count { color: #975a16; }
+
+.analysis-card.partner { background-color: #f0fff4; border-color: #9ae6b4; }
+.analysis-card.partner .count { color: #276749; }
+
+/* 상세 테이블 영역 */
+.analysis-detail-section { margin-top: 10px; }
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.detail-header select { padding: 4px; border-radius: 4px; border: 1px solid #ddd; }
+
+.table-scroll {
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+}
+
+/* --- 4. 주간 현황 및 부서 섹션 특화 스타일 (기존 유지) --- */
 #dept-section {
-  flex: 1;
-  max-width: 520px;   /* ✅ stats-table과 동일 */
-  max-height: 550px;  /* ✅ height도 동일하게 */
+    flex: 1;
+    max-width: 520px;
+    max-height: 550px;
 }
 
 #weekly-dept-section {
-  flex: 2;                  /* ✅ graph-section과 넓이 동일하게 */
-  max-width: none;          /* ✅ 기본 520px 제한 해제 */
-  max-height: 550px;        /* ✅ dept-section과 높이 맞춤 */
+    flex: 2;
+    max-width: none;
+    max-height: 550px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 #weekly-dept-table {
-  width: 100%;           /* ✅ 전체 그래프 영역에 맞게 */
-  font-size: 12px;
+    width: 100%;
+    font-size: 12px;
 }
 
-/* ✅ 명단 셀: 글자 더 작게, 셀 너비 늘림 */
 .weekly-name-cell {
-  font-size: 11px;
-  min-width: 120px;     /* ✅ 이름이 많은 경우 더 넓게 */
-  max-width: 200px;
-  word-break: break-word;
-  white-space: normal;
+    font-size: 11px;
+    min-width: 120px;
+    max-width: 200px;
+    word-break: break-word;
+    white-space: normal;
 }
 
-/* ✅ 부서명 셀: 넓이 확보 + 줄바꿈 허용 */
 .weekly-dept-cell {
-  min-width: 80px;       /* ✅ 기존보다 넓게 */
-  max-width: 100px;
-  white-space: normal;    /* ✅ 줄바꿈 허용 */
-  word-break: break-word; /* ✅ 단어 중간 줄바꿈 가능 */
+    min-width: 80px;
+    max-width: 100px;
+    white-space: normal;
+    word-break: break-word;
 }
 
+.day-checkbox {
+    accent-color: #28a745;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
 
-
-  /* 반응형 */
-  @media (max-width: 768px) {
+/* --- 5. 반응형 (기존 유지) --- */
+@media (max-width: 768px) {
     .stats-wrapper {
-      flex-direction: column;
+        flex-direction: column;
     }
-    .graph-box {
-      width: 100%;
+    .table-section, .graph-section, #weekly-dept-section {
+        max-width: 100%;
+        height: auto;
     }
-    .table-section {
-      max-width: 100%;
-    }
-  }
-  
+}
