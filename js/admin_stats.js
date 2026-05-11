@@ -941,7 +941,7 @@ async function runAutoCompare() {
     const formData = new FormData();
     formData.append("actual", fileInput.files[0]);
 
-    showToast("🔄 DB 데이터와 대조 분석 중입니다...");
+    //showToast("🔄 DB 데이터와 대조 분석 중입니다...");
 
     try {
         const response = await fetch(`${API_BASE_URL}/admin/stats/compare-auto`, {
@@ -958,7 +958,7 @@ async function runAutoCompare() {
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
-            showToast("✅ 분석 완료 및 다운로드 시작!");
+            //showToast("✅ 분석 완료 및 다운로드 시작!");
         } else {
             const err = await response.json();
             alert("분석 실패: " + err.error);
