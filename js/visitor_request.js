@@ -23,6 +23,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const visitSummaryBody = document.getElementById("visit-summary-body");
     if (visitSummaryBody) visitSummaryBody.addEventListener("click", handleTableActions);
 
+    // [복구] 로그 페이지의 조회(검색) 버튼 이벤트 리스너 연결
+    const logSearchBtn = document.getElementById("logSearchBtn") || document.getElementById("dept-log-search-btn");
+    if (logSearchBtn) logSearchBtn.addEventListener("click", loadDeptVisitorLogs);
+
+    // 일괄 편집 버튼 이벤트 리스너 복구 및 연결
+    const historyBulkEditBtn = document.getElementById("history-bulk-edit-btn");
+    if (historyBulkEditBtn) historyBulkEditBtn.addEventListener("click", toggleHistoryBulkEdit);
+
+    const historyBulkSaveBtn = document.getElementById("history-bulk-save-btn");
+    if (historyBulkSaveBtn) historyBulkSaveBtn.addEventListener("click", submitHistoryBulkUpdate);
+
     const storedDate = sessionStorage.getItem("lastVisitDate");
     if (storedDate) {
       const todayStr = getKSTDate().toISOString().split("T")[0];
@@ -133,9 +144,11 @@ function setupSidebarAndTabs() {
         const startInput = document.getElementById("logStartDate");
         const endInput = document.getElementById("logEndDate");
         if (startInput && !startInput.value) {
-            const { start, end } = getCurrentWeekRange();
-            startInput.value = start;
-            if (endInput) endInput.value = end;
+            if (typeof getCurrentWeekRange === "function") {
+                const { start, end } = getCurrentWeekRange();
+                startInput.value = start;
+                if (endInput) endInput.value = end;
+            }
         }
         loadDeptVisitorLogs(); 
       }
@@ -165,6 +178,7 @@ function setupSidebarAndTabs() {
 
 function handleDateChange() {
   const input = document.getElementById("visit-date");
+  if (!input || !input.value) return;
   const picked = new Date(input.value);
    
   if (picked.getDay() === 0 || picked.getDay() === 6) {
@@ -177,6 +191,7 @@ function handleDateChange() {
   document.getElementById("visit-week-date").value = selectedDate;
 
   const user = JSON.parse(sessionStorage.getItem("currentUser"));
+  if (!user) return;
   const actualType = sessionStorage.getItem("type") === "직영" ? "방문자" : "협력사";
   
   const checkUrl = `${API_BASE_URL}/visitors/check?date=${selectedDate}&id=${user.userId}&type=${actualType}`;
@@ -238,16 +253,17 @@ function setTodayDefault() {
   const dateField = document.getElementById("visit-date");
   const weekField = document.getElementById("visit-week-date");
 
-  if (!dateField.value) dateField.value = dateStr;
-  if (!weekField.value) weekField.value = dateStr;
+  if (dateField && !dateField.value) dateField.value = dateStr;
+  if (weekField && !weekField.value) weekField.value = dateStr;
 
   updateWeekday();
   handleDateChange();
 }
   
 function updateWeekday() {
-    const date = document.getElementById("visit-date").value;
-    if (!date) return;
+    const dateInput = document.getElementById("visit-date");
+    if (!dateInput || !dateInput.value) return;
+    const date = dateInput.value;
     document.getElementById("visit-day").innerText = getWeekdayName(date);
     updateDeadlineColors();
 }
@@ -321,11 +337,13 @@ function loadWeeklyVisitData() {
     if (!dateInput || !dateInput.value) return;
     
     const selectedDate = dateInput.value;
+    if (typeof getWeekStartAndEnd !== "function") return;
     const { start, end } = getWeekStartAndEnd(selectedDate);
     const params = `start=${start}&end=${end}`;
   
     getData(`${API_BASE_URL}/visitors/weekly?${params}`, (result) => {
         const tbody = document.getElementById("visit-summary-body");
+        if (!tbody) return;
         tbody.innerHTML = "";
   
         if (!result || result.length === 0) {
@@ -335,11 +353,14 @@ function loadWeeklyVisitData() {
           return;
         }
 
-        (result || []).forEach(row => {
-          const userType = sessionStorage.getItem("type") || "방문자";
-          const currentDept = sessionStorage.getItem("dept"); 
+        const userType = sessionStorage.getItem("type") || "방문자";
+        const currentDept = sessionStorage.getItem("dept"); 
 
-          if (userType === "협력사" && (row.type !== "협력사" || row.dept !== currentDept)) return;
+        (result || []).forEach(row => {
+          // [필터링 강화] 협력사는 자기 소속 회사(dept) 데이터만 무조건 필터링하도록 강제 검증
+          if (userType === "협력사") {
+            if (row.type !== "협력사" || String(row.dept).trim() !== String(currentDept).trim()) return;
+          }
           if (userType === "직영" && row.type !== "방문자") return;
 
           const tr = document.createElement("tr");
@@ -397,7 +418,7 @@ function submitVisit() {
     let actualType = userType === "직영" ? "방문자" : "협력사";
     
     if (isNextWeekDeadlinePassed(date)) {
-      alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 신청할 수 없습니다.");
+      alert("⛔ 다음 주 식사는 이번 주 화요일 이후에는 신청할 수 없습니다.");
       return;
     }
   
@@ -425,13 +446,13 @@ function submitVisit() {
     }
 
     getData(`/holidays?year=${date.substring(0, 4)}`, (holidays) => {
-      if (holidays.some(h => h.date === date)) {
+      if (holidays && holidays.some(h => h.date === date)) {
         alert(`❌ ${date}는 공휴일입니다. 신청할 수 없습니다.`);
         return;
       }
     
       getData(checkUrl, (res) => {
-        if (res.exists) {
+        if (res && res.exists) {
           if (!confirm("📌 해당 날짜에 이미 신청한 내역이 있습니다. 덮어쓰시겠습니까?")) return;
         }
 
@@ -481,7 +502,7 @@ function deleteVisit(id) {
     const expiredList = getExpiredMeals(date, { breakfast: b, lunch: l, dinner: d });
 
     if (isNextWeekDeadlinePassed(date)) {
-      alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
+      alert("⛔ 다음 주 식사는 이번 주 화요일 이후에는 수정할 수 없습니다.");
       loadWeeklyVisitData(); 
       return;
     }
@@ -549,7 +570,7 @@ function saveVisitEdit(id) {
   const date = tr.querySelector(".date-cell").innerText;
 
   if (isNextWeekDeadlinePassed(date)) {
-    alert("⛔ 다음 주 식사는 이번 주 수요일 이후에는 수정할 수 없습니다.");
+    alert("⛔ 다음 주 식사는 이번 주 화요일 이후에는 수정할 수 없습니다.");
     loadWeeklyVisitData();
     return;
   }
@@ -614,7 +635,7 @@ function isNextWeekDeadlinePassed(selectedDate) {
   thisWeekMonday.setHours(0,0,0,0);
 
   const tuesday16 = new Date(thisWeekMonday);
-  tuesday16.setDate(thisWeekMonday.getDate() + 1); // 2에서 1로 수정 (화요일)
+  tuesday16.setDate(thisWeekMonday.getDate() + 1); // 화요일로 유지
   tuesday16.setHours(16,0,0,0);
 
   const sundayEnd = new Date(thisWeekMonday);
@@ -628,7 +649,7 @@ function isNextWeekDeadlinePassed(selectedDate) {
   nextWeekSunday.setDate(nextWeekMonday.getDate() + 6);
 
   if (mealDate >= nextWeekMonday && mealDate <= nextWeekSunday) {
-    if (now >= wednesday16 && now <= sundayEnd) {
+    if (now >= tuesday16 && now <= sundayEnd) {
       return true;
     }
   }
@@ -729,6 +750,7 @@ function updateDeadlineColors() {
   }
 }
 
+// 주간 일괄 신청 모듈 익명 함수 내부
 (function () {
   const BULK_IDS = {
     toggle: "bulk-input-toggle-btn",
@@ -793,58 +815,59 @@ function updateDeadlineColors() {
   }
 
   function renderBulkVisitRows() {
-  const bulkBody = document.getElementById(BULK_IDS.body);
-  if (!bulkBody) return;
+    const bulkBody = document.getElementById(BULK_IDS.body);
+    if (!bulkBody) return;
 
-  const baseDateStr = document.getElementById(BULK_IDS.singleDate).value;
-  if (!baseDateStr) return;
+    const baseDateStr = document.getElementById(BULK_IDS.singleDate).value;
+    if (!baseDateStr) return;
 
-  const dates = getWeekDatesFromMonday(baseDateStr);
-  const { start, end } = getWeekStartAndEnd(baseDateStr);
-  
-  const user = JSON.parse(sessionStorage.getItem("currentUser"));
-  getData(`${API_BASE_URL}/visitors/weekly?start=${start}&end=${end}`, (allData) => {
-    const myDataMap = {};
-    const actualType = sessionStorage.getItem("type") === "직영" ? "방문자" : "협력사";
+    const dates = getWeekDatesFromMonday(baseDateStr);
+    if (typeof getWeekStartAndEnd !== "function") return;
+    const { start, end } = getWeekStartAndEnd(baseDateStr);
     
-    (allData || []).forEach(item => {
-      if (item.applicant_id === user.userId && item.type === actualType) {
-        myDataMap[item.date] = item;
-      }
-    });
-
-    bulkBody.innerHTML = "";
-    dates.forEach((date, index) => {
-      const rowData = myDataMap[date] || { breakfast: 0, lunch: 0, dinner: 0, reason: "" };
-      const row = document.createElement("tr");
-      row.dataset.date = date; 
+    const user = JSON.parse(sessionStorage.getItem("currentUser"));
+    getData(`${API_BASE_URL}/visitors/weekly?start=${start}&end=${end}`, (allData) => {
+      const myDataMap = {};
+      const actualType = sessionStorage.getItem("type") === "직영" ? "방문자" : "협력사";
       
-      const isClosed = isDeadlinePassed(date, "lunch", 1); 
+      (allData || []).forEach(item => {
+        if (item.applicant_id === user.userId && item.type === actualType) {
+          myDataMap[item.date] = item;
+        }
+      });
 
-      let html = `
-        <td class="col-adate">${date}</td>
-        <td class="col-aday">${getWeekdayName(date)}</td>
-        <td class="col-abreakfast"><input type="number" class="bulk-b-count" data-date="${date}" value="${rowData.breakfast}" min="0" ${isClosed ? 'disabled' : ''}></td>
-        <td class="col-alunch"><input type="number" class="bulk-l-count" data-date="${date}" value="${rowData.lunch}" min="0" ${isClosed ? 'disabled' : ''}></td>
-        <td class="col-adinner"><input type="number" class="bulk-d-count" data-date="${date}" value="${rowData.dinner}" min="0" ${isClosed ? 'disabled' : ''}></td>
-        <td class="col-areason"><input type="text" class="bulk-reason-input" data-date="${date}" value="${rowData.reason}" placeholder="사유" ${isClosed ? 'disabled' : ''}></td>
-      `;
+      bulkBody.innerHTML = "";
+      dates.forEach((date, index) => {
+        const rowData = myDataMap[date] || { breakfast: 0, lunch: 0, dinner: 0, reason: "" };
+        const row = document.createElement("tr");
+        row.dataset.date = date; 
+        
+        const isClosed = isDeadlinePassed(date, "lunch", 1); 
 
-      if (index === 0) {
-        html += `
-          <td class="col-asave bulk-save-cell" rowspan="${dates.length}">
-            <button type="button" id="${BULK_IDS.save}" class="action-btn save-btn visitor-save-btn bulk-save-btn-large">
-              💾<br>일괄<br>저장
-            </button>
-          </td>
+        let html = `
+          <td class="col-adate">${date}</td>
+          <td class="col-aday">${getWeekdayName(date)}</td>
+          <td class="col-abreakfast"><input type="number" class="bulk-b-count" data-date="${date}" value="${rowData.breakfast}" min="0" ${isClosed ? 'disabled' : ''}></td>
+          <td class="col-alunch"><input type="number" class="bulk-l-count" data-date="${date}" value="${rowData.lunch}" min="0" ${isClosed ? 'disabled' : ''}></td>
+          <td class="col-adinner"><input type="number" class="bulk-d-count" data-date="${date}" value="${rowData.dinner}" min="0" ${isClosed ? 'disabled' : ''}></td>
+          <td class="col-areason"><input type="text" class="bulk-reason-input" data-date="${date}" value="${rowData.reason}" placeholder="사유" ${isClosed ? 'disabled' : ''}></td>
         `;
-      }
-      row.innerHTML = html;
-      bulkBody.appendChild(row);
+
+        if (index === 0) {
+          html += `
+            <td class="col-asave bulk-save-cell" rowspan="${dates.length}">
+              <button type="button" id="${BULK_IDS.save}" class="action-btn save-btn visitor-save-btn bulk-save-btn-large">
+                💾<br>일괄<br>저장
+              </button>
+            </td>
+          `;
+        }
+        row.innerHTML = html;
+        bulkBody.appendChild(row);
+      });
+      applyBulkDeadlineState();
     });
-    applyBulkDeadlineState();
-  });
-}
+  }
 
   function applyStateToInput(input, locked, title) {
     if (!input) return;
@@ -920,7 +943,7 @@ function updateDeadlineColors() {
     if (!date) return { ok: false, message: "날짜가 없습니다." };
     if (breakfast + lunch + dinner === 0) return { ok: false, message: `${date}: 식사 수량이 없습니다.` };
     if (isReasonRequired() && !reason) return { ok: false, message: `${date}: 사유를 입력해주세요.` };
-    if (isNextWeekDeadlinePassed(date)) return { ok: false, message: `${date}: 다음 주 식사는 이번 주 수요일 이후 신청불가.` };
+    if (isNextWeekDeadlinePassed(date)) return { ok: false, message: `${date}: 다음 주 식사는 이번 주 화요일 이후 신청불가.` };
 
     const expiredList = getExpiredMeals(date, { breakfast, lunch, dinner });
     if (expiredList.length === 3) return { ok: false, message: `${date}: 모든 식사가 마감되었습니다.` };
@@ -940,7 +963,7 @@ function updateDeadlineColors() {
     const checkUrl = `${API_BASE_URL}/visitors/check?date=${date}&id=${sessionStorage.getItem("id")}&type=${payload.type}`;
 
     getData(`/holidays?year=${date.substring(0, 4)}`, (holidays) => {
-      if ((holidays || []).some(h => h.date === date)) {
+      if (holidays && holidays.some(h => h.date === date)) {
         if (callbacks.onError) callbacks.onError(`${date}: 공휴일이라 신청할 수 없습니다.`);
         return;
       }
@@ -1098,13 +1121,9 @@ function loadDeptVisitorLogs() {
   });
 }
 
-// 1. 이벤트 리스너 등록 (DOMContentLoaded 내부나 하단에 추가)
-document.getElementById("history-bulk-edit-btn").addEventListener("click", toggleHistoryBulkEdit);
-document.getElementById("history-bulk-save-btn").addEventListener("click", submitHistoryBulkUpdate);
-
-// 2. 일괄 편집 모드 토글 함수
 function toggleHistoryBulkEdit() {
     const tbody = document.getElementById("visit-summary-body");
+    if (!tbody) return;
     const rows = tbody.querySelectorAll("tr:not(.empty-row-text):not(.expired-row)");
     const saveBtn = document.getElementById("history-bulk-save-btn");
     const editBtn = document.getElementById("history-bulk-edit-btn");
@@ -1114,30 +1133,28 @@ function toggleHistoryBulkEdit() {
         return;
     }
 
-    const isEditing = editBtn.innerText.includes("취소");
+    const isEditing = editBtn && editBtn.innerText.includes("취소");
 
     if (!isEditing) {
-        // 편집 모드 시작
         rows.forEach(row => {
-            const id = row.getAttribute("data-id");
-            // 기존 editVisit(id) 로직을 활용하되 UI만 변경
             renderRowToEditMode(row);
         });
-        editBtn.innerText = "❌ 편집 취소";
-        editBtn.style.backgroundColor = "#ef4444";
-        saveBtn.classList.remove("ui-hidden");
+        if (editBtn) {
+          editBtn.innerText = "❌ 편집 취소";
+          editBtn.style.backgroundColor = "#ef4444";
+        }
+        if (saveBtn) saveBtn.classList.remove("ui-hidden");
     } else {
-        // 편집 모드 취소 (새로고침으로 복구)
         loadWeeklyVisitData();
-        editBtn.innerText = "✏️ 일괄 편집";
-        editBtn.style.backgroundColor = "#6366f1";
-        saveBtn.classList.add("ui-hidden");
+        if (editBtn) {
+          editBtn.innerText = "✏️ 일괄 편집";
+          editBtn.style.backgroundColor = "#6366f1";
+        }
+        if (saveBtn) saveBtn.classList.add("ui-hidden");
     }
 }
 
-// 3. 특정 행을 입력 필드로 전환 (기존 editVisit 로직 커스텀)
 function renderRowToEditMode(tr) {
-  // 이미 편집 모드라면 중복 실행 방지
   if (tr.querySelector("input")) return;
 
   const date = tr.querySelector(".date-cell").innerText;
@@ -1146,13 +1163,10 @@ function renderRowToEditMode(tr) {
   const d = tr.querySelector(".d-cell").innerText;
   const r = tr.querySelector(".r-cell")?.innerText || "";
 
-  // 1. 마감 여부 확인 (기존 로직 동일 적용)
   const isBExpired = isDeadlinePassed(date, "breakfast", Number(b));
   const isLExpired = isDeadlinePassed(date, "lunch", Number(l));
   const isDExpired = isDeadlinePassed(date, "dinner", Number(d));
 
-  // 2. 수량 칸을 기존 editVisit과 동일한 형태로 변환
-  // 기존 코드의 핵심인 'data-prev' 속성을 반드시 넣어야 나중에 변경 여부 감지가 가능합니다.
   tr.querySelector(".b-cell").innerHTML = isBExpired
     ? `${b}<input type="hidden" class="edit-b" value="${b}" data-prev="${b}">`
     : `<input type="number" class="edit-b" min="0" max="50" value="${b}" data-prev="${b}">`;
@@ -1165,12 +1179,10 @@ function renderRowToEditMode(tr) {
     ? `${d}<input type="hidden" class="edit-d" value="${d}" data-prev="${d}">`
     : `<input type="number" class="edit-d" min="0" max="50" value="${d}" data-prev="${d}">`;
 
-  // 3. 사유 칸 변환
   if (tr.querySelector(".r-cell")) {
     tr.querySelector(".r-cell").innerHTML = `<input type="text" class="edit-r" value="${r}" data-prev="${r}">`;
   }
 
-  // 4. 개별 행의 수정 버튼 상태 변경 (시각적 통일성)
   const editBtn = tr.querySelector("button.action-edit");
   if (editBtn) {
     editBtn.innerText = "💾";
@@ -1178,9 +1190,9 @@ function renderRowToEditMode(tr) {
   }
 }
 
-// 4. 일괄 저장 실행 함수
 function submitHistoryBulkUpdate() {
     const tbody = document.getElementById("visit-summary-body");
+    if (!tbody) return;
     const rows = tbody.querySelectorAll("tr[data-id]");
     const updateData = [];
 
@@ -1190,9 +1202,8 @@ function submitHistoryBulkUpdate() {
         const dInput = row.querySelector(".edit-d");
         const rInput = row.querySelector(".edit-r");
 
-        if (!bInput) return; // 편집 모드가 아닌 행 제외
+        if (!bInput) return; 
 
-        // 1. 현재 값과 이전 값(data-prev) 비교
         const bNew = Number(bInput.value);
         const lNew = Number(lInput.value);
         const dNew = Number(dInput.value);
@@ -1205,7 +1216,6 @@ function submitHistoryBulkUpdate() {
 
         const isChanged = (bNew !== bPrev) || (lNew !== lPrev) || (dNew !== dPrev) || (rNew !== rPrev);
 
-        // 2. 변경된 데이터만 배열에 담기
         if (isChanged) {
             updateData.push({
                 id: row.getAttribute("data-id"),
@@ -1218,7 +1228,6 @@ function submitHistoryBulkUpdate() {
         }
     });
 
-    // 3. 변경된 내용이 없는 경우 처리
     if (updateData.length === 0) {
         alert("변경된 내용이 없습니다.");
         return;
@@ -1226,7 +1235,6 @@ function submitHistoryBulkUpdate() {
 
     if (!confirm(`변경된 내역 총 ${updateData.length}건을 저장하시겠습니까?`)) return;
 
-    // 순차적 업데이트 실행 (기존 로직 유지)
     let successCount = 0;
     const runUpdate = (index) => {
         if (index >= updateData.length) {
@@ -1252,6 +1260,7 @@ function printMenuImage(imgSrc) {
   if (!imgSrc) return;
 
   const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
   printWindow.document.write(`
     <html>
       <head>
