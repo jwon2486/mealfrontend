@@ -724,7 +724,7 @@ function updateDeadlineColors() {
       if(!input) return;
       input.classList.add("expired-input");
       input.readOnly = true;
-      input.title = "⛔ 다음 주 식사는 이번 주 수요일 이후에는 신청할 수 없습니다.";
+      input.title = "⛔ 다음 주 식사는 이번 주 화요일 이후에는 신청할 수 없습니다.";
     });
   }
 }
