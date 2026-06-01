@@ -96,10 +96,10 @@ function isNextWeekGloballyClosed(dateStr) {
     
     if (dateStr !== ymdKST(nextMon)) return false;
     
-    const wednesdayCutoff = new Date(thisMon);
-    wednesdayCutoff.setDate(thisMon.getDate() + 2);
-    wednesdayCutoff.setHours(16, 0, 0, 0);
-    return now > wednesdayCutoff;
+    const tuesdayCutoff = new Date(thisMon);
+    tuesdayCutoff.setDate(thisMon.getDate() + 1);
+    tuesdayCutoff.setHours(16, 0, 0, 0);
+    return now > tuesdayCutoff;
 }
 
 function makeCreatedAt() {

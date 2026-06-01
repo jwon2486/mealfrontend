@@ -613,9 +613,9 @@ function isNextWeekDeadlinePassed(selectedDate) {
   thisWeekMonday.setDate(now.getDate() - nowDay + 1);
   thisWeekMonday.setHours(0,0,0,0);
 
-  const wednesday16 = new Date(thisWeekMonday);
-  wednesday16.setDate(thisWeekMonday.getDate() + 2);
-  wednesday16.setHours(16,0,0,0);
+  const tuesday16 = new Date(thisWeekMonday);
+  tuesday16.setDate(thisWeekMonday.getDate() + 1); // 2에서 1로 수정 (화요일)
+  tuesday16.setHours(16,0,0,0);
 
   const sundayEnd = new Date(thisWeekMonday);
   sundayEnd.setDate(thisWeekMonday.getDate() + 6);
