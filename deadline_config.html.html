@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식수 마감 통합 제어 센터 (최고관리자)</title>
+    <link rel="stylesheet" href="deadline_style.css">
+    <script src="deadline_config.js" defer></script>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2>🕒 식수 신청 및 변경 마감 통합 제어</h2>
+            <p class="subtitle">시스템 코드 수정 없이 실시간으로 금주 당일 마감 조건과 차주 신청 일괄 컷오프 조건을 통제합니다.</p>
+        </div>
+        
+        <form id="config-form" onsubmit="event.preventDefault();">
+            <div class="config-group">
+                <h3>🍳 [금주] 조식 마감 조건</h3>
+                <div class="input-row">
+                    <div class="input-cell">
+                        <label for="breakfast_days_before">신청 기준일</label>
+                        <select id="breakfast_days_before">
+                            <option value="1">1일 전 (전날 마감)</option>
+                            <option value="0">당일 마감</option>
+                        </select>
+                    </div>
+                    <div class="input-cell">
+                        <label for="breakfast_time">마감 시각</label>
+                        <input type="time" id="breakfast_time">
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-group">
+                <h3>🍱 [금주] 중식 마감 조건</h3>
+                <div class="input-row">
+                    <div class="input-cell">
+                        <label for="lunch_days_before">신청 기준일</label>
+                        <select id="lunch_days_before">
+                            <option value="1">1일 전 (전날 마감)</option>
+                            <option value="0">당일 마감</option>
+                        </select>
+                    </div>
+                    <div class="input-cell">
+                        <label for="lunch_time">마감 시각</label>
+                        <input type="time" id="lunch_time">
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-group">
+                <h3>🌆 [금주] 석식 마감 조건</h3>
+                <div class="input-row">
+                    <div class="input-cell">
+                        <label for="dinner_days_before">신청 기준일</label>
+                        <select id="dinner_days_before">
+                            <option value="1">1일 전 (전날 마감)</option>
+                            <option value="0">당일 마감</option>
+                        </select>
+                    </div>
+                    <div class="input-cell">
+                        <label for="dinner_time">마감 시각</label>
+                        <input type="time" id="dinner_time">
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-group highlight">
+                <h3>🚨 [차주] 다음 주 식수 신청 일괄 컷오프 요일</h3>
+                <div class="input-row">
+                    <div class="input-cell">
+                        <label for="next_week_day_of_week">마감 요일 (이번 주 기준)</label>
+                        <select id="next_week_day_of_week">
+                            <option value="1">월요일</option>
+                            <option value="2">화요일</option>
+                            <option value="3">수요일</option>
+                            <option value="4">목요일</option>
+                            <option value="5">금요일</option>
+                        </select>
+                    </div>
+                    <div class="input-cell">
+                        <label for="next_week_time">일괄 마감 시각</label>
+                        <input type="time" id="next_week_time">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button type="button" class="btn-save" onclick="saveSettings()">💾 마감 규칙 시스템 반영</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

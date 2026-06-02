@@ -1,5 +1,5 @@
 /**
- * 에스엔시스 식수 신청 시스템 Script (Refactored Version)
+ * 에스엔시스 식수 신청 시스템 Script (Refactored Version with Dynamic Deadlines)
  */
 
 // ============================================================================
@@ -14,6 +14,7 @@ let isAllSelected = false;
 
 window.mealCreatedAtMap = window.mealCreatedAtMap || {};
 window.selfcheckCreatedAtMap = window.selfcheckCreatedAtMap || {};
+window.serverDeadlines = null; // 🔥 백엔드 동적 마감시간 저장용 전역 객체
 
 // 자주 찾는 DOM 요소를 캐싱할 객체 (매번 getElementById 호출 방지)
 const DOM = {};
@@ -88,18 +89,26 @@ function isTwoWeeksLaterOrMore(dateStr) {
     return new Date(dateStr) >= targetWeek;
 }
 
+// 💡 리팩토링: 서버 동적 마감 데이터 Fetch 함수 추가
+function loadDeadlineSettingsFromServer(callback) {
+    getData("/admin/api/deadlines", (data) => {
+        window.serverDeadlines = data;
+        if (callback) callback();
+    }, () => {
+        console.error("❌ 마감 설정 연동 실패. 비상용 기본값으로 구동합니다.");
+        window.serverDeadlines = {
+            breakfast_days_before: "1", breakfast_time: "09:00",
+            lunch_days_before: "0", lunch_time: "10:30",
+            dinner_days_before: "0", dinner_time: "14:30",
+            next_week_day_of_week: "3", next_week_time: "16:00"
+        };
+        if (callback) callback();
+    });
+}
+
+// 💡 리팩토링: 차주 일괄마감은 단일 검증을 위해 isDeadlinePassed로 통합 라우팅
 function isNextWeekGloballyClosed(dateStr) {
-    const now = getKSTNow();
-    const thisMon = mondayOf(now);
-    const nextMon = new Date(thisMon);
-    nextMon.setDate(nextMon.getDate() + 7);
-    
-    if (dateStr !== ymdKST(nextMon)) return false;
-    
-    const tuesdayCutoff = new Date(thisMon);
-    tuesdayCutoff.setDate(thisMon.getDate() + 1);
-    tuesdayCutoff.setHours(16, 0, 0, 0);
-    return now > tuesdayCutoff;
+    return isDeadlinePassed(dateStr, "중식");
 }
 
 function makeCreatedAt() {
@@ -223,20 +232,23 @@ function login(event) {
             return;
         }
 
-        hideElement(DOM.loginWrapper);
-        showBlock(DOM.mainArea);
-        showBlock(DOM.datePickerContainer);
-        showBlock(DOM.mealContainer);
-        showInlineBlock(DOM.weekPicker);
-        showBlock(DOM.welcome);
-        showBlock(DOM.weekRangeText);
-        showBlock(DOM.mealSummary);
-        
-        DOM.welcome.innerText = `${data.name}님 (${data.dept}), 안녕하세요.`;
+        // 💡 리팩토링: 메인 화면 진입 시에도 백엔드 설정을 먼저 당겨온 후 랜더링 체이닝
+        loadDeadlineSettingsFromServer(() => {
+            hideElement(DOM.loginWrapper);
+            showBlock(DOM.mainArea);
+            showBlock(DOM.datePickerContainer);
+            showBlock(DOM.mealContainer);
+            showInlineBlock(DOM.weekPicker);
+            showBlock(DOM.welcome);
+            showBlock(DOM.weekRangeText);
+            showBlock(DOM.mealSummary);
+            
+            DOM.welcome.innerText = `${data.name}님 (${data.dept}), 안녕하세요.`;
 
-        setDefaultWeek();
-        loadWeekData();
-        if (typeof initMenuBoard === "function") initMenuBoard();
+            setDefaultWeek();
+            loadWeekData();
+            if (typeof initMenuBoard === "function") initMenuBoard();
+        });
     }, () => alert("❌ 로그인 실패: 올바른 정보를 입력해주세요!"));
 }
 
@@ -259,17 +271,17 @@ function logout() {
     showToast("로그아웃 되었습니다.");
 }
 
-// 💡 리팩토링: 매우 깔끔해진 마감 시간 판별 로직
+// 💡 리팩토링: 하드코딩 타임을 들어내고 DB 실시간 설정값을 연동한 통제 로직
 function isDeadlinePassed(dateStr, mealType) {
-
     const now = getKSTNow();
     if (isTwoWeeksLaterOrMore(dateStr)) return false;
-    
+    if (!window.serverDeadlines) return true; // 설정 로드 미완료 시 방어적 마감 처리
+
     const mealDate = new Date(dateStr);
     mealDate.setHours(0, 0, 0, 0);
 
+    // --- [1] 금주 당일 식사 마감 통제 분기 ---
     if (isThisWeek(dateStr)) {
-        // 수정: 테크센터 사용자는 본인확인 페널티(isSelfcheckLate)를 체크하지 않음
         if (window.currentUser?.region === "에코센터") {
             const thisMondayStr = ymdKST(mondayOf(mealDate));
             const createdAtStr = window.selfcheckCreatedAtMap[thisMondayStr];
@@ -282,29 +294,41 @@ function isDeadlinePassed(dateStr, mealType) {
             }
         }
         
-        // 이 부분은 모든 사용자에게 공통 적용되는 "식사별 제한 시간"입니다
-        let deadline = new Date(mealDate);
-        if (mealType === "조식") {
-            deadline.setDate(deadline.getDate() - 1);
-            deadline.setHours(9, 0, 0, 0);
-        } else if (mealType === "중식") {
-            deadline.setHours(10, 30, 0, 0);
-        } else if (mealType === "석식") {
-            deadline.setHours(14, 30, 0, 0);
-        }
+        // DB 설정 기반 변수 매핑 처리
+        const prefix = mealType === "조식" ? "breakfast" : mealType === "중식" ? "lunch" : "dinner";
+        const daysBefore = parseInt(window.serverDeadlines[`${prefix}_days_before`] || 0, 10);
+        const timeStr = window.serverDeadlines[`${prefix}_time`] || "00:00";
+        const [hour, minute] = timeStr.split(":").map(Number);
+        
+        const deadline = new Date(mealDate);
+        deadline.setDate(deadline.getDate() - daysBefore);
+        deadline.setHours(hour, minute, 0, 0);
+        
         return now > deadline;
     }
 
-    // 다음 주 식수 신청인 경우 (수요일 16시 일괄 마감)
+    // --- [2] 차주 일괄 신청 마감 통제 분기 ---
     const thisMon = mondayOf(now);
-    const wednesdayDeadline = new Date(thisMon);
-    wednesdayDeadline.setDate(thisMon.getDate() + 2);
-    wednesdayDeadline.setHours(16, 0, 0, 0);
-    // 테크센터는 수요일 16시 일괄 마감 룰에서 제외하려면 아래 조건 추가
-    if (window.currentUser?.region !== "에코센터") {
-        return false; // 테크센터는 마감 아님 처리
+    const nextMon = new Date(thisMon);
+    nextMon.setDate(nextMon.getDate() + 7);
+    
+    if (dateStr === ymdKST(nextMon) || new Date(dateStr) >= nextMon) {
+        if (window.currentUser?.region !== "에코센터") {
+            return false;
+        }
+        
+        const targetDayIndex = parseInt(window.serverDeadlines["next_week_day_of_week"] || 3, 10);
+        const targetTimeStr = window.serverDeadlines["next_week_time"] || "16:00";
+        const [h, m] = targetTimeStr.split(":").map(Number);
+        
+        const nextWeekDeadline = new Date(thisMon);
+        nextWeekDeadline.setDate(thisMon.getDate() + (targetDayIndex - 1));
+        nextWeekDeadline.setHours(h, m, 0, 0);
+        
+        return now > nextWeekDeadline;
     }
-    return now > wednesdayDeadline;
+
+    return false;
 }
 
 function toggleMeal(btn) {
@@ -464,7 +488,6 @@ function renderMealTable(dates) {
     });
 }
 
-// 💡 리팩토링: 약어 변수들을 직관적인 변수명으로 교체
 function checkPreviousWeek(userId, currentWeekStart, callback) {
     const lastMon = new Date(currentWeekStart);
     lastMon.setDate(lastMon.getDate() - 7);
@@ -577,15 +600,10 @@ window.logout = logout;
 window.saveMeals = saveMeals;
 window.loadWeekData = loadWeekData;
 window.toggleSelectAll = toggleSelectAll;
-// 이 부분을 추가하세요!
-window.goToAdminDashboard = () => {
-    window.location.href = "admin_dashboard.html";
-};
-
+window.goToAdminDashboard = () => { window.location.href = "admin_dashboard.html"; };
 window.goToVisitor = () => location.href = "visitor_request.html";
 window.goToTeamEdit = () => location.href = "team_edit.html";
 
-// 색각 보정 모드 관리
 const COLOR_BLIND_STORAGE_KEY = "snsysColorBlindMode";
 function applyColorBlindMode(mode) {
     document.body.classList.remove("cb-protan", "cb-deutan", "cb-tritan", "cb-protan-deutan", "cb-tritan-deutan", "cb-highcontrast");
@@ -594,7 +612,6 @@ function applyColorBlindMode(mode) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 테마 복구
     const savedTheme = localStorage.getItem(COLOR_BLIND_STORAGE_KEY) || "normal";
     applyColorBlindMode(savedTheme);
     const s1 = document.getElementById("colorBlindMode");
@@ -606,7 +623,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 세션 및 로컬스토리지 데이터 복구
     const savedSelfcheckMap = sessionStorage.getItem("selfcheckCreatedAtMap");
     if (savedSelfcheckMap) window.selfcheckCreatedAtMap = JSON.parse(savedSelfcheckMap);
     
@@ -629,7 +645,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (window.currentUser.level === 2) showInlineBlock(DOM.teamEditBtn);
     }
 
-    // 휴일 데이터 Fetch (올해 + 내년)
     const year = new Date().getFullYear();
     fetchHolidayList(`/api/public-holidays?year=${year}`, (h1) => {
         fetchHolidayList(`/api/public-holidays?year=${year + 1}`, (h2) => {
@@ -637,16 +652,17 @@ document.addEventListener("DOMContentLoaded", () => {
             holidayList = merged.map(h => normalizeDate(h.date || h));
             merged.forEach(h => { holidayMap[normalizeDate(h.date || h)] = h.description || h.name || ""; });
             
-            // 데이터 로드 완료 후 로그인 유저 렌더링
+            // 💡 리팩토링: 초기 구동 로드 프로세스 체이닝 적용
             if (savedUser) { 
-                hideElement(DOM.loginWrapper); 
-                showBlock(DOM.mainArea); 
-                loadWeekData();
-                if (typeof initMenuBoard === "function") initMenuBoard();
+                loadDeadlineSettingsFromServer(() => {
+                    hideElement(DOM.loginWrapper); 
+                    showBlock(DOM.mainArea); 
+                    loadWeekData();
+                    if (typeof initMenuBoard === "function") initMenuBoard();
+                });
             }
         });
     });
 
-    // 날짜 선택 이벤트 바인딩
     DOM.weekPicker.addEventListener("change", loadWeekData);
 });
