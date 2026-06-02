@@ -34,6 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveBtn) {
         saveBtn.addEventListener('click', saveSettings);
     }
+
+    // ============================================================================
+    // 💡 [추가 스펙]: 대시보드 메인화면으로 돌아가기 핸들러 바인딩
+    // ============================================================================
+    const backBtn = document.getElementById('logoutBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            location.href = "admin_dashboard.html";
+        });
+    }
 });
 
 /**
@@ -93,7 +103,6 @@ function updateCurrentSettingsText(settings) {
  * 4. 변경된 설정을 util.js의 requestApi를 통해 서버에 전송
  */
 async function saveSettings() {
-    // 💡 [보안 패치]: app.py 백엔드가 요구하는 구조(requester_id 및 settings 블록)로 페이로드 재구성
     const settingsPayload = {
         breakfast_days_before: parseInt(document.getElementById('breakfast_days_before').value, 10),
         breakfast_time: document.getElementById('breakfast_time').value,
@@ -106,7 +115,7 @@ async function saveSettings() {
     };
 
     const finalPayload = {
-        requester_id: window.currentUser ? window.currentUser.userId : "", // 최고관리자 사번 증명
+        requester_id: window.currentUser ? window.currentUser.userId : "", 
         settings: settingsPayload
     };
 
