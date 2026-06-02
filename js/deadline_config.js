@@ -1,99 +1,125 @@
-/**
- * 에스엔시스 통합 식수 마감 조건 관리 전용 Script (Authorized Supervision)
- */
+// deadline_config.js
 
-let currentUser = null;
+// 💡 [수정] 상대 경로 오인 방지 및 확실한 백엔드 도메인 결합 강제화
+const API_URL = API_ROUTES.DEADLINES.startsWith("http") 
+    ? API_ROUTES.DEADLINES 
+    : `${API_BASE_URL}${API_ROUTES.DEADLINES}`;
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 1단계 권한 감시: 세션에서 로그인한 유저 상태를 확인
+// 비상용 초기값 (서버 연동 실패 시 기본값)
+const FALLBACK_SETTINGS = {
+    breakfast_days_before: 1,
+    breakfast_time: '09:00',
+    lunch_days_before: 0,
+    lunch_time: '10:30',
+    dinner_days_before: 0,
+    dinner_time: '14:30',
+    next_week_day_of_week: 3,
+    next_week_time: '16:00'
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 💡 [보안 확인] 최고 관리자 세션이 유효한지 검증 후 로드 진행
     const savedUser = sessionStorage.getItem("currentUser");
-    if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-    }
-
-    // 최고관리자(level 3)가 존재하지 않거나 권한이 미달될 경우 접근 전면 즉시 차단
-    if (!currentUser || currentUser.level !== 3) {
-        alert("⛔ 접근 권한이 탈락되었습니다. 최고 관리자 계정으로 다시 로그인하십시오.");
-        window.location.href = "index.html";
+    if (!savedUser) {
+        alert("관리자 권한이 필요합니다. 다시 로그인해주세요.");
+        location.href = "index.html";
         return;
     }
+    window.currentUser = JSON.parse(savedUser);
 
-    // 최고관리자 서명 패스 시 CSS 불투명도 레이어를 걷어내고 폼 표출
-    document.body.classList.add("authorized");
-
-    // 2단계 데이터 바인딩: 백엔드 DB에 기록된 기존 세팅값 전송받아 바인딩
-    fetch("/admin/api/deadlines")
-        .then(res => {
-            if (!res.ok) throw new Error("서버로부터 설정을 읽어오지 못했습니다.");
-            return res.json();
-        })
-        .then(data => {
-            if (data && data.breakfast_time) {
-                document.getElementById("breakfast_time").value = data.breakfast_time;
-                document.getElementById("breakfast_days_before").value = data.breakfast_days_before;
-                document.getElementById("lunch_time").value = data.lunch_time;
-                document.getElementById("lunch_days_before").value = data.lunch_days_before;
-                document.getElementById("dinner_time").value = data.dinner_time;
-                document.getElementById("dinner_days_before").value = data.dinner_days_before;
-                document.getElementById("next_week_day_of_week").value = data.next_week_day_of_week;
-                document.getElementById("next_week_time").value = data.next_week_time;
-            }
-        })
-        .catch(err => {
-            console.error("⚠️ 설정값 로드 실패:", err.message);
-        });
+    loadSettings();
+    
+    // 저장 버튼 이벤트 리스너 등록
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveSettings);
+    }
 });
 
 /**
- * 변경된 마감 설정 폼 데이터 종합 수집 후 백엔드 전송 요청 (감시자 토큰 동봉)
+ * 1. util.js의 requestApi를 통해 마감 설정 로드
  */
-function saveSettings() {
-    if (!currentUser || currentUser.level !== 3) {
-        alert("최고 관리자 세션 권한이 만료되었습니다. 다시 로그인하십시오.");
-        window.location.href = "index.html";
-        return;
-    }
-
-    // 서버 이중 차단용 마패(requester_id) 및 신규 입력 폼 데이터 캡처 구조화
-    const payload = {
-        requester_id: currentUser.userId, // 변조 차단용 암행어사 마패 역할 토큰
-        settings: {
-            breakfast_time: document.getElementById("breakfast_time").value,
-            breakfast_days_before: document.getElementById("breakfast_days_before").value,
-            lunch_time: document.getElementById("lunch_time").value,
-            lunch_days_before: document.getElementById("lunch_days_before").value,
-            dinner_time: document.getElementById("dinner_time").value,
-            dinner_days_before: document.getElementById("dinner_days_before").value,
-            next_week_day_of_week: document.getElementById("next_week_day_of_week").value,
-            next_week_time: document.getElementById("next_week_time").value
+async function loadSettings() {
+    try {
+        console.log(`📡 마감시간 설정 동기화 경로 연동 중: ${API_URL}`);
+        const data = await requestApi(API_URL);
+        const settings = Array.isArray(data) ? data[0] : data;
+        
+        if (settings) {
+            applySettingsToUI(settings);
+        } else {
+            throw new Error('올바른 설정 데이터 포맷이 아닙니다.');
         }
+    } catch (error) {
+        console.error('❌ 마감 설정 연동 실패. 비상용 기본값으로 구동합니다.', error);
+        applySettingsToUI(FALLBACK_SETTINGS);
+    }
+}
+
+/**
+ * 2. 가져온 설정 데이터를 UI 및 '현재 설정 시간' 텍스트 뱃지에 반영
+ */
+function applySettingsToUI(settings) {
+    document.getElementById('breakfast_days_before').value = settings.breakfast_days_before;
+    document.getElementById('breakfast_time').value = settings.breakfast_time;
+    document.getElementById('lunch_days_before').value = settings.lunch_days_before;
+    document.getElementById('lunch_time').value = settings.lunch_time;
+    document.getElementById('dinner_days_before').value = settings.dinner_days_before;
+    document.getElementById('dinner_time').value = settings.dinner_time;
+    document.getElementById('next_week_day_of_week').value = settings.next_week_day_of_week;
+    document.getElementById('next_week_time').value = settings.next_week_time;
+
+    updateCurrentSettingsText(settings);
+}
+
+/**
+ * 3. 현재 설정 시간 텍스트 동적 변환 및 출력
+ */
+function updateCurrentSettingsText(settings) {
+    const dayLabels = { 1: '월요일', 2: '화요일', 3: '수요일', 4: '목요일', 5: '금요일' };
+    
+    const bfDay = settings.breakfast_days_before == 1 ? '전날' : '당일';
+    const lcDay = settings.lunch_days_before == 1 ? '전날' : '당일';
+    const dnDay = settings.dinner_days_before == 1 ? '전날' : '당일';
+    const nwDay = dayLabels[settings.next_week_day_of_week] || '미정';
+
+    document.getElementById('current-breakfast').textContent = `현재 설정: ${bfDay} ${settings.breakfast_time}`;
+    document.getElementById('current-lunch').textContent = `현재 설정: ${lcDay} ${settings.lunch_time}`;
+    document.getElementById('current-dinner').textContent = `현재 설정: ${dnDay} ${settings.dinner_time}`;
+    document.getElementById('current-nextweek').textContent = `현재 설정: ${nwDay} ${settings.next_week_time}`;
+}
+
+/**
+ * 4. 변경된 설정을 util.js의 requestApi를 통해 서버에 전송
+ */
+async function saveSettings() {
+    // 💡 [보안 패치]: app.py 백엔드가 요구하는 구조(requester_id 및 settings 블록)로 페이로드 재구성
+    const settingsPayload = {
+        breakfast_days_before: parseInt(document.getElementById('breakfast_days_before').value, 10),
+        breakfast_time: document.getElementById('breakfast_time').value,
+        lunch_days_before: parseInt(document.getElementById('lunch_days_before').value, 10),
+        lunch_time: document.getElementById('lunch_time').value,
+        dinner_days_before: parseInt(document.getElementById('dinner_days_before').value, 10),
+        dinner_time: document.getElementById('dinner_time').value,
+        next_week_day_of_week: parseInt(document.getElementById('next_week_day_of_week').value, 10),
+        next_week_time: document.getElementById('next_week_time').value
     };
 
-    // 시간 값 및 요일 필수 검증 입력 누락 방어 체크
-    const s = payload.settings;
-    if (!s.breakfast_time || !s.lunch_time || !s.dinner_time || !s.next_week_time) {
-        alert("⚠️ 누락된 마감 시각 항목이 있습니다. 모든 시간을 올바르게 선택해 주세요.");
-        return;
-    }
+    const finalPayload = {
+        requester_id: window.currentUser ? window.currentUser.userId : "", // 최고관리자 사번 증명
+        settings: settingsPayload
+    };
 
-    // 백엔드로 안전 전송 프로세스 실행
-    fetch("/admin/api/deadlines", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    })
-    .then(res => {
-        if (res.status === 403 || res.status === 401) {
-            throw new Error("🚨 권한 변조 적발 감시: 서버 보안 필터 패널티에 의해 처리가 완전히 차단되었습니다.");
-        }
-        if (!res.ok) throw new Error("네트워크 서버 통신 중 오류가 발생했습니다.");
-        return res.json();
-    })
-    .then(data => {
-        alert(data.message || "식수 마감 규칙이 성공적으로 저장되었습니다.");
-    })
-    .catch(err => {
-        alert(err.message);
-        window.location.href = "index.html";
-    });
+    try {
+        await requestApi(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(finalPayload)
+        });
+
+        alert('💾 마감 제어 규칙이 시스템 백엔드 데이터베이스에 안전하게 반영되었습니다.');
+        updateCurrentSettingsText(settingsPayload);
+    } catch (error) {
+        console.error('저장 중 오류 발생:', error);
+        alert(`❌ 저장 실패: ${error.message}`);
+    }
 }

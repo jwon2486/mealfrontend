@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>식수 마감 통합 제어 센터 (최고관리자)</title>
     <link rel="stylesheet" href="css/deadlinestyle.css">
-    <script src="js/deadline_config.js" defer></script>
+    
+    <script src="js/config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/deadline_config.js"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -16,7 +19,10 @@
         
         <form id="config-form" onsubmit="event.preventDefault();">
             <div class="config-group">
-                <h3>🍳 [금주] 조식 마감 조건</h3>
+                <h3>
+                    🍳 [금주] 조식 마감 조건 
+                    <span id="current-breakfast" class="current-badge">조회 중...</span>
+                </h3>
                 <div class="input-row">
                     <div class="input-cell">
                         <label for="breakfast_days_before">신청 기준일</label>
@@ -33,7 +39,10 @@
             </div>
 
             <div class="config-group">
-                <h3>🍱 [금주] 중식 마감 조건</h3>
+                <h3>
+                    🍱 [금주] 중식 마감 조건 
+                    <span id="current-lunch" class="current-badge">조회 중...</span>
+                </h3>
                 <div class="input-row">
                     <div class="input-cell">
                         <label for="lunch_days_before">신청 기준일</label>
@@ -50,7 +59,10 @@
             </div>
 
             <div class="config-group">
-                <h3>🌆 [금주] 석식 마감 조건</h3>
+                <h3>
+                    🌆 [금주] 석식 마감 조건 
+                    <span id="current-dinner" class="current-badge">조회 중...</span>
+                </h3>
                 <div class="input-row">
                     <div class="input-cell">
                         <label for="dinner_days_before">신청 기준일</label>
@@ -67,7 +79,10 @@
             </div>
 
             <div class="config-group highlight">
-                <h3>🚨 [차주] 다음 주 식수 신청 일괄 컷오프 요일</h3>
+                <h3>
+                    🚨 [차주] 다음 주 식수 신청 일괄 컷오프 요일 
+                    <span id="current-nextweek" class="current-badge">조회 중...</span>
+                </h3>
                 <div class="input-row">
                     <div class="input-cell">
                         <label for="next_week_day_of_week">마감 요일 (이번 주 기준)</label>
@@ -87,7 +102,7 @@
             </div>
 
             <div class="action-row">
-                <button type="button" class="btn-save" onclick="saveSettings()">💾 마감 규칙 시스템 반영</button>
+                <button type="button" class="btn-save" id="save-btn">💾 마감 규칙 시스템 반영</button>
             </div>
         </form>
     </div>

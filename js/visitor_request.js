@@ -1,8 +1,8 @@
 /**
- * 에스엔시스 방문자/협력사 식수 신청 시스템 Script (Refactored for Dynamic Deadlines)
+ * 에스엔시스 방문자/협력사 식수 신청 시스템 Script (Refactored for Dynamic Deadlines & Server Time)
  */
 
-window.serverDeadlines = null; // 🔥 백엔드 마감 연동용 전역 저장 공간
+window.serverDeadlines = null; // 백엔드 마감 연동용 전역 저장 공간
 
 // 💡 리팩토링: 초기 구동 시 백엔드 마감 데이터를 호출하는 가변 로더 함수 주입
 function loadDeadlinesForVisitor(callback) {
@@ -22,10 +22,11 @@ function loadDeadlinesForVisitor(callback) {
     }
 }
 
-// 💡 리팩토링: 하드코딩된 시각 대신 DB 마감 셋업을 연동하도록 전면 개조
+// 💡 리팩토링: 하드코딩된 로컬 시각 대신 통합된 전역 서버 시간(getKSTNow)을 연동하도록 전면 개조
 function isExpired(mealType, dateStr) {
     if (!window.serverDeadlines) return true; // 데이터 지연 시 방어적 차단
     
+    // 💡 [수정] 무조건 서버 시간과 동기화가 완료된 오차 보정 시간 함수를 참조합니다.
     const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
     const mealDate = new Date(dateStr);
     mealDate.setHours(0, 0, 0, 0);
@@ -57,18 +58,32 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("topUserText").innerText = `${window.currentUser.userName}님`;
     document.getElementById("welcomeText").innerText = `${window.currentUser.userName}님 (${window.currentUser.dept}), 반갑습니다.`;
 
+    // 💡 [구조 개선] UI 렌더링 구동 전에 util.js의 서버 시간 동기화를 우선 체이닝 진행합니다.
+    if (typeof syncServerTime === "function") {
+        syncServerTime(() => {
+            setupInitialWeekPickerAndLoad();
+        });
+    } else {
+        setupInitialWeekPickerAndLoad();
+    }
+});
+
+/**
+ * 💡 [추가] 서버 시간 동기화 이후 순차적으로 바인딩 및 데이터를 호출하기 위한 래핑 함수
+ */
+function setupInitialWeekPickerAndLoad() {
     const picker = document.getElementById("weekPicker");
     if (picker) {
+        // 💡 오차가 보정된 '진짜 서버 KST 시간'을 주차 초기값 산출에 주입
         const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
         picker.value = ymdKST(mondayOf(now));
         picker.addEventListener("change", loadWeeklySummary);
     }
 
-    // 💡 리팩토링: 화면 렌더링 구동 전 DB 마감 설정을 먼저 비동기 탑재 실행
     loadDeadlinesForVisitor(() => {
         loadWeeklySummary();
     });
-});
+}
 
 function mondayOf(d) {
     const c = new Date(d);

@@ -1,3 +1,46 @@
+// util.js
+
+// =================================================================
+// 💡 [추가] 전역 서버 시간 동기화 및 보정을 위한 베이스 구조 정의
+// =================================================================
+window.serverTimeDiff = window.serverTimeDiff || 0;
+
+/**
+ * 💡 사용자의 로컬 PC 컴퓨터 시간이 아닌, 오차가 보정된 '진짜 서버 KST 시간'을 리턴합니다.
+ */
+function getKSTNow() {
+    return new Date(Date.now() + window.serverTimeDiff);
+}
+window.getKSTNow = getKSTNow;
+
+/**
+ * 💡 앱 구동 시 백엔드에게 현재 시간을 물어보고 오차값(ms)을 계산하는 함수
+ */
+function syncServerTime(callback) {
+    getData("/api/server-time", (data) => {
+        // 백엔드가 제공한 정밀한 KST 시각 문자열을 날짜 객체로 변환
+        const serverTime = new Date(data.server_time.replace(' ', 'T') + '+09:00');
+        const localTime = new Date();
+        // 서버 시각과 브라우저 시각의 물리적인 차이 저장 (사용자가 컴퓨터 시계 조작 시 방어 목적)
+        window.serverTimeDiff = serverTime.getTime() - localTime.getTime();
+        console.log(`⏰ 서버 시간 동기화 완료 (오차 보정값: ${window.serverTimeDiff}ms)`);
+        if (callback) callback();
+    }, () => {
+        console.warn("⚠️ 서버 시간 동기화 실패. 로컬 PC 시각으로 구동합니다.");
+        window.serverTimeDiff = 0;
+        if (callback) callback();
+    });
+}
+window.syncServerTime = syncServerTime;
+
+// =================================================================
+// 💡 [기존] 마감시간 관리를 위한 API 라우트 경로 통합 정의
+// config.js에 선언된 API_BASE_URL을 가져와 완성된 경로를 제공합니다.
+// =================================================================
+const API_ROUTES = {
+    DEADLINES: `${API_BASE_URL}/admin/api/deadlines`
+};
+
 // ✅ 공통 fetch POST 함수
 function postData(path, data, onSuccess, onError) {
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
@@ -53,6 +96,39 @@ function showToast(message, duration = 2000) {
     setTimeout(() => { toast.className = "toast"; }, duration);
 }
 
+// 💡 공통 API 호출용 비동기 함수 (deadline_config.js 연동 규격 호환용)
+async function requestApi(url, options = {}) {
+    try {
+        const defaultHeaders = {
+            'Content-Type': 'application/json',
+        };
+
+        const config = {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers
+            }
+        };
+
+        const response = await fetch(url, config);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `서버 에러가 발생했습니다. (Status: ${response.status})`);
+        }
+
+        if (response.status === 204) {
+            return null;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`[API Error] URL: ${url}`, error);
+        throw error;
+    }
+}
+
 // ✅ DELETE 요청용 함수
 function deleteData(path, onSuccess, onError) {
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
@@ -94,7 +170,7 @@ function getData(path, onSuccess, onError) {
 }
 
 /**
- * ✅ 누락된 관리자 UI 활성화 함수 복구
+ * ✅ 관리자 UI 활성화 함수
  */
 function applyMenuBoardRoleUI() {
   const isAdmin = isAdminUser();
@@ -102,7 +178,6 @@ function applyMenuBoardRoleUI() {
 
   if (adminBar) {
     if (isAdmin) {
-      // hidden과 ui-hidden을 모두 제거하여 CSS 선택자가 작동하게 함
       adminBar.classList.remove("hidden", "ui-hidden"); 
       adminBar.style.setProperty("display", "flex", "important");
     } else {
@@ -113,15 +188,14 @@ function applyMenuBoardRoleUI() {
 }
 
 /**
- * ✅ 누락된 초기화 함수 복구
+ * ✅ 초기화 함수
  */
 function initMenuBoard() {
-  applyMenuBoardRoleUI(); // 관리자 버튼 노출 여부 결정
-  if (typeof bindMenuBoardEvents === "function") bindMenuBoardEvents(); // 이벤트 연결
-  renderMenuBoard(); // 목록 불러오기
+  applyMenuBoardRoleUI(); 
+  if (typeof bindMenuBoardEvents === "function") bindMenuBoardEvents(); 
+  renderMenuBoard(); 
 }
 
-// 외부에서 호출할 수 있도록 window 객체에 등록
 window.initMenuBoard = initMenuBoard;
 
 /**
@@ -154,11 +228,13 @@ function normalizeDate(dateStr) {
     return d.toISOString().split('T')[0];
 }
 
+// ✅ 요일 이름 가져오기
 function getWeekdayName(dateStr) {
     const days = ["일", "월", "화", "수", "목", "금", "토"];
     return days[new Date(dateStr).getDay()];
 }
 
+// ✅ 이번 주 월요일 ~ 금요일 범위 계산
 function getWeekStartAndEnd(dateStr) {
     const date = new Date(dateStr);
     const day = date.getDay();
@@ -169,12 +245,14 @@ function getWeekStartAndEnd(dateStr) {
     return { start: getKSTDateString(monday), end: getKSTDateString(friday) };
 }
 
+// ✅ KST 시간 적용 데이터 포맷 문자열 변환
 function getKSTDateString(date) {
     const tzOffset = date.getTimezoneOffset() * 60000;
     const kst = new Date(date.getTime() - tzOffset + (9 * 60 * 60 * 1000));
     return kst.toISOString().slice(0, 10);
 }
 
+// ✅ KST 현재 시각 데이터 반환
 function getKSTDate() {
     const now = new Date();
     const utc = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -182,7 +260,7 @@ function getKSTDate() {
 }
 
 /* ==========================================
-   🖼️ 식단표 게시판 (Refactored)
+    🖼️ 식단표 게시판
 ========================================== */
 
 function isAdminUser() {
@@ -199,7 +277,6 @@ function resolveMenuImageUrl(imageUrl) {
   return imageUrl.startsWith("/") ? `${base}${imageUrl}` : `${base}/${imageUrl}`;
 }
 
-// ✅ 모달 창 리팩토링: 인쇄 버튼 추가
 function openMenuImageModal(src, title) {
   if (!src) return;
   let modal = document.getElementById("menuModal");
@@ -230,10 +307,9 @@ function openMenuImageModal(src, title) {
   modal.classList.add("open");
 }
 
-// ✅ 썸네일 생성 리팩토링: 카드 구조 및 인쇄 버튼 삽입
 function createMenuThumb(item, adminMode) {
   const container = document.createElement("div");
-  container.className = "menu-item-card"; // CSS 스타일링을 위한 래퍼
+  container.className = "menu-item-card"; 
 
   const button = document.createElement("button");
   button.type = "button";
@@ -262,7 +338,6 @@ function createMenuThumb(item, adminMode) {
   button.appendChild(image);
   button.appendChild(caption);
 
-  // 개별 인쇄 버튼 추가
   const printBtn = document.createElement("button");
   printBtn.type = "button";
   printBtn.className = "action-btn menu-print-btn";
@@ -277,7 +352,6 @@ function createMenuThumb(item, adminMode) {
   return container;
 }
 
-// ✅ 식단표 렌더링 (기존 로직 유지)
 async function renderMenuBoard() {
   const list = document.getElementById("menuList");
   if (!list) return;
@@ -300,19 +374,16 @@ async function renderMenuBoard() {
   }
 }
 
-
-// ✅ 1. 공휴일 리스트 fetch 함수 복구
 function fetchHolidayList(path, onSuccess, onError) {
     getData(path,
         (data) => { if (onSuccess) onSuccess(data); },
         (err) => { 
-            console.error("공휴일 불러오기 실패:", err); 
+            console.error("공휴일 불러오기 실패:", err);
             if (onError) onError(err); 
         }
     );
 }
 
-// ✅ 2. 식단표 이미지 업로드 함수 복구
 async function uploadMenuBoardImage(file) {
   if (!file) throw new Error("업로드할 파일이 없습니다.");
 
@@ -333,7 +404,6 @@ async function uploadMenuBoardImage(file) {
   return await response.json();
 }
 
-// ✅ 3. 식단표 삭제 API 호출 함수 복구
 async function deleteMenuBoardItems(ids) {
   const response = await fetch(resolveMenuImageUrl("/api/menu-board/delete"), {
     method: "POST",
@@ -344,7 +414,6 @@ async function deleteMenuBoardItems(ids) {
   return await response.json();
 }
 
-// ✅ 4. 선택된 항목 삭제 실행 함수 복구
 async function deleteSelectedMenuBoardItems() {
   const checkedList = Array.from(document.querySelectorAll("#menuList .menu-select:checked"));
   if (checkedList.length === 0) {
@@ -357,30 +426,27 @@ async function deleteSelectedMenuBoardItems() {
   try {
     await deleteMenuBoardItems(ids);
     alert("삭제 완료");
-    await renderMenuBoard(); // 목록 새로고침
+    await renderMenuBoard(); 
   } catch (error) {
     console.error("❌ 식단표 삭제 실패:", error);
     alert(`❌ 식단표 삭제 실패: ${error.message}`);
   }
 }
 
-// ✅ 5. 가장 중요한 버튼 기능 연결(Event Binding) 함수 복구
 function bindMenuBoardEvents() {
   const uploadBtn = document.getElementById("menuUploadBtn");
   const deleteBtn = document.getElementById("menuDeleteBtn");
   const input = document.getElementById("menuUploadInput");
   const list = document.getElementById("menuList");
 
-  // 업로드 버튼 클릭 이벤트
   if (uploadBtn && input && !uploadBtn.dataset.bound) {
     uploadBtn.dataset.bound = "1";
     uploadBtn.addEventListener("click", () => {
       if (!isAdminUser()) return alert("관리자만 업로드할 수 있습니다.");
-      input.click(); // 숨겨진 input file 실행
+      input.click(); 
     });
   }
 
-  // 파일 선택 시 업로드 실행 이벤트
   if (input && !input.dataset.bound) {
     input.dataset.bound = "1";
     input.addEventListener("change", async (event) => {
@@ -391,77 +457,56 @@ function bindMenuBoardEvents() {
         const result = await uploadMenuBoardImage(file);
         if (!result?.cancelled) {
           alert("업로드 완료");
-          await renderMenuBoard(); // 업로드 후 목록 갱신
+          await renderMenuBoard(); 
         }
       } catch (error) {
         alert(error.message);
       } finally {
-        event.target.value = ""; // 동일한 파일 재업로드 가능하게 초기화
+        event.target.value = ""; 
       }
     });
   }
 
-  // ✅ 삭제 버튼 클릭 이벤트 수정 (즉시 삭제 방식)
-if (deleteBtn && list && !deleteBtn.dataset.bound) {
-  deleteBtn.dataset.bound = "1";
-  deleteBtn.addEventListener("click", async () => {
-    // 1. 권한 체크
-    if (!isAdminUser()) return alert("관리자만 삭제할 수 있습니다.");
-
-    // 2. 체크박스 선택 여부 즉시 확인
-    const checkedList = Array.from(document.querySelectorAll("#menuList .menu-select:checked"));
-    
-    if (checkedList.length === 0) {
-      alert("삭제할 식단표를 먼저 체크해 주세요.");
-      return;
-    }
-
-    // 3. 체크된 항목이 있다면 바로 삭제 프로세스 진행
-    await deleteSelectedMenuBoardItems();
-  });
-}
+  if (deleteBtn && list && !deleteBtn.dataset.bound) {
+    deleteBtn.dataset.bound = "1";
+    deleteBtn.addEventListener("click", async () => {
+      if (!isAdminUser()) return alert("관리자만 삭제할 수 있습니다.");
+      const checkedList = Array.from(document.querySelectorAll("#menuList .menu-select:checked"));
+      
+      if (checkedList.length === 0) {
+        alert("삭제할 식단표를 먼저 체크해 주세요.");
+        return;
+      }
+      await deleteSelectedMenuBoardItems();
+    });
+  }
 }
 
 function getCurrentWeekRange() {
-    // 1. 현재 시간의 순수 UTC 타임스탬프(ms) 추출 (로컬 설정 무시)
     const now = new Date();
     const utcTimestamp = now.getTime(); 
     
-    // 2. 한국 시간(KST) 보정: UTC 타임스탬프 + 9시간
     const KST_OFFSET = 9 * 60 * 60 * 1000;
     const kstTimestamp = utcTimestamp + KST_OFFSET;
     
-    // 3. 보정된 타임스탬프를 기준으로 요일 추출
-    // 🚨 이미 한국시간으로 9시간을 밀어두었으므로, 로컬의 영향을 받지 않는 getUTCDay()를 사용해야 합니다.
     const kstDate = new Date(kstTimestamp);
-    const day = kstDate.getUTCDay(); // 0(일) ~ 6(토)
+    const day = kstDate.getUTCDay(); 
     
-    // 4. 월요일로 가기 위한 날짜(ms) 차이 계산
     const diffToMonday = day === 0 ? -6 : 1 - day;
     const ONE_DAY = 24 * 60 * 60 * 1000;
     
-    // 5. 한국 시간 기준 월요일과 금요일의 타임스탬프 계산
     const mondayTimestamp = kstTimestamp + (diffToMonday * ONE_DAY);
     const fridayTimestamp = mondayTimestamp + (4 * ONE_DAY);
     
-    // 6. 결과 반환
-    // 이미 내부 시간이 KST로 +9시간 맞춰져 있으므로, 
-    // 무조건 UTC 기준으로 문자를 내뱉는 toISOString()을 사용하면 정확히 KST 날짜가 출력됩니다.
     return {
         start: new Date(mondayTimestamp).toISOString().split('T')[0],
         end: new Date(fridayTimestamp).toISOString().split('T')[0]
     };
 }
 
-/**
- * ISO 형식의 날짜 문자열을 한국 시간 형식(YYYY-MM-DD HH:mm:ss)으로 변환하는 함수
- */
 function formatToKoreanTime(dateStr) {
     if (!dateStr) return "-";
-    
     const date = new Date(dateStr);
-    
-    // 유효하지 않은 날짜인 경우 처리
     if (isNaN(date.getTime())) return "-"; 
 
     return date.toLocaleString("ko-KR", { 
@@ -472,6 +517,6 @@ function formatToKoreanTime(dateStr) {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: false // 24시간제로 표시하려면 false, 오전/오후로 표시하려면 true
+        hour12: false 
     });
 }

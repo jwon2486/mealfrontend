@@ -1,5 +1,5 @@
 /**
- * 에스엔시스 식수 신청 시스템 Script (Refactored Version with Dynamic Deadlines)
+ * 에스엔시스 식수 신청 시스템 Script (Bug-Fixed & Server-Time Synchronized Version)
  */
 
 // ============================================================================
@@ -14,7 +14,7 @@ let isAllSelected = false;
 
 window.mealCreatedAtMap = window.mealCreatedAtMap || {};
 window.selfcheckCreatedAtMap = window.selfcheckCreatedAtMap || {};
-window.serverDeadlines = null; // 🔥 백엔드 동적 마감시간 저장용 전역 객체
+window.serverDeadlines = null; // 백엔드 동적 마감시간 저장용 전역 객체
 
 // 자주 찾는 DOM 요소를 캐싱할 객체 (매번 getElementById 호출 방지)
 const DOM = {};
@@ -41,15 +41,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================================================
-// 2. 날짜 및 시간 유틸리티 (중복 로직 통합)
+// 2. 날짜 및 시간 유틸리티 (중복 로직 통합 및 고도화)
 // ============================================================================
 const pad2 = n => String(n).padStart(2, '0');
 const fmtKST = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 const ymdKST = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-
-function getKSTNow() {
-    return (typeof getKSTDate === "function") ? getKSTDate() : new Date();
-}
 
 function mondayOf(d) {
     const c = new Date(d);
@@ -60,7 +56,7 @@ function mondayOf(d) {
 }
 
 function isThisWeek(dateStr) {
-    const now = getKSTNow();
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
     const target = new Date(dateStr);
     const mon = mondayOf(now);
     const sun = new Date(mon);
@@ -70,12 +66,13 @@ function isThisWeek(dateStr) {
 }
 
 function isSameWeekAsNow(dateStr) {
-    const now = getKSTNow();
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
     return dateStr === ymdKST(mondayOf(now));
 }
 
 function lastWeekWednesdayCutoff() {
-    const mon = mondayOf(getKSTNow());
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    const mon = mondayOf(now);
     const lastWed = new Date(mon);
     lastWed.setDate(mon.getDate() - 5);
     lastWed.setHours(16, 0, 0, 0);
@@ -83,13 +80,14 @@ function lastWeekWednesdayCutoff() {
 }
 
 function isTwoWeeksLaterOrMore(dateStr) {
-    const mon = mondayOf(getKSTNow());
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    const mon = mondayOf(now);
     const targetWeek = new Date(mon);
     targetWeek.setDate(mon.getDate() + 14);
     return new Date(dateStr) >= targetWeek;
 }
 
-// 💡 리팩토링: 서버 동적 마감 데이터 Fetch 함수 추가
+// 서버 동적 마감 데이터 Fetch 함수
 function loadDeadlineSettingsFromServer(callback) {
     getData("/admin/api/deadlines", (data) => {
         window.serverDeadlines = data;
@@ -106,13 +104,13 @@ function loadDeadlineSettingsFromServer(callback) {
     });
 }
 
-// 💡 리팩토링: 차주 일괄마감은 단일 검증을 위해 isDeadlinePassed로 통합 라우팅
 function isNextWeekGloballyClosed(dateStr) {
     return isDeadlinePassed(dateStr, "중식");
 }
 
 function makeCreatedAt() {
-    return fmtKST(getKSTNow());
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    return fmtKST(now);
 }
 
 function getCurrentWeekDates() {
@@ -128,7 +126,8 @@ function getCurrentWeekDates() {
 }
 
 function setDefaultWeek() {
-    DOM.weekPicker.value = ymdKST(mondayOf(getKSTNow()));
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    DOM.weekPicker.value = ymdKST(mondayOf(now));
 }
 
 
@@ -185,6 +184,10 @@ function showToast(msg) {
 // ============================================================================
 function login(event) {
     if (event) event.preventDefault();
+    
+    // 💡 [버그 수정] DOM 원소 캐싱 보호 및 부드러운 예외 처리
+    if (!DOM.userId || !DOM.userName) return;
+
     const userId = DOM.userId.value.trim();
     const userName = DOM.userName.value.trim();
 
@@ -232,7 +235,6 @@ function login(event) {
             return;
         }
 
-        // 💡 리팩토링: 메인 화면 진입 시에도 백엔드 설정을 먼저 당겨온 후 랜더링 체이닝
         loadDeadlineSettingsFromServer(() => {
             hideElement(DOM.loginWrapper);
             showBlock(DOM.mainArea);
@@ -271,11 +273,10 @@ function logout() {
     showToast("로그아웃 되었습니다.");
 }
 
-// 💡 리팩토링: 하드코딩 타임을 들어내고 DB 실시간 설정값을 연동한 통제 로직
 function isDeadlinePassed(dateStr, mealType) {
-    const now = getKSTNow();
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
     if (isTwoWeeksLaterOrMore(dateStr)) return false;
-    if (!window.serverDeadlines) return true; // 설정 로드 미완료 시 방어적 마감 처리
+    if (!window.serverDeadlines) return true; 
 
     const mealDate = new Date(dateStr);
     mealDate.setHours(0, 0, 0, 0);
@@ -294,7 +295,6 @@ function isDeadlinePassed(dateStr, mealType) {
             }
         }
         
-        // DB 설정 기반 변수 매핑 처리
         const prefix = mealType === "조식" ? "breakfast" : mealType === "중식" ? "lunch" : "dinner";
         const daysBefore = parseInt(window.serverDeadlines[`${prefix}_days_before`] || 0, 10);
         const timeStr = window.serverDeadlines[`${prefix}_time`] || "00:00";
@@ -382,7 +382,9 @@ function updateMealSummary() {
         else if (type === "석식") dinnerCount++;
     });
     const total = breakfastCount + lunchCount + dinnerCount;
-    DOM.mealSummary.innerText = `총 식수 ${total} (조식 ${breakfastCount}, 중식 ${lunchCount}, 석식 ${dinnerCount})`;
+    if (DOM.mealSummary) {
+        DOM.mealSummary.innerText = `총 식수 ${total} (조식 ${breakfastCount}, 중식 ${lunchCount}, 석식 ${dinnerCount})`;
+    }
 }
 
 // ============================================================================
@@ -398,7 +400,9 @@ function loadWeekData() {
 
     checkPreviousWeek(userId, start, () => {
         loadSelfCheck(userId, start, () => {
-            DOM.welcome.innerHTML = `${window.currentUser.userName}님, 안녕하세요. (기간: ${start} ~ ${end})`;
+            if (DOM.welcome) {
+                DOM.welcome.innerHTML = `${window.currentUser.userName}님, 안녕하세요. (기간: ${start} ~ ${end})`;
+            }
             renderMealTable(dates);
             
             getData(`/meals?user_id=${userId}&start=${start}&end=${end}`, (data) => {
@@ -422,6 +426,7 @@ function loadWeekData() {
 }
 
 function renderMealTable(dates) {
+    if (!DOM.mealBody) return;
     DOM.mealBody.innerHTML = "";
     const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -505,7 +510,7 @@ function checkPreviousWeek(userId, currentWeekStart, callback) {
         new Promise(r => getData(`/selfcheck?user_id=${userId}&date=${lastStartStr}`, r)),
         new Promise(r => getData(`/selfcheck?user_id=${userId}&date=${prevStartStr}`, r))
     ]).then(([lastWeekMeals, prevWeekMeals, lastWeekCheck, prevWeekCheck]) => {
-        const hasMeal = [lastWeekMeals, prevWeekMeals].some(weekData => 
+        const hasMeal = [lastWeekMeals, prevWeekMeals].some(weekData =>
             Object.values(weekData).some(day => day.breakfast || day.lunch || day.dinner)
         );
         const isChecked = lastWeekCheck.checked === 1 || prevWeekCheck.checked === 1;
@@ -530,7 +535,9 @@ function loadSelfCheck(userId, date, callback) {
         
         const weekEnd = new Date(date);
         weekEnd.setDate(weekEnd.getDate() + 4);
-        DOM.selfCheck.disabled = !isThisWeek(date) && getKSTNow() > weekEnd;
+        
+        const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+        DOM.selfCheck.disabled = !isThisWeek(date) && now > weekEnd;
         
         if (callback) callback();
     }, () => {
@@ -543,8 +550,12 @@ function saveMeals() {
     const hasMealSelected = document.querySelectorAll(".meal-btn.selected").length > 0;
     const weekStartStr = window.currentWeekStartDate;
 
-    if (!isTwoWeeksLaterOrMore(weekStartStr) && isNextWeekGloballyClosed(weekStartStr)) {
-        alert("마감시간이 지났기 때문에 변경이 불가능합니다.");
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    const thisMondayStr = ymdKST(mondayOf(now));
+    const isModifyingNextWeek = weekStartStr > thisMondayStr;
+
+    if (isModifyingNextWeek && !isTwoWeeksLaterOrMore(weekStartStr) && isNextWeekGloballyClosed(weekStartStr)) {
+        alert("차주 식수 신청 마감시간이 지났기 때문에 변경이 불가능합니다.");
         return;
     }
 
@@ -562,15 +573,15 @@ function saveMeals() {
         ...(__createdAt && { created_at: __createdAt })
     }, () => {
         const meals = getCurrentWeekDates().map(date => {
-            const mealData = { 
-                user_id: window.currentUser.userId, 
-                name: window.currentUser.userName, 
-                dept: window.currentUser.dept, 
-                date, 
-                breakfast: 0, 
-                lunch: 0, 
-                dinner: 0, 
-                ...(__createdAt && { created_at: __createdAt }) 
+            const mealData = {
+                user_id: window.currentUser.userId,
+                name: window.currentUser.userName,
+                dept: window.currentUser.dept,
+                date,
+                breakfast: 0,
+                lunch: 0,
+                dinner: 0,
+                ...(__createdAt && { created_at: __createdAt })
             };
             
             document.querySelectorAll(`.meal-btn[data-date="${date}"]`).forEach(btn => {
@@ -612,6 +623,20 @@ function applyColorBlindMode(mode) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // 💡 [구조 개선] util.js에 내장된 공통 시간 동기화 완료 후 초기 바인딩 전개
+    if (typeof syncServerTime === "function") {
+        syncServerTime(() => {
+            initializeApplication();
+        });
+    } else {
+        initializeApplication();
+    }
+});
+
+/**
+ * 💡 어플리케이션 순차 초기화 코어
+ */
+function initializeApplication() {
     const savedTheme = localStorage.getItem(COLOR_BLIND_STORAGE_KEY) || "normal";
     applyColorBlindMode(savedTheme);
     const s1 = document.getElementById("colorBlindMode");
@@ -619,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
     [s1, s2].forEach(selectEl => { 
         if (selectEl) {
             selectEl.value = savedTheme;
-            selectEl.addEventListener("change", e => applyColorBlindMode(e.target.value)); 
+            selectEl.addEventListener("change", e => applyColorBlindMode(e.target.value));
         }
     });
 
@@ -631,32 +656,35 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const savedId = localStorage.getItem("savedUserId");
     const savedName = localStorage.getItem("savedUserName");
+    
+    // 💡 [버그 수정] DOM 객체 자체를 문자열로 덮어쓰던 치명적 결함(DOM.userName = savedName) 해결!
     if (savedId && savedName) {
-        DOM.userId.value = savedId;
-        DOM.userName.value = savedName;
-        DOM.rememberMe.checked = true;
+        if (DOM.userId) DOM.userId.value = savedId;
+        if (DOM.userName) DOM.userName.value = savedName;
+        if (DOM.rememberMe) DOM.rememberMe.checked = true;
     }
 
     const savedUser = sessionStorage.getItem("currentUser");
     if (savedUser) {
         window.currentUser = JSON.parse(savedUser);
-        DOM.topUserText.textContent = `${window.currentUser.userName}님`;
+        if (DOM.topUserText) DOM.topUserText.textContent = `${window.currentUser.userName}님`;
         if (window.currentUser.level === 3) showInlineBlock(DOM.adminBtn);
         if (window.currentUser.level === 2) showInlineBlock(DOM.teamEditBtn);
     }
 
-    const year = new Date().getFullYear();
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    const year = now.getFullYear();
+    
     fetchHolidayList(`/api/public-holidays?year=${year}`, (h1) => {
         fetchHolidayList(`/api/public-holidays?year=${year + 1}`, (h2) => {
             const merged = [].concat(h1 || []).concat(h2 || []);
             holidayList = merged.map(h => normalizeDate(h.date || h));
             merged.forEach(h => { holidayMap[normalizeDate(h.date || h)] = h.description || h.name || ""; });
             
-            // 💡 리팩토링: 초기 구동 로드 프로세스 체이닝 적용
             if (savedUser) { 
                 loadDeadlineSettingsFromServer(() => {
-                    hideElement(DOM.loginWrapper); 
-                    showBlock(DOM.mainArea); 
+                    hideElement(DOM.loginWrapper);
+                    showBlock(DOM.mainArea);
                     loadWeekData();
                     if (typeof initMenuBoard === "function") initMenuBoard();
                 });
@@ -664,5 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    DOM.weekPicker.addEventListener("change", loadWeekData);
-});
+    if (DOM.weekPicker) {
+        DOM.weekPicker.addEventListener("change", loadWeekData);
+    }
+}

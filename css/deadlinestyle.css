@@ -1,123 +1,180 @@
-/* deadline_style.css */
-
-/* 초기 상태 숨김 처리로 권한 미달자 화면 깜빡임 차단 */
-body {
-    font-family: 'Segoe UI', AppleSDGothicNeo-Regular, Malgun Gothic, sans-serif;
-    background-color: #f1f5f9;
-    margin: 0;
-    padding: 40px 20px;
-    color: #333;
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+:root {
+    --primary-color: #4361ee;
+    --primary-light: #eef2ff;
+    --danger-color: #f72585;
+    --danger-light: #ffeef4;
+    --text-main: #2b2d42;
+    --text-muted: #6c757d;
+    --bg-main: #f8f9fa;
+    --card-bg: #ffffff;
+    --border-color: #e9ecef;
+    --radius: 12px;
+    --shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
 }
 
-/* 최고 관리자 검증 완료 시 화면이 부드럽게 노출됨 */
-body.authorized {
-    opacity: 1;
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
 .admin-container {
-    max-width: 680px;
-    margin: 0 auto;
-    background: #ffffff;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 700px;
     padding: 35px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
 }
 
-h2 {
-    margin-top: 0;
-    color: #0f172a;
+.admin-header {
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.admin-header h2 {
+    margin: 0 0 10px 0;
     font-size: 24px;
-    font-weight: 700;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 12px;
+    color: #1e1e2f;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .subtitle {
-    font-size: 13.5px;
-    color: #64748b;
-    margin-top: -5px;
-    margin-bottom: 30px;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
     line-height: 1.5;
 }
 
 .config-group {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 20px;
+    background: #fafbfe;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 22px;
     margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* 차주 일괄마감 중요 통제영역 주황색 하이라이트 인디케이터 */
+.config-group:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(67, 97, 238, 0.05);
+}
+
+.config-group h3 {
+    margin: 0 0 18px 0;
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .config-group.highlight {
-    border-left: 5px solid #f97316;
+    background: var(--danger-light);
+    border-color: #ffccd5;
 }
 
-h3 {
-    margin: 0 0 15px 0;
-    font-size: 15px;
-    color: #1e293b;
-    font-weight: 600;
+.config-group.highlight h3 {
+    color: #bc1a5f;
 }
 
 .input-row {
     display: flex;
-    gap: 15px;
+    gap: 20px;
 }
 
 .input-cell {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-label {
-    display: block;
-    font-size: 12px;
+.input-cell label {
+    font-size: 13px;
     font-weight: 600;
-    color: #475569;
-    margin-bottom: 6px;
+    color: var(--text-muted);
+}
+
+.config-group.highlight .input-cell label {
+    color: #a33b66;
 }
 
 select, input[type="time"] {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
     font-size: 14px;
-    color: #334155;
     background-color: #fff;
+    color: var(--text-main);
     box-sizing: border-box;
-    transition: border-color 0.15s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 select:focus, input[type="time"]:focus {
     outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.config-group.highlight select:focus, 
+.config-group.highlight input[type="time"]:focus {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(247, 37, 133, 0.15);
 }
 
 .action-row {
-    margin-top: 25px;
-    text-align: right;
+    margin-top: 35px;
 }
 
 .btn-save {
-    background-color: #2563eb;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--primary-color), #5b76f6);
     color: white;
     border: none;
-    padding: 12px 35px;
-    font-size: 14px;
+    border-radius: var(--radius);
+    font-size: 16px;
     font-weight: 600;
-    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.1s ease;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    transition: opacity 0.2s, transform 0.1s;
 }
 
 .btn-save:hover {
-    background-color: #1d4ed8;
+    opacity: 0.95;
 }
 
 .btn-save:active {
-    background-color: #1e40af;
+    transform: scale(0.99);
+}
+
+.current-badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border: 1px solid rgba(67, 97, 238, 0.2);
+}
+
+.config-group.highlight .current-badge {
+    background-color: #ffe3ed;
+    color: var(--danger-color);
+    border: 1px solid rgba(247, 37, 133, 0.2);
 }
