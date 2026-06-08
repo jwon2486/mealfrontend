@@ -420,7 +420,14 @@ body.cb-highcontrast .meal-btn{ border-width:2px !important; box-shadow: inset 0
   .colorblind-label{ font-size:.78rem; }
   .colorblind-select{ max-width:132px; min-height:28px; padding:4px 8px; font-size:.78rem; }
   .accessibility-card{ margin-top:10px; }
+  .menu-item-card {
+    gap: 6px;
+  }
+  .menu-print-btn {
+    display: none !important;
+  }
 }
+
 
 @media (max-width: 560px){
   .topbar{ grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); padding: 6px 8px; column-gap: 6px; }

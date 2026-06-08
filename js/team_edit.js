@@ -1,9 +1,12 @@
-// team_edit.js - 수정된 전체 코드
+// team_edit.js - 서버 기반 마감 로직 동기화 버전
 
 let holidayList = [];
+let holidayMap = {}; // 공휴일 설명 매핑용 추가
 let editMode = "all";
 let selfcheckMap = {};
-//본인확인 불러오는 함수
+window.serverDeadlines = null; // 백엔드 동적 마감시간 저장용 전역 객체
+
+// 본인확인 불러오는 함수
 async function fetchSelfcheckMap(startDate, endDate) {
   return new Promise((resolve) => {
     getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
@@ -18,7 +21,8 @@ async function fetchSelfcheckMap(startDate, endDate) {
     });
   });
 }
-//본인확인 ox 여부 필터링 함수
+
+// 본인확인 ox 여부 필터링 함수
 function applySelfcheckFilter() {
     const filter = document.getElementById("selfcheckFilter").value;
 
@@ -45,6 +49,23 @@ function formatDateWithDay(dateStr) {
     return `${dateStr} (${day})`;
 }
 
+// 💡 [서버 동기화] 서버 마감 설정 동적 Fetch 함수 이식
+function loadDeadlineSettingsFromServer(callback) {
+    getData("/admin/api/deadlines", (data) => {
+        window.serverDeadlines = data;
+        if (callback) callback();
+    }, () => {
+        console.error("❌ 마감 설정 연동 실패. 비상용 기본값으로 구동합니다.");
+        window.serverDeadlines = {
+            breakfast_days_before: "1", breakfast_time: "09:00",
+            lunch_days_before: "0", lunch_time: "10:30",
+            dinner_days_before: "0", dinner_time: "14:30",
+            next_week_day_of_week: "3", next_week_time: "16:00"
+        };
+        if (callback) callback();
+    });
+}
+
 async function loadEditData(selectedWeek) {
     editMode = "all";
     const range = selectedWeek ? getWeekRange(selectedWeek) : getCurrentWeekRange();
@@ -56,7 +77,7 @@ async function loadEditData(selectedWeek) {
         alert("❗ 주간 날짜가 지정되지 않았습니다.");
         return;
     }
-    // ✅ selfcheck 데이터 불러오기 추가
+    
     selfcheckMap = await fetchSelfcheckMap(start, end);
 
     const url = `/admin/meals?start=${start}&end=${end}&mode=${editMode}`;
@@ -72,35 +93,33 @@ async function loadEditData(selectedWeek) {
 
         const grouped = {};
         flatData.forEach(entry => {
-    if (!entry.user_id || !entry.name || !entry.dept) return;  // ✅ entry.date 조건 제거
-    if (entry.dept !== myDept) return;
+            if (!entry.user_id || !entry.name || !entry.dept) return;
+            if (entry.dept !== myDept) return;
 
-    const uid = entry.user_id;
-    if (!grouped[uid]) {
-        grouped[uid] = {
-            id: entry.user_id,
-            name: entry.name,
-            dept: entry.dept,
-            region: entry.region,
-            meals: {}
-        };
-    }
+            const uid = entry.user_id;
+            if (!grouped[uid]) {
+                grouped[uid] = {
+                    id: entry.user_id,
+                    name: entry.name,
+                    dept: entry.dept,
+                    region: entry.region,
+                    meals: {}
+                };
+            }
 
-    // ✅ entry.date가 있을 때만 meals 추가
-    if (entry.date) {
-        grouped[uid].meals[entry.date] = {
-            breakfast: entry.breakfast === 1,
-            lunch: entry.lunch === 1,
-            dinner: entry.dinner === 1
-        };
-    }
-});
-
+            if (entry.date) {
+                grouped[uid].meals[entry.date] = {
+                    breakfast: entry.breakfast === 1,
+                    lunch: entry.lunch === 1,
+                    dinner: entry.dinner === 1
+                };
+            }
+        });
 
         const dates = getDateArray(start, end);
         const groupedValues = Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
         generateTableHeader(dates);
-        applyStickyHeaderOffsets();  // th 고정용 코드
+        applyStickyHeaderOffsets();
         generateTableBody(dates, groupedValues);
         updateSummary(groupedValues, dates);
         applySelfcheckFilter();
@@ -148,18 +167,14 @@ function generateTableBody(dates, data) {
 
     data.forEach(emp => {
         const tr = document.createElement("tr");
-
-        // ✅ selfcheck 상태 가져오기
         const selfcheckStatus = selfcheckMap[emp.id] ? "✅" : "❌";
 
-        // ✅ 부서, 사번, 이름, 본인확인 열 추가
         tr.innerHTML = `<td>${emp.dept}</td>
                         <td>${emp.id}</td>
                         <td>${emp.name}</td>
-                        <td>${emp.region || ""}</td>  <!-- ✅ region 열 추가 -->
+                        <td>${emp.region || ""}</td>
                         <td class="selfcheck-col">${selfcheckStatus}</td>`;
 
-        // ✅ 날짜별 식사 버튼 생성
         dates.forEach(date => {
             const meal = emp.meals[date] || {};
             ["조식", "중식", "석식"].forEach(type => {
@@ -185,16 +200,14 @@ function generateTableBody(dates, data) {
                 if (isHoliday) {
                     btn.style.backgroundColor = "#ffe6e6";
                     btn.style.color = "#cc0000";
-                    btn.disabled = false;
+                    btn.disabled = true; // 관리자 대시보드 성격에 따라 차단 동기화
                     btn.title = "공휴일에는 신청할 수 없습니다.";
                     btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
-                } else if (isDeadlinePassed(date, type)) {
-                console.log("마감판정", date, type, isDeadlinePassed(date, type));
-                btn.classList.add("meal-deadline"); 
-                btn.title = "신청 마감됨";
-                btn.disabled = true; // ✅ 버튼 비활성화 추가
-                // 필요 시 알림 유지:
-                btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
+                } else if (isDeadlinePassed(date, type, emp.region)) { // 💡 대상 부서원의 근무지역 정보 전달
+                    btn.classList.add("meal-deadline"); 
+                    btn.title = "신청 마감됨";
+                    btn.disabled = true;
+                    btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
                 } else {
                     btn.onclick = () => toggleMeal(btn);
                 }
@@ -208,7 +221,6 @@ function generateTableBody(dates, data) {
         tbody.appendChild(tr);
     });
 }
-
 
 function toggleMeal(btn) {
     if (btn.classList.contains("selected")) {
@@ -234,7 +246,7 @@ function filterEditData() {
         const idVal = row.children[1].innerText.toLowerCase();
         const nameVal = row.children[2].innerText.toLowerCase();
         const regionVal = row.children[3].innerText;
-        const show =(!id || idVal.includes(id)) &&(!name || nameVal.includes(name)) &&(!region || regionVal === region);
+        const show = (!id || idVal.includes(id)) && (!name || nameVal.includes(name)) && (!region || regionVal === region);
         row.style.display = show ? "" : "none";
     });
 }
@@ -276,7 +288,7 @@ function saveEditChanges() {
         }
     });
 
-    const meals = Object.values(mealsMap); // 모든 유저+날짜 조합 포함
+    const meals = Object.values(mealsMap);
 
     postData("/admin/edit_meals", { meals },
         () => {
@@ -288,123 +300,148 @@ function saveEditChanges() {
     );
 }
 
+// 날짜 유틸리티 함수군 (script.js의 동기화 구현체 반영)
+function mondayOf(d) {
+    const c = new Date(d);
+    const idx = (c.getDay() + 6) % 7;
+    c.setHours(0, 0, 0, 0);
+    c.setDate(c.getDate() - idx);
+    return c;
+}
+
+function ymdKST(d) {
+    const pad2 = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
 
 function getWeekRange(dateStr) {
-    const date = new Date(dateStr);
-    const day = date.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    const monday = new Date(date);
-    monday.setDate(date.getDate() + diff);
+    const monday = mondayOf(new Date(dateStr));
     const friday = new Date(monday);
     friday.setDate(monday.getDate() + 4);
     return {
-        start: monday.toISOString().split("T")[0],
-        end: friday.toISOString().split("T")[0]
+        start: ymdKST(monday),
+        end: ymdKST(friday)
     };
 }
 
 function getNextWeekRange() {
-    const today = getKSTDate();
-    const day = today.getDay();
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-
-    const thisMonday = new Date(today);
-    thisMonday.setDate(today.getDate() + diffToMonday);
-
-    const nextMonday = new Date(thisMonday);
-    nextMonday.setDate(thisMonday.getDate() + 7);
-
-    const nextFriday = new Date(nextMonday);
-    nextFriday.setDate(nextMonday.getDate() + 4);
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    const thisMon = mondayOf(now);
+    const nextMon = new Date(thisMon);
+    nextMon.setDate(thisMon.getDate() + 7);
+    const nextFri = new Date(nextMon);
+    nextFri.setDate(nextMon.getDate() + 4);
 
     return {
-        start: nextMonday.toISOString().split("T")[0],
-        end: nextFriday.toISOString().split("T")[0]
+        start: ymdKST(nextMon),
+        end: ymdKST(nextFri)
     };
 }
 
 function getCurrentWeekRange() {
-    return getWeekRange(getKSTDate().toISOString().split("T")[0]);
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    return getWeekRange(ymdKST(now));
 }
 
 function getDateArray(start, end) {
     const dates = [];
     let current = new Date(start);
     while (current <= new Date(end)) {
-        dates.push(current.toISOString().split("T")[0]);
+        dates.push(ymdKST(current));
         current.setDate(current.getDate() + 1);
     }
     return dates;
 }
 
-function isDeadlinePassed(dateStr, mealType) {
-    const now = getKSTDate();
+function isTwoWeeksLaterOrMore(dateStr) {
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    const mon = mondayOf(now);
+    const targetWeek = new Date(mon);
+    targetWeek.setDate(mon.getDate() + 14);
+    return new Date(dateStr) >= targetWeek;
+}
+
+function lastWeekWednesdayCutoff() {
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    const mon = mondayOf(now);
+    const lastWed = new Date(mon);
+    lastWed.setDate(mon.getDate() - 5);
+    lastWed.setHours(16, 0, 0, 0);
+    return lastWed;
+}
+
+// 💡 [핵심 변경] script.js의 완벽한 서버 연동 통제식 마감 판정 로직으로 교체
+function isDeadlinePassed(dateStr, mealType, empRegion) {
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
+    if (isTwoWeeksLaterOrMore(dateStr)) return false;
+    if (!window.serverDeadlines) return true; 
+
     const mealDate = new Date(dateStr);
     mealDate.setHours(0, 0, 0, 0);
 
-     // ✅ 2주 뒤 월요일부터는 마감 제한 없음
-    const day = now.getDay(); // 0(일) ~ 6(토)
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-    let thisMonday = new Date(now);
-    thisMonday.setDate(now.getDate() + diffToMonday);
-    thisMonday.setHours(0, 0, 0, 0);
+    // 과거 날짜는 무조건 차단
+    const todayZero = new Date(now);
+    todayZero.setHours(0, 0, 0, 0);
+    if (mealDate < todayZero) return true;
 
-    const twoWeeksLaterMonday = new Date(thisMonday);
-    twoWeeksLaterMonday.setDate(thisMonday.getDate() + 14);
-
-    // ✅ 이미 지난 날짜면 무조건 마감
-    if (mealDate < new Date(now.toDateString())) {
-        return true;
-    }
-
-    if (mealDate >= twoWeeksLaterMonday) {
-        return false; // ✅ 마감 없음
-    }
-
-    // ✅ 이번 주 마감 규칙
+    // --- [1] 금주 당일 식사 마감 통제 분기 ---
     if (isThisWeek(dateStr)) {
-        let deadline = new Date(mealDate);
-        if (mealType === "조식") {
-            deadline.setDate(mealDate.getDate() - 1);
-            deadline.setHours(9, 0, 0, 0); // 전날 오전 0시
-        } else if (mealType === "중식") {
-            deadline.setHours(10, 30, 0, 0); // 당일 오전 10시 30분
-        } else if (mealType === "석식") {
-            deadline.setHours(14, 30, 0, 0); // 당일 오후 2시 30분
+        // 부서원이 에코센터 소속인 경우 본인 확인 시점 통제 조건식 결합
+        if (empRegion === "에코센터" || window.currentUser?.region === "에코센터") {
+            const thisMondayStr = ymdKST(mondayOf(mealDate));
+            const createdAtStr = sessionStorage.getItem("selfcheckCreatedAtMap") ? JSON.parse(sessionStorage.getItem("selfcheckCreatedAtMap"))[thisMondayStr] : null;
+            if (createdAtStr) {
+                const checkTime = new Date(createdAtStr.replace(' ', 'T') + '+09:00');
+                if (checkTime > lastWeekWednesdayCutoff()) {
+                    return true;
+                }
+            }
         }
+        
+        const prefix = mealType === "조식" ? "breakfast" : mealType === "중식" ? "lunch" : "dinner";
+        const daysBefore = parseInt(window.serverDeadlines[`${prefix}_days_before`] || 0, 10);
+        const timeStr = window.serverDeadlines[`${prefix}_time`] || "00:00";
+        const [hour, minute] = timeStr.split(":").map(Number);
+        
+        const deadline = new Date(mealDate);
+        deadline.setDate(deadline.getDate() - daysBefore);
+        deadline.setHours(hour, minute, 0, 0);
+        
         return now > deadline;
     }
 
-    // ✅ 다음 주는 이번 주 수요일 오후 4시까지만 신청 가능
-    thisMonday = new Date(now);
-    const diff = thisMonday.getDay() === 0 ? -6 : 1 - thisMonday.getDay();
-    thisMonday.setDate(thisMonday.getDate() + diff); // 이번 주 월요일
-    thisMonday.setHours(0, 0, 0, 0);
+    // --- [2] 차주 일괄 신청 마감 통제 분기 ---
+    const thisMon = mondayOf(now);
+    const nextMon = new Date(thisMon);
+    nextMon.setDate(nextMon.getDate() + 7);
+    
+    if (dateStr === ymdKST(nextMon) || new Date(dateStr) >= nextMon) {
+        if (empRegion !== "에코센터" && window.currentUser?.region !== "에코센터") {
+            return false;
+        }
+        
+        const targetDayIndex = parseInt(window.serverDeadlines["next_week_day_of_week"] || 3, 10);
+        const targetTimeStr = window.serverDeadlines["next_week_time"] || "16:00";
+        const [h, m] = targetTimeStr.split(":").map(Number);
+        
+        const nextWeekDeadline = new Date(thisMon);
+        nextWeekDeadline.setDate(thisMon.getDate() + (targetDayIndex - 1));
+        nextWeekDeadline.setHours(h, m, 0, 0);
+        
+        return now > nextWeekDeadline;
+    }
 
-    const wednesdayDeadline = new Date(thisMonday);
-    wednesdayDeadline.setDate(thisMonday.getDate() + 2); // 수요일
-    wednesdayDeadline.setHours(16, 0, 0, 0); // 16시
-
-    return now > wednesdayDeadline;
+    return false;
 }
 
-
 function isThisWeek(dateStr) {
+    const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
     const target = new Date(dateStr);
-    target.setHours(0, 0, 0, 0);
-    const now = getKSTDate();
-
-    const monday = new Date(now);
-    const day = now.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    monday.setDate(now.getDate() + diff);
-    monday.setHours(0, 0, 0, 0);
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
-
-    return target >= monday && target <= sunday;
+    const mon = mondayOf(now);
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    sun.setHours(23, 59, 59, 999);
+    return target >= mon && target <= sun;
 }
 
 function updateSummary(data, dates) {
@@ -426,19 +463,14 @@ function updateSummary(data, dates) {
 
 function onSearch() {
     const picker = document.getElementById("editWeekPicker");
-    
-    // ✅ 값이 비어 있으면 다음 주로 자동 설정
     if (!picker.value) {
         const { start } = getNextWeekRange();
         picker.value = start;
     }
-
-    // ✅ 사용자가 직접 선택한 값 또는 다음 주
-    const selected = picker.value;
-     // ✅ 근무지역 필터 적용
     setTimeout(() => filterEditData(), 300);
 }
 
+// 💡 [프로세스 제어] 초기화부 내부 구조 최적화 및 마감 Fetch 추가
 document.addEventListener("DOMContentLoaded", () => {
     const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
     if (!currentUser || currentUser.level !== 2) {
@@ -446,81 +478,63 @@ document.addEventListener("DOMContentLoaded", () => {
         location.href = "index.html";
         return;
     }
-    window.currentUser = currentUser; // ← 전역 등록
+    window.currentUser = currentUser; 
     console.log("✅ 현재 로그인한 사용자 정보:", window.currentUser);
-    // ✅ 근무지역 드롭다운 초기값 설정
+
     const region = currentUser.region;
     const regionFilter = document.getElementById("regionFilter");
     if (region && regionFilter) {
         const validOptions = Array.from(regionFilter.options).map(o => o.value);
         if (validOptions.includes(region)) {
             regionFilter.value = region;
-            filterEditData();  // ✅ 자동 필터링까지 적용
+            filterEditData(); 
         }
     }
 
     const picker = document.getElementById("editWeekPicker");
-    const { start } = getNextWeekRange();  // ✅ 다음 주 월요일로 변경됨
+    const { start } = getNextWeekRange(); 
     picker.value = start;
 
     const year = new Date().getFullYear();
     const nextYear = year + 1;
 
-    // ✅ 1) 공공 공휴일(자동) + 2) DB 공휴일(수동) 둘 다 가져와서 병합
-fetchHolidayList(`/api/public-holidays?year=${year}`, (apiThisYear) => {
-  fetchHolidayList(`/api/public-holidays?year=${nextYear}`, (apiNextYear) => {
+    // 공휴일 정보 병합 Fetch 프로세스
+    fetchHolidayList(`/api/public-holidays?year=${year}`, (apiThisYear) => {
+      fetchHolidayList(`/api/public-holidays?year=${nextYear}`, (apiNextYear) => {
+        fetchHolidayList(`/holidays?year=${year}`, (customThisYear) => {
+          fetchHolidayList(`/holidays?year=${nextYear}`, (customNextYear) => {
 
-    fetchHolidayList(`/holidays?year=${year}`, (customThisYear) => {
-      fetchHolidayList(`/holidays?year=${nextYear}`, (customNextYear) => {
+            const apiMerged = [].concat(apiThisYear || []).concat(apiNextYear || []);
+            const customMerged = [].concat(customThisYear || []).concat(customNextYear || []);
 
-        const apiMerged = []
-          .concat(Array.isArray(apiThisYear) ? apiThisYear : [])
-          .concat(Array.isArray(apiNextYear) ? apiNextYear : []);
+            const apiDates = new Set(apiMerged.map(h => (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date)));
+            const filteredCustom = customMerged.filter(h => !apiDates.has((typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date)));
 
-        const customMerged = []
-          .concat(Array.isArray(customThisYear) ? customThisYear : [])
-          .concat(Array.isArray(customNextYear) ? customNextYear : []);
+            const merged = [...apiMerged, ...filteredCustom];
+            holidayList = merged.map(h => (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date));
 
-        // ✅ api 날짜와 겹치는 custom은 제거(중복 방지)
-        const apiDates = new Set(
-          apiMerged.map(h => (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date))
-        );
-        const filteredCustom = customMerged.filter(h => {
-          const d = (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date);
-          return !apiDates.has(d);
+            holidayMap = {};
+            merged.forEach(h => {
+              const key  = (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date);
+              const desc = (typeof h === "string") ? "" : (h.description || h.desc || h.name || "");
+              holidayMap[key] = desc;
+            });
+
+            // 💡 공휴일 조회가 끝나면 서버 동적 마감 설정을 가져온 후 화면을 로드하도록 제어
+            loadDeadlineSettingsFromServer(() => {
+                loadEditData(start);
+            });
+          });
         });
-
-        const merged = [...apiMerged, ...filteredCustom];
-
-        // ✅ team_edit에서 쓰는 holidayList 구성(기존 방식 유지)
-        holidayList = merged.map(h =>
-          (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date)
-        );
-
-        // (선택) 설명까지 저장해두기
-        holidayMap = {};
-        merged.forEach(h => {
-          const key  = (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date);
-          const desc = (typeof h === "string") ? "" : (h.description || h.desc || h.name || "");
-          holidayMap[key] = desc;
-        });
-
-        loadEditData(start); // ✅ 기존 흐름 그대로
       });
     });
 
-  });
-});
-
-    // ✅ 본인확인 드롭다운 필터 이벤트 리스너 추가
     document.getElementById("selfcheckFilter").addEventListener("change", applySelfcheckFilter);
-    document.getElementById("regionFilter").addEventListener("change", filterEditData);  // ✅ 근무지역 필터
+    document.getElementById("regionFilter").addEventListener("change", filterEditData); 
 });
-
 
 document.getElementById("editWeekPicker").addEventListener("change", function () {
     loadEditData(this.value);
-    // ✅ selfcheck 필터 자동 적용
     setTimeout(() => applySelfcheckFilter(), 300);
 });
 
@@ -531,14 +545,12 @@ function applyStickyHeaderOffsets() {
     if (headerRows.length >= 2) {
         const firstRowHeight = headerRows[0].offsetHeight;
 
-        // 상단 첫 줄 (날짜 행)
         headerRows[0].querySelectorAll('th').forEach(th => {
             th.style.position = 'sticky';
             th.style.top = '0px';
             th.style.zIndex = '10';
         });
 
-        // 두 번째 줄 (조/중/석)
         headerRows[1].querySelectorAll('th').forEach(th => {
             th.style.position = 'sticky';
             th.style.top = `${firstRowHeight}px`;
@@ -547,8 +559,5 @@ function applyStickyHeaderOffsets() {
     }
 }
 
-
-// ✅ 전역 등록 (HTML 버튼에서 호출 가능하게 하기)
-window.loadEditData = loadEditData;
 window.loadEditData = loadEditData;
 window.onSearch = onSearch;
