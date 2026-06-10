@@ -211,13 +211,12 @@ th.col-areason, td.col-areason { width: 46%; }
 th.col-asave, td.col-asave { width: 10%; }
 
 /* 일괄 입력 */
-.bulk-visit-table th:nth-child(1), .bulk-visit-table td:nth-child(1) { width: 14%; }
-.bulk-visit-table th:nth-child(2), .bulk-visit-table td:nth-child(2) { width: 6%; }
-.bulk-visit-table th:nth-child(3), .bulk-visit-table td:nth-child(3),
-.bulk-visit-table th:nth-child(4), .bulk-visit-table td:nth-child(4),
-.bulk-visit-table th:nth-child(5), .bulk-visit-table td:nth-child(5) { width: 8%; }
-.bulk-visit-table th:nth-child(6), .bulk-visit-table td:nth-child(6) { width: 46%; }
-.bulk-visit-table th:nth-child(7), .bulk-visit-table td:nth-child(7) { width: 10%; }
+.bulk-visit-table th:nth-child(1), .bulk-visit-table td:nth-child(1) { width: 18%; } /* 날짜 */
+.bulk-visit-table th:nth-child(2), .bulk-visit-table td:nth-child(2) { width: 10%; } /* 요일 */
+.bulk-visit-table th:nth-child(3), .bulk-visit-table td:nth-child(3) { width: 16%; } /* 조식 */
+.bulk-visit-table th:nth-child(4), .bulk-visit-table td:nth-child(4) { width: 16%; } /* 중식 */
+.bulk-visit-table th:nth-child(5), .bulk-visit-table td:nth-child(5) { width: 16%; } /* 석식 */
+.bulk-visit-table th:nth-child(6), .bulk-visit-table td:nth-child(6) { width: 24%; } /* 일괄저장버튼 */
 
 /* 주간 요약 */
 th.col-summary-date, td.col-summary-date { width: 14%; }

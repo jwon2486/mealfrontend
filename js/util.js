@@ -1,7 +1,7 @@
 // util.js
 
 // =================================================================
-// 💡 [추가] 전역 서버 시간 동기화 및 보정을 위한 베이스 구조 정의
+// 💡 전역 서버 시간 동기화 및 보정을 위한 베이스 구조 정의
 // =================================================================
 window.serverTimeDiff = window.serverTimeDiff || 0;
 
@@ -34,14 +34,14 @@ function syncServerTime(callback) {
 window.syncServerTime = syncServerTime;
 
 // =================================================================
-// 💡 [기존] 마감시간 관리를 위한 API 라우트 경로 통합 정의
+// 💡 마감시간 관리를 위한 API 라우트 경로 통합 정의
 // config.js에 선언된 API_BASE_URL을 가져와 완성된 경로를 제공합니다.
 // =================================================================
 const API_ROUTES = {
     DEADLINES: `${API_BASE_URL}/admin/api/deadlines`
 };
 
-// ✅ 공통 fetch POST 함수
+// ✅ 공통 fetch POST 함수 (스트림 중복 소비 버그 완벽 수정)
 function postData(path, data, onSuccess, onError) {
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
     fetch(url, {
@@ -50,11 +50,13 @@ function postData(path, data, onSuccess, onError) {
         body: JSON.stringify(data)
     })
     .then(async res => {
+        const text = await res.text(); // 스트림을 텍스트로 딱 한 번만 안전하게 읽음
         if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || `서버 오류 (${res.status})`);
+            let parsedErr;
+            try { parsedErr = JSON.parse(text); } catch(e) { parsedErr = {}; }
+            throw new Error(parsedErr.error || `서버 오류 (${res.status})`);
         }
-        return res.json();
+        try { return JSON.parse(text); } catch(e) { return {}; }
     })
     .then(onSuccess)
     .catch(err => {
@@ -64,7 +66,7 @@ function postData(path, data, onSuccess, onError) {
     });
 }
 
-// ✅ 공통 PUT 요청 함수
+// ✅ 공통 fetch PUT 함수 (스트림 중복 소비 버그 완벽 수정)
 function putData(path, data, onSuccess, onError) {
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
     fetch(url, {
@@ -73,11 +75,13 @@ function putData(path, data, onSuccess, onError) {
         body: JSON.stringify(data)
     })
     .then(async res => {
+        const text = await res.text(); // 스트림 중복 소비 방지 보정
         if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || `수정 실패 (${res.status})`);
+            let parsedErr;
+            try { parsedErr = JSON.parse(text); } catch(e) { parsedErr = {}; }
+            throw new Error(parsedErr.error || `수정 실패 (${res.status})`);
         }
-        return res.json();
+        try { return JSON.parse(text); } catch(e) { return {}; }
     })
     .then(onSuccess)
     .catch(err => {
@@ -133,9 +137,10 @@ async function requestApi(url, options = {}) {
 function deleteData(path, onSuccess, onError) {
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
     fetch(url, { method: "DELETE" })
-    .then(res => {
+    .then(async res => {
+        const text = await res.text();
         if (!res.ok) throw new Error("삭제 실패");
-        return res.json();
+        try { return JSON.parse(text); } catch(e) { return {}; }
     })
     .then(onSuccess)
     .catch(err => {
