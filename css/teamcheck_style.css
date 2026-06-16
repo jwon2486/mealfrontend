@@ -1,372 +1,363 @@
-/* 전체 페이지 스타일 */
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 20px;
+/* 에스엔시스 인력 관리 테마 스타일 완벽 병합 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --brand: #1e3a8a;
+  --brand2: #2563eb;
+  --text: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --radius: 1rem;
+  --radius-sm: 0.5rem;
+  --shadow: 0 0.625rem 1.5625rem rgba(0,0,0,0.05);
 }
 
-.table-container {
-  width: 85%;
-  margin: auto;
-  overflow-x: auto;
-  max-height: 500px;   /* ✅ 세로 최대 높이 설정 */
-  overflow-y: auto;    /* ✅ 세로 스크롤 활성화 */
+* { box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+body { 
+  margin: 0; 
+  background: var(--bg); 
+  color: var(--text); 
+  overflow-x: hidden; 
+  font-size: 1rem; 
 }
 
-/* 테이블 헤더 고정 (선택적으로 사용할 경우) */
-.table-container thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+/* --- [레이아웃 및 헤더 탑바] --- */
+.topbar {
+  height: 4.375rem; 
+  background: #fff; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 0 1.5rem; 
+  border-bottom: 0.0625rem solid var(--line); 
+  position: sticky; 
+  top: 0; 
+  z-index: 100;
+}
+.brand { 
+  display: flex; align-items: center; justify-content: center; gap: 0.75rem; 
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.brand img { height: 2rem; display: block; }
+.brand .title { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.brand .title strong { display: block; font-size: 1.1rem; color: var(--brand); line-height: 1.2; }
+.brand .title span { font-size: 0.8rem; color: var(--muted); line-height: 1.2; }
+.top-actions { margin-left: auto; z-index: 101; }
+.pill { background: var(--bg); padding: 0.5rem 1rem; border-radius: 1.25rem; font-weight: 600; font-size: 0.9rem; }
+
+/* --- [메인 레이아웃 외곽 쉘] --- */
+.shell { padding: 1.5rem; max-width: 103.125rem; margin: 0 auto; }
+.erp-layout { display: grid; grid-template-columns: clamp(220px, 14vw, 260px) 1fr; gap: 1.65rem; }
+
+/* --- [사이드바 & 통계 위젯] --- */
+.erp-sidebar { background: #1e293b; border-radius: var(--radius); padding: 1.25rem; color: #fff; height: fit-content; }
+.erp-nav { display: flex; flex-direction: column; gap: 0.5rem; }
+.nav-item {
+  width: 100%; padding: 0.75rem 1rem; border: none; border-radius: 0.5rem; background: transparent; 
+  text-align: left; cursor: pointer; color: #cbd5e1; font-weight: 500; font-size: 0.95rem; transition: all 0.2s;
+}
+.nav-item.active { background: var(--brand2); color: #fff; font-weight: 600; }
+.nav-item:hover:not(.active) { background: rgba(255,255,255,0.1); }
+.sidebar-btn-group { display: flex; flex-direction: column; gap: 0.625rem; }
+.sidebar-summary-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 1rem; margin: 1.25rem 0; }
+.summary-title { font-size: 0.85rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.25rem; }
+.summary-item { font-size: 0.9rem; color: #e2e8f0; margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+.num-highlight { font-weight: 700; color: #38bdf8; }
+
+.erp-sidebar-actions { padding: 0 0.25rem; }
+
+/* --- [콘텐츠 전역 카드 및 폼 인프라] --- */
+.erp-content { display: flex; flex-direction: column; gap: 1.65rem; width: 100%; }
+.card { background: var(--surface); border-radius: var(--radius); padding: 1.65rem; box-shadow: var(--shadow); }
+.search-flex { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+.input-box { display: flex; flex-direction: column; gap: 0.375rem; flex: 1; min-width: 8.75rem; }
+.input-box label { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+.input-box input, .input-box select { padding: 0.625rem; border: 0.0625rem solid var(--line); border-radius: 0.5rem; outline: none; height: 2.5rem; background-color: #fff; font-size: 0.9rem; }
+
+/* ==========================================================================
+   새로운 대시보드 카드 그리드 (답답한 표 구조 전면 해제)
+   ========================================================================== */
+.emp-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); /* 화면 너비에 맞게 배치 자동 확장 */
+  gap: 1.25rem;
+  max-height: 650px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+/* 직원 한 명의 개별 카드 쉘 */
+.emp-meal-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.emp-meal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
+  border-color: #bfdbfe;
 }
 
-/* 테이블 헤더 스타일 */
-th {
-    background-color: #007bff;
-    color: white;
-    padding: 12px;
-    font-size: 16px;
-    border: 1px solid #ddd;
+/* 카드 상단 헤더: 사원 핵심 정보 */
+.card-emp-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--bg);
+  padding-bottom: 0.75rem;
+}
+.emp-profile { display: flex; align-items: baseline; gap: 0.5rem; }
+.emp-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.emp-id { font-size: 0.85rem; color: var(--muted); }
+.emp-meta { display: flex; gap: 0.5rem; }
+.meta-badge { padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: #475569; }
+.meta-badge.self-ok { background: #dcfce7; color: #15803d; }
+.meta-badge.self-no { background: #fee2e2; color: #b91c1c; }
+
+/* 카드 본문: 주간 요일 매트릭스 랙 */
+.card-meal-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.timeline-day-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  background: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+.day-label { font-size: 0.85rem; font-weight: 700; color: #475569; }
+.day-label.holiday { color: #ef4444; }
+
+/* 조중석 버튼을 품는 그룹 */
+.meal-badge-group {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
-
-th[colspan] {
-  background-color: #007bff !important; 
-  color: white;
-  font-size: 16px;
-  padding: 8px;
+/* 알약 배지 버튼 컴포넌트 */
+.meal-btn {
+  flex: 1;
+  max-width: 4.5rem;
+  height: 1.85rem;
+  border-radius: 1rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.meal-btn.selected {
+  background: #e6f4ea !important;
+  color: #137333 !important;
+  border-color: #137333 !important;
+}
+.meal-btn.meal-deadline {
+  background: #f5f5f5 !important;
+  color: #c2c2c2 !important;
+  border-color: #e2e8f0 !important;
+  cursor: not-allowed;
+}
+.meal-btn.meal-holiday {
+  background: #fce8e6 !important;
+  color: #c5221f !important;
+  border-color: #c5221f !important;
+  cursor: not-allowed;
+}
+.meal-btn:not(:disabled):hover {
+  transform: scale(1.03);
 }
 
-th.holiday-header {
-  background-color: #ffdddd !important;
-  color: red !important;
+/* 공통 버튼 및 토스트 보존 */
+.btn { padding: 0.625rem 1.25rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover { background: #1e40af; }
+.btn-secondary { background: #f1f5f9; color: var(--text); border: 0.0625rem solid var(--line); }
+.btn-secondary:hover { background: #e2e8f0; }
+.w-full { width: 100%; }
+.toast { visibility: hidden; background: #0f172a; color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-sm); position: fixed; top: 1.5rem; right: 1.5rem; font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow); opacity: 0; transition: opacity 0.3s; z-index: 9999; }
+.toast.show { visibility: visible; opacity: 1; }
+/* 에스엔시스 인력 관리 테마 스타일 완벽 병합 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --brand: #1e3a8a;
+  --brand2: #2563eb;
+  --text: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --radius: 1rem;
+  --radius-sm: 0.5rem;
+  --shadow: 0 0.625rem 1.5625rem rgba(0,0,0,0.05);
 }
 
-/* 날짜 표시 스타일 */
-.date-header {
-    background-color: #007bff;
-    color: #333;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 10px;
+* { box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+body { 
+  margin: 0; 
+  background: var(--bg); 
+  color: var(--text); 
+  overflow-x: hidden; 
+  font-size: 1rem; 
 }
 
-/* 테이블 본문 스타일 */
-td {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-    font-size: 14px;
+/* --- [레이아웃 및 헤더 탑바] --- */
+.topbar {
+  height: 4.375rem; 
+  background: #fff; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 0 1.5rem; 
+  border-bottom: 0.0625rem solid var(--line); 
+  position: sticky; 
+  top: 0; 
+  z-index: 100;
+}
+.brand { 
+  display: flex; align-items: center; justify-content: center; gap: 0.75rem; 
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.brand img { height: 2rem; display: block; }
+.brand .title { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.brand .title strong { display: block; font-size: 1.1rem; color: var(--brand); line-height: 1.2; }
+.brand .title span { font-size: 0.8rem; color: var(--muted); line-height: 1.2; }
+.top-actions { margin-left: auto; z-index: 101; }
+.pill { background: var(--bg); padding: 0.5rem 1rem; border-radius: 1.25rem; font-weight: 600; font-size: 0.9rem; }
+
+/* --- [메인 레이아웃 외곽 쉘] --- */
+.shell { padding: 1.5rem; max-width: 103.125rem; margin: 0 auto; }
+.erp-layout { display: grid; grid-template-columns: clamp(220px, 14vw, 260px) 1fr; gap: 1.65rem; }
+
+/* --- [사이드바 & 통계 위젯] --- */
+.erp-sidebar { background: #1e293b; border-radius: var(--radius); padding: 1.25rem; color: #fff; height: fit-content; }
+.erp-nav { display: flex; flex-direction: column; gap: 0.5rem; }
+.nav-item {
+  width: 100%; padding: 0.75rem 1rem; border: none; border-radius: 0.5rem; background: transparent; 
+  text-align: left; cursor: pointer; color: #cbd5e1; font-weight: 500; font-size: 0.95rem; transition: all 0.2s;
+}
+.nav-item.active { background: var(--brand2); color: #fff; font-weight: 600; }
+.nav-item:hover:not(.active) { background: rgba(255,255,255,0.1); }
+.sidebar-btn-group { display: flex; flex-direction: column; gap: 0.625rem; }
+.sidebar-summary-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 1rem; margin: 1.25rem 0; }
+.summary-title { font-size: 0.85rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.25rem; }
+.summary-item { font-size: 0.9rem; color: #e2e8f0; margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+.num-highlight { font-weight: 700; color: #38bdf8; }
+.erp-sidebar-actions { padding: 0 0.25rem; }
+
+/* --- [콘텐츠 전역 카드 및 폼 인프라] --- */
+.erp-content { display: flex; flex-direction: column; gap: 1.65rem; width: 100%; }
+.card { background: var(--surface); border-radius: var(--radius); padding: 1.65rem; box-shadow: var(--shadow); }
+.search-flex { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; }
+.input-box { display: flex; flex-direction: column; gap: 0.375rem; flex: 1; min-width: 8.75rem; }
+.input-box label { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+.input-box input, .input-box select { padding: 0.625rem; border: 0.0625rem solid var(--line); border-radius: 0.5rem; outline: none; height: 2.5rem; background-color: #fff; font-size: 0.9rem; }
+
+/* --- [대시보드 카드 그리드 인프라] --- */
+.emp-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  gap: 1.25rem;
+  max-height: 650px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+.emp-meal-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.emp-meal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
+  border-color: #bfdbfe;
+}
+.card-emp-info { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--bg); padding-bottom: 0.75rem; }
+.emp-profile { display: flex; align-items: baseline; gap: 0.5rem; }
+.emp-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.emp-id { font-size: 0.85rem; color: var(--muted); }
+.emp-meta { display: flex; gap: 0.5rem; }
+.meta-badge { padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: #475569; }
+.meta-badge.self-ok { background: #dcfce7; color: #15803d; }
+.meta-badge.self-no { background: #fee2e2; color: #b91c1c; }
+.card-meal-timeline { display: flex; flex-direction: column; gap: 0.5rem; }
+.timeline-day-row { display: grid; grid-template-columns: 110px 1fr; align-items: center; background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 0.5rem; }
+.day-label { font-size: 0.85rem; font-weight: 700; color: #475569; }
+.day-label.holiday { color: #ef4444; }
+.meal-badge-group { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+/* --- [알약 배지 디자인 랙 명세] --- */
+.meal-btn {
+  flex: 1;
+  max-width: 4.5rem;
+  height: 1.85rem;
+  border-radius: 1rem;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.meal-btn.selected {
+  background: #e6f4ea !important;
+  color: #137333 !important;
+  border-color: #137333 !important;
 }
 
-/* 신청 여부 스타일 */
-.meal-yes {
-    color: #28a745;
-    font-weight: bold;
-}
-
-.meal-no {
-    color: #dc3545;
-    font-weight: bold;
-}
-
-/* 홀수/짝수 행 색상 변경 */
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-/* 마우스를 올리면 강조 효과 */
-tr:hover {
-    background-color: #d6e4ff;
-    transition: 0.3s;
-}
-
-/* 부서칸 좌우폭*/
-.input-dept {
-  min-width: 50px;   /* 최소 120px */
-  max-width: 170px;   /* 최대 300px */
-  width: 100%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
-}
-
-/* 이름칸 좌우폭*/
-.input-name {
-  min-width: 50px;   /* 최소 120px */
-  max-width: 170px;   /* 최대 300px */
-  width: 100%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
-}
-
-/* 사번칸 좌우폭*/
-.input-empid {
-  min-width: 100px;
-  max-width: 200px;
-  width: 100%;
-}
-
-
-/* 마감된 식사 버튼 스타일 */
-.meal-deadline {
-  background-color: #ffe5e5 !important; /* 연한 붉은색 */
-  color: #990000 !important;
+/* 1. 미신청인 상태로 마감되었을 때 (취소선 추가로 직관성 부여) */
+.meal-btn.meal-deadline {
+  background: #f1f5f9 !important;
+  color: #cbd5e1 !important;
+  border-color: #e2e8f0 !important;
+  text-decoration: line-through;
   cursor: not-allowed;
 }
 
-/* 신청/미신청 버튼 스타일 */
-.meal-btn {
-    padding: 8px 15px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: px;
-    transition: background-color 0.3s;
+/* 2. [디테일 추가] 신청되었던 채로 마감되었을 때 (톤다운된 안전 녹색 블록 명시) */
+.meal-btn.meal-deadline-selected {
+  background: #f0fdf4 !important;
+  color: #16a34a !important;
+  border-color: #bbf7d0 !important;
+  cursor: not-allowed;
+  font-weight: 800;
 }
 
-/* 신청 버튼 (선택된 경우) */
-.meal-btn.selected {
-    background-color: #28a745;
-    color: white;
+.meal-btn.meal-holiday {
+  background: #fce8e6 !important;
+  color: #c5221f !important;
+  border-color: #c5221f !important;
+  cursor: not-allowed;
 }
+.meal-btn:not(:disabled):hover { transform: scale(1.03); }
 
-/* 미신청 버튼 (기본 상태) */
-.meal-btn {
-    background-color: #e0e0e0;
-    color: black;
-}
-
-/* 버튼 클릭 시 색상 변경 효과 */
-.meal-btn:hover {
-    background-color: #c0c0c0;
-}
-
-/* 로그인 및 주 선택 영역 스타일 */
-.login-container, #date-picker-container {
-    margin-bottom: 20px;
-}
-
-/* 버튼 스타일 */
-button {
-    padding: 10px 20px;
-    margin-top: 15px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    max-width: 140px;
-    width: 100%;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.search-button-wrapper {
-  display: flex;
-  align-items: center;     /* 버튼과 주 선택 input 높이 맞춤 */
-  justify-content: center; /* 가운데 정렬 */
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.search-button {
-  height: 36px;
-  margin-top: 0px;
-  padding: 0 10;
-  font-size: 14px;
-  border-radius: 6px;
-}
-
-#editWeekPicker {
-  height: 20px;
-  padding: 6px 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-@media (max-width: 768px) {
-  body {
-    padding: 5px;
-  }
-
-  table {
-    font-size: 12px;
-    width: 100%;
-  }
-
-  th, td {
-    padding: 6px;
-  }
-
-  .filter-container,
-  .search-container,
-  .action-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  
-  select{
-    width: 100%;
-    font-size: 14px;
-  }
-
-  button {
-    width: 100%;
-    font-size: 14px;
-  }
-  /* 부서원 조회버튼 */
-  .search-button-wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.search-button {
-    width: auto; /* 버튼이 꽉 차지 않도록 */
-  }
-}
-
- .filter-container {
-  display: flex;          /* ✅ 핵심! */
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;  /* ✅ 가운데 정렬 */
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-  .filter-container label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 15px;
-    width: auto; /* ✅ 100% 대신 내용 크기에 맞춤 */
-    white-space: nowrap; /* ✅ 줄바꿈 방지 */
-  }
-
-  /* 이름칸 좌우폭*/
-.input-name {
-  max-width: 100px;   /* 최대 300px */
-  width: 80%;        /* 가능한 한 넓게, 하지만 위 범위 안에서 */
-  height: 15px
-}
-
-/* 사번칸 좌우폭*/
-.input-empid {
-  max-width: 100px;
-  width: 80%;
-  height: 15px
-}
-
-  .login-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  h1, h2 {
-    font-size: 18px;
-    font-weight: bold;
-  }
-
-  .summary {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-.toast {
-  visibility: hidden;
-  min-width: 160px;
-  background-color: #333;
-  color: white;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px;
-  position: fixed;
-  z-index: 9999;
-  top: 20px;
-  right: 20px;
-  font-size: 14px;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-}
-.toast.show {
-  visibility: visible;
-  opacity: 1;
-}
-/* 첫 번째 헤더 줄 (날짜 줄) 고정 */
-#edit-table thead tr:nth-child(1) th {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: #007bff;
-  color: white;
-}
-
-/* 두 번째 헤더 줄 (조식/중식/석식 줄) 고정 */
-#edit-table thead tr:nth-child(2) th {
-  position: sticky;
-  
-  z-index: 2;
-  background-color: #007bff;
-  color: white;
-}
-#edit-table thead tr:nth-child(2) th::after {
-  content: "";
-  position: absolute;
-  top: -2px; /* ← 위로 2px 올라가도록 설정 */
-  left: 0;
-  width: 100%;
-  height: 2px; /* ← 덮을 높이 */
-  background-color: white; /* ← 배경색과 동일하게 맞춤 */
-  z-index: 3;
-}
-/*테이블과  div라인 간격조정정*/
-.filter-container {
-  margin-bottom: 20px; /* ✅ 버튼 아래 공간 확보 */
-}
-
-/* 데스크탑모드*/
-@media (min-width: 769px) {
-   .summary {
-    font-size: clamp(14px, 2vw, 20px);
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .filter-container label {
-    font-size: 19px;
-    font-weight: bold;
-  }
-  .input-dept,
-  .input-name,
-  .input-empid {
-    font-size: 18px;
-    height: 20px;
-    font-weight: bold;
-    padding: 6px 8px;
-  }
-
-  h1 {
-    font-size: clamp(20px, 2vw, 26px);       /* ✅ 제목도 더 크게 */
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-}
+/* 인터페이스 공통 컴포넌트 */
+.btn { padding: 0.625rem 1.25rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover { background: #1e40af; }
+.btn-secondary { background: #f1f5f9; color: var(--text); border: 0.0625rem solid var(--line); }
+.btn-secondary:hover { background: #e2e8f0; }
+.w-full { width: 100%; }
+.toast { visibility: hidden; background: #0f172a; color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-sm); position: fixed; top: 1.5rem; right: 1.5rem; font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow); opacity: 0; transition: opacity 0.3s; z-index: 9999; }
+.toast.show { visibility: visible; opacity: 1; }

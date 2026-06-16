@@ -6,14 +6,14 @@
   <link rel="stylesheet" href="css/stats.css" />
   <script>
     // 세션 및 권한 체크
-    const savedUser = sessionStorage.getItem("currentUser");
-    if (!savedUser) {
-      location.href = "index.html"; 
-    } else {
-      const user = JSON.parse(savedUser);
-      if (user.level !== 3) {
-        alert("관리자만 접근 가능합니다.");
-        location.href = "index.html";
+    const savedUser = sessionStorage.getItem("currentUser"); //
+    if (!savedUser) { //
+      location.href = "index.html";  //
+    } else { //
+      const user = JSON.parse(savedUser); //
+      if (user.level !== 3) { //
+        alert("관리자만 접근 가능합니다."); //
+        location.href = "index.html"; //
       }
     }
   </script>
@@ -87,16 +87,15 @@
     </div>
 
     <div class="graph-section" id="auto-compare-section">
-      <h3>🔎 식사 데이터 자동 분석기</h3>
-      <p class="section-desc">실적 엑셀을 업로드하여 DB와 대조 분석 후 결과 파일을 즉시 다운로드합니다.</p>
-      
+      <h3>🔎 식사 실적 데이터 자동 분석기</h3>
+      <p class="section-desc">식사 실적 데이터 파일을 업로드하여 DB와 대조 분석 후 결과 파일을 즉시 다운로드합니다.</p>
       <div class="analysis-upload-box">
-        <input type="file" id="actualFileOnly" accept=".xlsx, .xls" />
+        <input type="file" id="actualFileOnly" accept=".xlsx, .xls, .png" />
         <button onclick="runAutoCompare()" class="btn-analyze">📊 분석 및 엑셀 다운로드</button>
       </div>
     </div>
   </div>
- 
+
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

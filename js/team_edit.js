@@ -1,12 +1,11 @@
-// team_edit.js - 서버 기반 마감 로직 동기화 버전
+// team_edit.js - 모던 카드 그리드 아키텍처 완전 리팩토링 버전
 
 let holidayList = [];
-let holidayMap = {}; // 공휴일 설명 매핑용 추가
+let holidayMap = {}; 
 let editMode = "all";
 let selfcheckMap = {};
-window.serverDeadlines = null; // 백엔드 동적 마감시간 저장용 전역 객체
+window.serverDeadlines = null; 
 
-// 본인확인 불러오는 함수
 async function fetchSelfcheckMap(startDate, endDate) {
   return new Promise((resolve) => {
     getData(`/admin/selfcheck?start=${startDate}&end=${endDate}`, (data) => {
@@ -22,34 +21,28 @@ async function fetchSelfcheckMap(startDate, endDate) {
   });
 }
 
-// 본인확인 ox 여부 필터링 함수
 function applySelfcheckFilter() {
     const filter = document.getElementById("selfcheckFilter").value;
-
-    document.querySelectorAll("#edit-body tr").forEach(tr => {
-        const selfcheckCell = tr.querySelector("td.selfcheck-col");
-        if (!selfcheckCell) return;
-
+    document.querySelectorAll(".emp-meal-card").forEach(card => {
+        const isChecked = card.dataset.selfcheck === "true";
         if (filter === "") {
-            tr.style.display = "";
-        } else if (filter === "1" && selfcheckCell.textContent === "✅") {
-            tr.style.display = "";
-        } else if (filter === "0" && selfcheckCell.textContent === "❌") {
-            tr.style.display = "";
+            card.style.display = "";
+        } else if (filter === "1" && isChecked) {
+            card.style.display = "";
+        } else if (filter === "0" && !isChecked) {
+            card.style.display = "";
         } else {
-            tr.style.display = "none";
+            card.style.display = "none";
         }
     });
 }
 
-function formatDateWithDay(dateStr) {
+function getShortDayName(dateStr) {
     const date = new Date(dateStr);
     const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
-    const day = weekdays[date.getDay()];
-    return `${dateStr} (${day})`;
+    return `${dateStr.substring(5)} (${weekdays[date.getDay()]})`;
 }
 
-// 💡 [서버 동기화] 서버 마감 설정 동적 Fetch 함수 이식
 function loadDeadlineSettingsFromServer(callback) {
     getData("/admin/api/deadlines", (data) => {
         window.serverDeadlines = data;
@@ -118,9 +111,8 @@ async function loadEditData(selectedWeek) {
 
         const dates = getDateArray(start, end);
         const groupedValues = Object.values(grouped).sort((a, b) => a.name.localeCompare(b.name));
-        generateTableHeader(dates);
-        applyStickyHeaderOffsets();
-        generateTableBody(dates, groupedValues);
+        
+        renderEmployeeCards(dates, groupedValues);
         updateSummary(groupedValues, dates);
         applySelfcheckFilter();
         filterEditData();
@@ -129,111 +121,91 @@ async function loadEditData(selectedWeek) {
     });
 }
 
-function generateTableHeader(dates) {
-    const thead = document.getElementById("table-head");
-    thead.innerHTML = "";
-
-    const topRow = document.createElement("tr");
-    topRow.innerHTML = `<th rowspan="2">부서</th>
-                    <th rowspan="2">사번</th>
-                    <th rowspan="2">이름</th>
-                    <th rowspan="2">근무지역</th>
-                    <th rowspan="2">본인확인</th>`;
-
-    dates.forEach(date => {
-        const isHoliday = holidayList.includes(normalizeDate(date));
-        const className = isHoliday ? "holiday-header" : "";
-        topRow.innerHTML += `<th colspan="3" class="${className}">${formatDateWithDay(date)}</th>`;
-    });
-
-    const subRow = document.createElement("tr");
-    dates.forEach(date => {
-        const isHoliday = holidayList.includes(normalizeDate(date));
-        const className = isHoliday ? "holiday-header" : "";
-        subRow.innerHTML += `
-          <th class="${className}">조식</th>
-          <th class="${className}">중식</th>
-          <th class="${className}">석식</th>
-        `;
-    });
-
-    thead.appendChild(topRow);
-    thead.appendChild(subRow);
-}
-
-function generateTableBody(dates, data) {
-    const tbody = document.getElementById("edit-body");
-    tbody.innerHTML = "";
+function renderEmployeeCards(dates, data) {
+    const gridContainer = document.getElementById("empGrid");
+    gridContainer.innerHTML = "";
 
     data.forEach(emp => {
-        const tr = document.createElement("tr");
-        const selfcheckStatus = selfcheckMap[emp.id] ? "✅" : "❌";
+        const isSelfChecked = !!selfcheckMap[emp.id];
+        const card = document.createElement("div");
+        card.className = "emp-meal-card";
+        card.dataset.id = emp.id;
+        card.dataset.name = emp.name;
+        card.dataset.region = emp.region || "";
+        card.dataset.selfcheck = isSelfChecked;
 
-        tr.innerHTML = `<td>${emp.dept}</td>
-                        <td>${emp.id}</td>
-                        <td>${emp.name}</td>
-                        <td>${emp.region || ""}</td>
-                        <td class="selfcheck-col">${selfcheckStatus}</td>`;
+        let cardHtml = `
+            <div class="card-emp-info">
+                <div class="emp-profile">
+                    <span class="emp-name">${emp.name}</span>
+                    <span class="emp-id">${emp.id}</span>
+                </div>
+                <div class="emp-meta">
+                    <span class="meta-badge">${emp.dept}</span>
+                    <span class="meta-badge">${emp.region || "미지정"}</span>
+                    <span class="meta-badge ${isSelfChecked ? 'self-ok' : 'self-no'}">
+                        ${isSelfChecked ? '확인 완료' : '미확인'}
+                    </span>
+                </div>
+            </div>
+            <div class="card-meal-timeline">
+        `;
 
         dates.forEach(date => {
+            const isHoliday = holidayList.includes(normalizeDate(date));
             const meal = emp.meals[date] || {};
+            
+            cardHtml += `
+                <div class="timeline-day-row">
+                    <span class="day-label ${isHoliday ? 'holiday' : ''}">
+                        ${getShortDayName(date)} ${isHoliday ? '[휴]' : ''}
+                    </span>
+                    <div class="meal-badge-group" data-date="${date}" data-id="${emp.id}" data-name="${emp.name}" data-dept="${emp.dept}">
+            `;
+
             ["조식", "중식", "석식"].forEach(type => {
                 const key = type === "조식" ? "breakfast" : type === "중식" ? "lunch" : "dinner";
                 const selected = meal[key] === true;
+                
+                let btnClass = "meal-btn";
+                let btnText = type;
+                let disabledAttr = "";
 
-                const btn = document.createElement("button");
-                btn.className = "meal-btn";
-                btn.dataset.id = emp.id;
-                btn.dataset.name = emp.name;
-                btn.dataset.dept = emp.dept;
-                btn.dataset.date = date;
-                btn.dataset.type = type;
-                btn.innerText = selected ? "✅" : "❌";
+                if (selected) btnClass += " selected";
 
-                if (selected) {
-                    btn.classList.add("selected");
-                    btn.style.backgroundColor = "#28a745";
-                    btn.style.color = "#fff";
-                }
-
-                const isHoliday = holidayList.includes(normalizeDate(date));
                 if (isHoliday) {
-                    btn.style.backgroundColor = "#ffe6e6";
-                    btn.style.color = "#cc0000";
-                    btn.disabled = true; // 관리자 대시보드 성격에 따라 차단 동기화
-                    btn.title = "공휴일에는 신청할 수 없습니다.";
-                    btn.onclick = () => alert("⛔ 공휴일에는 신청할 수 없습니다.");
-                } else if (isDeadlinePassed(date, type, emp.region)) { // 💡 대상 부서원의 근무지역 정보 전달
-                    btn.classList.add("meal-deadline"); 
-                    btn.title = "신청 마감됨";
-                    btn.disabled = true;
-                    btn.onclick = () => alert(`${type}은 신청 마감 시간이 지났습니다.`);
-                } else {
-                    btn.onclick = () => toggleMeal(btn);
+                    btnClass += " meal-holiday";
+                    disabledAttr = "disabled";
+                    btnText = "휴무";
+                } else if (isDeadlinePassed(date, type, emp.region)) {
+                    disabledAttr = "disabled";
+                    // 💡 [핵심 수정 분기] 마감 통제 랙 안에서 신청 유무 계층 분할 설계
+                    if (selected) {
+                        btnClass = "meal-btn meal-deadline-selected";
+                        btnText = `✓ ${type}`; // 신청 상태 마감 처리
+                    } else {
+                        btnClass = "meal-btn meal-deadline";
+                        btnText = type; // 미신청 상태 마감 처리
+                    }
                 }
 
-                const td = document.createElement("td");
-                td.appendChild(btn);
-                tr.appendChild(td);
+                cardHtml += `<button class="${btnClass}" data-type="${type}" ${disabledAttr}>${btnText}</button>`;
             });
+
+            cardHtml += `</div></div>`;
         });
 
-        tbody.appendChild(tr);
-    });
-}
+        cardHtml += `</div>`;
+        card.innerHTML = cardHtml;
 
-function toggleMeal(btn) {
-    if (btn.classList.contains("selected")) {
-        btn.classList.remove("selected");
-        btn.innerText = "❌";
-        btn.style.backgroundColor = "#e0e0e0";
-        btn.style.color = "#000";
-    } else {
-        btn.classList.add("selected");
-        btn.innerText = "✅";
-        btn.style.backgroundColor = "#28a745";
-        btn.style.color = "#fff";
-    }
+        card.querySelectorAll(".meal-btn:not(:disabled)").forEach(btn => {
+            btn.onclick = () => {
+                btn.classList.toggle("selected");
+            };
+        });
+
+        gridContainer.appendChild(card);
+    });
 }
 
 function filterEditData() {
@@ -241,55 +213,43 @@ function filterEditData() {
     const name = document.getElementById("searchName").value.trim().toLowerCase();
     const region = document.getElementById("regionFilter")?.value || "";
 
-    const rows = document.querySelectorAll("#edit-body tr");
-    rows.forEach(row => {
-        const idVal = row.children[1].innerText.toLowerCase();
-        const nameVal = row.children[2].innerText.toLowerCase();
-        const regionVal = row.children[3].innerText;
+    document.querySelectorAll(".emp-meal-card").forEach(card => {
+        const idVal = card.dataset.id.toLowerCase();
+        const nameVal = card.dataset.name.toLowerCase();
+        const regionVal = card.dataset.region;
         const show = (!id || idVal.includes(id)) && (!name || nameVal.includes(name)) && (!region || regionVal === region);
-        row.style.display = show ? "" : "none";
+        card.style.display = show ? "" : "none";
     });
 }
 
 function saveEditChanges() {
     if (!confirm("변경사항을 저장하시겠습니까?")) return;
 
-    const allBtns = document.querySelectorAll(".meal-btn");
     const mealsMap = {};
+    document.querySelectorAll(".timeline-day-row").forEach(row => {
+        const group = row.querySelector(".meal-badge-group");
+        if (!group) return;
 
-    allBtns.forEach(btn => {
-        const userId = btn.dataset.id;
-        const name = btn.dataset.name;
-        const dept = btn.dataset.dept;
-        const date = btn.dataset.date;
-        const type = btn.dataset.type;
+        const userId = group.dataset.id;
+        const name = group.dataset.name;
+        const dept = group.dataset.dept;
+        const date = group.dataset.date;
 
         const key = `${userId}_${date}`;
         if (!mealsMap[key]) {
-            mealsMap[key] = {
-                user_id: userId,
-                name: name,
-                dept: dept,
-                date: date,
-                breakfast: 0,
-                lunch: 0,
-                dinner: 0
-            };
+            mealsMap[key] = { user_id: userId, name, dept, date, breakfast: 0, lunch: 0, dinner: 0 };
         }
 
-        const isSelected = btn.classList.contains("selected");
-
-        if (type === "조식") {
-            mealsMap[key].breakfast = isSelected ? 1 : 0;
-        } else if (type === "중식") {
-            mealsMap[key].lunch = isSelected ? 1 : 0;
-        } else if (type === "석식") {
-            mealsMap[key].dinner = isSelected ? 1 : 0;
-        }
+        row.querySelectorAll(".meal-btn").forEach(btn => {
+            const type = btn.dataset.type;
+            const isSelected = btn.classList.contains("selected") || btn.classList.contains("meal-deadline-selected");
+            if (type === "조식") mealsMap[key].breakfast = isSelected ? 1 : 0;
+            if (type === "중식") mealsMap[key].lunch = isSelected ? 1 : 0;
+            if (type === "석식") mealsMap[key].dinner = isSelected ? 1 : 0;
+        });
     });
 
     const meals = Object.values(mealsMap);
-
     postData("/admin/edit_meals", { meals },
         () => {
             alert("✅ 저장되었습니다.");
@@ -300,7 +260,6 @@ function saveEditChanges() {
     );
 }
 
-// 날짜 유틸리티 함수군 (script.js의 동기화 구현체 반영)
 function mondayOf(d) {
     const c = new Date(d);
     const idx = (c.getDay() + 6) % 7;
@@ -318,10 +277,7 @@ function getWeekRange(dateStr) {
     const monday = mondayOf(new Date(dateStr));
     const friday = new Date(monday);
     friday.setDate(monday.getDate() + 4);
-    return {
-        start: ymdKST(monday),
-        end: ymdKST(friday)
-    };
+    return { start: ymdKST(monday), end: ymdKST(friday) };
 }
 
 function getNextWeekRange() {
@@ -331,11 +287,7 @@ function getNextWeekRange() {
     nextMon.setDate(thisMon.getDate() + 7);
     const nextFri = new Date(nextMon);
     nextFri.setDate(nextMon.getDate() + 4);
-
-    return {
-        start: ymdKST(nextMon),
-        end: ymdKST(nextFri)
-    };
+    return { start: ymdKST(nextMon), end: ymdKST(nextFri) };
 }
 
 function getCurrentWeekRange() {
@@ -370,7 +322,6 @@ function lastWeekWednesdayCutoff() {
     return lastWed;
 }
 
-// 💡 [핵심 변경] script.js의 완벽한 서버 연동 통제식 마감 판정 로직으로 교체
 function isDeadlinePassed(dateStr, mealType, empRegion) {
     const now = (typeof getKSTNow === "function") ? getKSTNow() : new Date();
     if (isTwoWeeksLaterOrMore(dateStr)) return false;
@@ -378,26 +329,19 @@ function isDeadlinePassed(dateStr, mealType, empRegion) {
 
     const mealDate = new Date(dateStr);
     mealDate.setHours(0, 0, 0, 0);
-
-    // 과거 날짜는 무조건 차단
     const todayZero = new Date(now);
     todayZero.setHours(0, 0, 0, 0);
     if (mealDate < todayZero) return true;
 
-    // --- [1] 금주 당일 식사 마감 통제 분기 ---
     if (isThisWeek(dateStr)) {
-        // 부서원이 에코센터 소속인 경우 본인 확인 시점 통제 조건식 결합
         if (empRegion === "에코센터" || window.currentUser?.region === "에코센터") {
             const thisMondayStr = ymdKST(mondayOf(mealDate));
             const createdAtStr = sessionStorage.getItem("selfcheckCreatedAtMap") ? JSON.parse(sessionStorage.getItem("selfcheckCreatedAtMap"))[thisMondayStr] : null;
             if (createdAtStr) {
                 const checkTime = new Date(createdAtStr.replace(' ', 'T') + '+09:00');
-                if (checkTime > lastWeekWednesdayCutoff()) {
-                    return true;
-                }
+                if (checkTime > lastWeekWednesdayCutoff()) return true;
             }
         }
-        
         const prefix = mealType === "조식" ? "breakfast" : mealType === "중식" ? "lunch" : "dinner";
         const daysBefore = parseInt(window.serverDeadlines[`${prefix}_days_before`] || 0, 10);
         const timeStr = window.serverDeadlines[`${prefix}_time`] || "00:00";
@@ -406,20 +350,15 @@ function isDeadlinePassed(dateStr, mealType, empRegion) {
         const deadline = new Date(mealDate);
         deadline.setDate(deadline.getDate() - daysBefore);
         deadline.setHours(hour, minute, 0, 0);
-        
         return now > deadline;
     }
 
-    // --- [2] 차주 일괄 신청 마감 통제 분기 ---
     const thisMon = mondayOf(now);
     const nextMon = new Date(thisMon);
     nextMon.setDate(nextMon.getDate() + 7);
     
     if (dateStr === ymdKST(nextMon) || new Date(dateStr) >= nextMon) {
-        if (empRegion !== "에코센터" && window.currentUser?.region !== "에코센터") {
-            return false;
-        }
-        
+        if (empRegion !== "에코센터" && window.currentUser?.region !== "에코센터") return false;
         const targetDayIndex = parseInt(window.serverDeadlines["next_week_day_of_week"] || 3, 10);
         const targetTimeStr = window.serverDeadlines["next_week_time"] || "16:00";
         const [h, m] = targetTimeStr.split(":").map(Number);
@@ -427,10 +366,8 @@ function isDeadlinePassed(dateStr, mealType, empRegion) {
         const nextWeekDeadline = new Date(thisMon);
         nextWeekDeadline.setDate(thisMon.getDate() + (targetDayIndex - 1));
         nextWeekDeadline.setHours(h, m, 0, 0);
-        
         return now > nextWeekDeadline;
     }
-
     return false;
 }
 
@@ -454,23 +391,12 @@ function updateSummary(data, dates) {
             if (meal.dinner) dinner++;
         });
     });
-
     document.getElementById("totalPeople").innerText = data.length;
     document.getElementById("totalBreakfast").innerText = breakfast;
     document.getElementById("totalLunch").innerText = lunch;
     document.getElementById("totalDinner").innerText = dinner;
 }
 
-function onSearch() {
-    const picker = document.getElementById("editWeekPicker");
-    if (!picker.value) {
-        const { start } = getNextWeekRange();
-        picker.value = start;
-    }
-    setTimeout(() => filterEditData(), 300);
-}
-
-// 💡 [프로세스 제어] 초기화부 내부 구조 최적화 및 마감 Fetch 추가
 document.addEventListener("DOMContentLoaded", () => {
     const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
     if (!currentUser || currentUser.level !== 2) {
@@ -479,15 +405,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
     window.currentUser = currentUser; 
-    console.log("✅ 현재 로그인한 사용자 정보:", window.currentUser);
 
-    const region = currentUser.region;
     const regionFilter = document.getElementById("regionFilter");
-    if (region && regionFilter) {
-        const validOptions = Array.from(regionFilter.options).map(o => o.value);
-        if (validOptions.includes(region)) {
-            regionFilter.value = region;
-            filterEditData(); 
+    if (currentUser.region && regionFilter) {
+        if (Array.from(regionFilter.options).map(o => o.value).includes(currentUser.region)) {
+            regionFilter.value = currentUser.region;
         }
     }
 
@@ -498,29 +420,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const year = new Date().getFullYear();
     const nextYear = year + 1;
 
-    // 공휴일 정보 병합 Fetch 프로세스
     fetchHolidayList(`/api/public-holidays?year=${year}`, (apiThisYear) => {
       fetchHolidayList(`/api/public-holidays?year=${nextYear}`, (apiNextYear) => {
         fetchHolidayList(`/holidays?year=${year}`, (customThisYear) => {
           fetchHolidayList(`/holidays?year=${nextYear}`, (customNextYear) => {
-
             const apiMerged = [].concat(apiThisYear || []).concat(apiNextYear || []);
             const customMerged = [].concat(customThisYear || []).concat(customNextYear || []);
-
             const apiDates = new Set(apiMerged.map(h => (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date)));
             const filteredCustom = customMerged.filter(h => !apiDates.has((typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date)));
-
             const merged = [...apiMerged, ...filteredCustom];
             holidayList = merged.map(h => (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date));
 
-            holidayMap = {};
-            merged.forEach(h => {
-              const key  = (typeof h === "string") ? normalizeDate(h) : normalizeDate(h.date);
-              const desc = (typeof h === "string") ? "" : (h.description || h.desc || h.name || "");
-              holidayMap[key] = desc;
-            });
-
-            // 💡 공휴일 조회가 끝나면 서버 동적 마감 설정을 가져온 후 화면을 로드하도록 제어
             loadDeadlineSettingsFromServer(() => {
                 loadEditData(start);
             });
@@ -538,26 +448,6 @@ document.getElementById("editWeekPicker").addEventListener("change", function ()
     setTimeout(() => applySelfcheckFilter(), 300);
 });
 
-function applyStickyHeaderOffsets() {
-    const thead = document.querySelector('#edit-table thead');
-    const headerRows = thead.querySelectorAll('tr');
-
-    if (headerRows.length >= 2) {
-        const firstRowHeight = headerRows[0].offsetHeight;
-
-        headerRows[0].querySelectorAll('th').forEach(th => {
-            th.style.position = 'sticky';
-            th.style.top = '0px';
-            th.style.zIndex = '10';
-        });
-
-        headerRows[1].querySelectorAll('th').forEach(th => {
-            th.style.position = 'sticky';
-            th.style.top = `${firstRowHeight}px`;
-            th.style.zIndex = '9';
-        });
-    }
-}
-
+function applyStickyHeaderOffsets() {}
 window.loadEditData = loadEditData;
 window.onSearch = onSearch;
