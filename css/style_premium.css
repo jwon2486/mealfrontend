@@ -98,7 +98,6 @@ button, input, textarea, select{ font:inherit; touch-action: manipulation; }
 /* 공통 카드 */
 .card{ background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
 .card.pad{ width:100%; padding: var(--space-2); }
-.card-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding: var(--space-2) var(--space-2) 12px; }
 .card-title{ display:flex; flex-direction:column; gap:2px; }
 .card-title h2{ margin:0; font-size:1rem; letter-spacing:-.3px; }
 .card-title p{ margin:0; font-size:.95rem; color: var(--muted); }
@@ -162,10 +161,7 @@ button, input, textarea, select{ font:inherit; touch-action: manipulation; }
 
 .deadline-mini{ font-size:.92rem; color: var(--muted); text-align: left; line-height:1.6; background: rgba(255, 255, 255, 0.5); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid #f87171; }
 .deadline-mini .deadline-title{ font-weight:800; color: #e11d48; margin-bottom:4px; }
-.deadline-mini .deadline-note{ font-size:.85rem; opacity:.8; display: block; }
-.weekly-summary-card .card-header { display: none; }
 .deadline-title{ margin-bottom:10px; }
-.deadline-h2{ margin:0; font-size:1rem; }
 .deadline-info{ text-align:left !important; line-height:1.65; font-size:.98rem; color: var(--text); }
 .deadline-info strong{ color: var(--text); }
 .deadline-info u{ text-underline-offset:3px; }
@@ -178,7 +174,9 @@ button, input, textarea, select{ font:inherit; touch-action: manipulation; }
 
 /* 식수 신청 테이블 영역 */
 .card-meal-history{ width:100%; margin-top:8px; min-width:0; }
-.meal-header{ position:relative; display:flex; align-items:center; justify-content:flex-start; min-height:34px; margin-bottom:10px; }
+/* 상하폭 +10%: 카드 상하 여백도 같은 비율로. .card.pad 와 특이도를 맞추기 위해 클래스를 겹쳐 쓴다. */
+.card.pad.card-meal-history{ padding-block: calc(var(--space-2) * 1.1); }
+.meal-header{ position:relative; display:flex; align-items:center; justify-content:flex-start; min-height:37.4px; margin-bottom:11px; }
 .mealchart{ font-size:1.15rem; font-weight:900; color: var(--text); letter-spacing:-.2px; }
 .selfcheckment{ position:absolute; left:50%; transform: translateX(-50%); display:flex; align-items:center; gap:10px; font-size:1rem; font-weight:700; }
 .selfcheckbox{ width:1.2rem; height:1.2rem; accent-color: var(--theme-checkbox-accent); }
@@ -187,20 +185,21 @@ button, input, textarea, select{ font:inherit; touch-action: manipulation; }
 .meal-table-area{ width:100%; min-width:0; overflow:visible; }
 .meal-table-scroll{ width:100%; overflow-x:auto; overflow-y:visible; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 
-#meal-table{ table-layout:auto; width:100% !important; margin:0 !important; border-collapse:separate !important; border-spacing:0 !important; background: rgba(255,255,255,.95); box-shadow:none !important; border-radius:16px !important; overflow:hidden; border:1px solid var(--line); }
+/* table-layout:fixed — 버튼 글자수(미신청/✔신청/❌마감/⛔차단)에 따라 열 너비가 재계산되지 않게 고정한다. */
+#meal-table{ table-layout:fixed; width:100% !important; margin:0 !important; border-collapse:separate !important; border-spacing:0 !important; background: rgba(255,255,255,.95); box-shadow:none !important; border-radius:16px !important; overflow:hidden; border:1px solid var(--line); }
 th{ background: var(--theme-table-head-bg) !important; border-bottom:none !important; border-right:1px solid var(--theme-table-head-border) !important; padding:12px 10px !important; font-size:.95rem !important; color:var(--theme-table-head-text) !important; letter-spacing:-.2px; text-align:center; vertical-align:middle; }
 th:last-child{ border-right:none !important; }
-td{ padding:8px !important; border-bottom:1px solid rgba(15,23,42,.06) !important; font-size:.98rem; text-align:center; vertical-align:middle; font-size:1rem; }
+td{ padding:8px !important; border-bottom:1px solid rgba(15,23,42,.06) !important; text-align:center; vertical-align:middle; font-size:1rem; }
 tr:nth-child(even){ background-color: rgba(2,6,23,.02) !important; }
 tr:hover{ background-color: rgba(37,99,235,.06) !important; transition:.2s; }
 
 .holiday-desc{ color:#b91c1c; font-weight:700; font-size:.85rem; margin-top:2px; line-height:1.1; }
-.holiday-cell{ line-height:1.2; }
 
 /* 공통 버튼 디자인 유지 */
 .button-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: var(--space-2); }
-.meal-button-row{ margin-top:14px; position:relative; z-index:5; display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:8px; }
-.meal-button-row .action-btn{ width:100%; min-width:0; flex:none; }
+.meal-button-row{ margin-top:15.4px; position:relative; z-index:5; display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:8px; }
+/* 이 버튼은 높이가 패딩으로 결정되므로 min-height 만으로는 커지지 않는다. */
+.meal-button-row .action-btn{ width:100%; min-width:0; flex:none; min-height:46.2px; padding-block:12.4px !important; }   /* 42px / 10px 각각 +10% */
 
 .action-btn{ display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:10px 14px !important; margin-top:0 !important; border-radius:12px !important; font-size:.96rem !important; font-weight:800 !important; border:1px solid transparent !important; cursor:pointer; transition: transform .12s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease; }
 .action-btn:active{ transform: translateY(1px); }
@@ -221,6 +220,31 @@ tr:hover{ background-color: rgba(37,99,235,.06) !important; transition:.2s; }
 #meal-table td .meal-btn{ width:100%; max-width:100px; margin:0 auto; white-space:nowrap; }
 .meal-btn[disabled]{ opacity:.75; cursor:not-allowed; }
 
+/* ── 신청 표 골격 고정 ──────────────────────────────────────────────
+   상태가 바뀔 때 열 너비·행 높이가 흔들리지 않도록 치수를 미리 확보한다.
+   열 너비는 th에 %로 못박고, 버튼은 높이·줄간격을 고정해 이모지가 붙어도
+   줄 상자가 커지지 않게 한다. (합계 100%) */
+#meal-table th.date{ width:28%; }
+#meal-table th.day{ width:11%; }
+#meal-table th.breakfast,
+#meal-table th.lunch,
+#meal-table th.dinner{ width:20.333%; }
+/* 아래 세로 치수들은 카드 상하폭이 기존보다 정확히 10% 커지도록 잡은 값이다.
+   테두리 1px 들은 비례 확대되지 않으므로 행 높이에서 그만큼을 보정한다. */
+#meal-table th{ white-space:nowrap; padding-block:14.35px !important; }   /* 12px → 머리행 47px의 +10% */
+
+#meal-table tbody td{ height:66.5px; }        /* 60px +10% + 테두리 보정. 표에서 height는 최소 높이로 동작 */
+#meal-table td.date{ white-space:nowrap; }
+#meal-table td.date .holiday-desc{ white-space:normal; }
+
+#meal-table td .meal-btn{
+  height:44px; min-height:44px;               /* 40px +10%. 이모지 유무와 무관하게 동일 */
+  padding:0 8px;
+  line-height:1;                              /* 글리프 높이차가 행을 밀지 않게 */
+  display:inline-flex; align-items:center; justify-content:center;
+  overflow:hidden; text-overflow:ellipsis;
+}
+
 /* 메뉴 게시판 및 썸네일/모달 (원형 복구) */
 .erp-menu-board-section{ min-width:0; }
 #menuBoard{ min-width:0; }
@@ -230,7 +254,7 @@ tr:hover{ background-color: rgba(37,99,235,.06) !important; transition:.2s; }
 #menuBoardAdminBar{ display:none; align-items:center; justify-content:flex-end; gap:8px; flex:0 0 auto; }
 #menuUploadInput{ display:none !important; width:auto !important; }
 .menu-list{ margin-top:8px; display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; align-content:start; }
-.menu-thumb{ position:relative; width:100%; padding:8px; border:1px solid var(--line); border-radius:12px; background: rgba(255,255,255,.86); cursor:pointer; overflow:hidden; transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; }
+.menu-thumb{ position:relative; width:100%; margin:0 auto; padding:8px; border:1px solid var(--line); border-radius:12px; background: rgba(255,255,255,.86); cursor:pointer; overflow:hidden; transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; }
 .menu-thumb:hover{ transform: translateY(-2px); box-shadow: 0 8px 18px rgba(2,6,23,.08); border-color: rgba(37,99,235,.18); }
 .menu-thumb img{ width:100%; height:144px; object-fit:cover; border-radius:10px; }
 .menu-item-title{ margin-top:6px; font-size:.9rem; font-weight:800; color: var(--text); text-align:left; line-height:1.2; word-break:keep-all; }
@@ -239,30 +263,31 @@ tr:hover{ background-color: rgba(37,99,235,.06) !important; transition:.2s; }
 .menu-upload-btn:hover{ box-shadow: 0 10px 22px rgba(2,6,23,.10); background: rgba(34,197,94,.28); }
 .menu-delete-btn{ border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.10); color:#991b1b; }
 .menu-delete-btn:hover{ box-shadow: 0 10px 22px rgba(2,6,23,.10); }
+/* 썸네일 선택 체크박스 — 기본은 숨김, 관리자 바가 보일 때만 노출한다.
+   (이전에는 같은 셀렉터가 세 군데 흩어져 !important 로 서로를 덮고 있었다) */
 .menu-select {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 20px;
-  height: 20px;
+  top: 12px;
+  left: 12px;
+  width: 22px;
+  height: 22px;
+  z-index: 999;
   cursor: pointer;
   accent-color: var(--theme-checkbox-accent);
-  z-index: 10;
   border: 1px solid #fff;
-  box-shadow: 0 0 4px rgba(0,0,0,0.3);
-  
-  /* 기본적으로는 숨김 (Level 1, 2 사용자에게는 안 보임) */
-  display: none; 
+  box-shadow: 0 0 4px rgba(0,0,0,.3);
+  display: none;
 }
 
-/* 2. 관리자(Level 3) 바가 보일 때만 체크박스를 노출 */
-/* #menuBoardAdminBar에 .hidden 클래스가 없을 때(=관리자일 때)만 체크박스 표시 */
 #menuBoardAdminBar:not(.hidden) ~ .menu-list .menu-select,
-#menuBoardAdminBar:not(.hidden) ~ #menuList .menu-select {
-  display: block !important;
+#menuBoardAdminBar:not(.hidden) ~ #menuList .menu-select,
+#menuBoardAdminBar:not(.hidden) + .menu-board-desc + .menu-list .menu-select,
+body:has(#menuBoardAdminBar:not(.hidden)) .menu-select {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
 }
-.menu-thumb.menu-mark-delete{ outline:3px solid rgba(239,68,68,.55); }
-.menu-thumb.menu-mark-delete img{ filter: brightness(.9); }
 .menu-modal{ position:fixed; inset:0; display:none; z-index:2000; }
 .menu-modal.open{ display:block; }
 .menu-modal__backdrop{ position:absolute; inset:0; background: rgba(2,6,23,.55); backdrop-filter: blur(4px); }
@@ -273,22 +298,16 @@ tr:hover{ background-color: rgba(37,99,235,.06) !important; transition:.2s; }
 .menu-modal__body{ padding:10px; overflow:auto; }
 .menu-modal__body img{ width:100%; height:auto; display:block; border-radius:14px; border:1px solid var(--line); }
 
-/* 접근성 툴바 및 Toast */
-.colorblind-toolbar{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.78); }
-.colorblind-label{ font-size:.9rem; font-weight:800; color:var(--muted); white-space:nowrap; }
-.colorblind-select, .sidebar-colorblind-select{ min-height:34px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--text); padding:6px 10px; outline:none; }
-.colorblind-select:focus, .sidebar-colorblind-select:focus{ border-color: rgba(37,99,235,.55); box-shadow: 0 0 0 4px rgba(37,99,235,.12); }
+/* 접근성(색각 보정) 및 Toast */
 .accessibility-card{ margin-top:12px; padding:14px; border-radius:16px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.08); display:flex; flex-direction:column; gap:10px; }
 .accessibility-title{ font-weight:900; font-size:.96rem; color:#fff; }
 .accessibility-desc{ font-size:.84rem; line-height:1.5; color:rgba(255,255,255,.72); }
-.sidebar-colorblind-select{ width:100%; background:rgba(255,255,255,.95); }
+.sidebar-colorblind-select{ width:100%; min-height:34px; padding:6px 10px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.95); color:var(--text); outline:none; }
+.sidebar-colorblind-select:focus{ border-color: rgba(37,99,235,.55); box-shadow: 0 0 0 4px rgba(37,99,235,.12); }
 .sr-only{ position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0, 0, 0, 0) !important; white-space:nowrap !important; border:0 !important; }
 
 .toast{ min-width:180px !important; border-radius:14px !important; padding:12px 14px !important; background: rgba(15,23,42,.92) !important; box-shadow: var(--shadow) !important; color:#fff !important; display:none; font-size:1rem; text-align:center; position:fixed; left:50%; bottom:24px; transform: translateX(-50%); z-index:3000; }
 .toast.show{ display:block !important; }
-
-/* 잔재 클래스 무효화 */
-.shell-grid, .main-grid, .left-col, .shell2, .grid{ all: unset; }
 
 /* 시각 상태 제어용 헬퍼 클래스 (JS 연동) */
 .ui-hidden{ display:none !important; }
@@ -372,7 +391,8 @@ body.cb-highcontrast .meal-btn{ border-width:2px !important; box-shadow: inset 0
   #mainArea .erp-layout{ grid-template-columns:1fr; gap:0.6rem; height:auto; }
   #mainArea .erp-sidebar, #mainArea .erp-sidebar-inner, #mainArea .erp-content, #mainArea .erp-page{ width:100%; height:auto !important; min-height:auto; overflow:visible !important; }
   #mainArea .erp-sidebar, #mainArea .erp-content{ margin-inline:0; }
-  #mainArea .erp-page, #weeklySection.card-weekly{ width: 100%; max-width: 100%; margin-inline: 0; padding-right:0; }
+  /* width:100% 는 위 규칙에서 이미 적용됨 (#weeklySection 도 .erp-page 임) */
+  #mainArea .erp-page, #weeklySection.card-weekly{ max-width: 100%; margin-inline: 0; padding-right:0; }
 
   .card-weekly{ padding-left: var(--space-2); padding-right: var(--space-2); }
   .erp-sidebar-actions{ margin-top:0.6rem; display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:8px; }
@@ -410,15 +430,23 @@ body.cb-highcontrast .meal-btn{ border-width:2px !important; box-shadow: inset 0
   .button-row{ gap:8px; justify-content:stretch; }
   .action-btn{ flex:1 1 calc(50% - 8px); }
   .meal-btn{ max-width:100%; }
-  #meal-table td .meal-btn{ width:100%; }
+
+  /* 좁은 화면에서도 날짜가 줄바꿈되지 않도록 글자를 줄이고 폭을 다시 배분한다. */
+  #meal-table th.date{ width:27%; }
+  #meal-table th.day{ width:11%; }
+  #meal-table th.breakfast,
+  #meal-table th.lunch,
+  #meal-table th.dinner{ width:20.667%; }
+  /* 세로 치수는 데스크톱과 동일하게 +10% 적용 (테두리 보정 포함) */
+  #meal-table th{ font-size:.86rem !important; padding:11.6px 4px !important; }
+  #meal-table tbody td{ height:62.6px; padding:6px 4px !important; }
+  #meal-table td.date{ font-size:.88rem; }
+  #meal-table td.day{ font-size:.88rem; }
+  #meal-table td .meal-btn{ width:100%; max-width:none; height:41.8px; min-height:41.8px; padding:0 4px; font-size:.86rem; }
 
   .remember-me{ flex-direction:column; align-items:stretch; }
   .login-field{ grid-template-columns:1fr; gap:6px !important; }
   .menu-list{ grid-template-columns: repeat(2, 1fr); }
-  
-  .colorblind-toolbar{ padding:4px 8px; gap:6px; }
-  .colorblind-label{ font-size:.78rem; }
-  .colorblind-select{ max-width:132px; min-height:28px; padding:4px 8px; font-size:.78rem; }
   .accessibility-card{ margin-top:10px; }
   .menu-item-card {
     gap: 6px;
@@ -454,7 +482,6 @@ body.cb-highcontrast .meal-btn{ border-width:2px !important; box-shadow: inset 0
   .mealchart{ font-size:1.2rem; }
   .selfcheckment{ font-size:1.2rem; gap:4px; }
   .selfcheckbox{ width:1.1rem; height:1.1rem; }
-  .colorblind-toolbar{ order:2; }
 }
 
 @media (min-width: 769px){
@@ -490,43 +517,3 @@ body.cb-highcontrast .meal-btn{ border-width:2px !important; box-shadow: inset 0
   justify-content: center !important;
 }
 
-/* 썸네일 버튼 자체도 중앙 정렬 확인 */
-.menu-thumb {
-  margin: 0 auto;
-}
-
-/* [수정] 관리자 바가 hidden이 아닐 때 체크박스를 강제로 표시 */
-#menuBoardAdminBar:not(.hidden) ~ .menu-list .menu-select,
-#menuBoardAdminBar:not(.hidden) + .menu-board-desc + .menu-list .menu-select,
-#menuBoardAdminBar:not(.hidden) ~ #menuList .menu-select {
-  display: block !important; /* display: none을 강제로 무시 */
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* 추가 보안: 이미지 위에서 체크박스가 잘 보이도록 위치 보정 */
-.menu-select {
-  position: absolute !important;
-  top: 15px !important;
-  left: 15px !important;
-  z-index: 999 !important; /* 이미지보다 훨씬 위에 배치 */
-}
-
-/* ✅ 특정 구조에 상관없이 관리자가 로그인 상태라면 무조건 체크박스 표시 */
-body:has(#menuBoardAdminBar:not(.hidden)) .menu-select {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* ✅ 체크박스 위치 및 디자인 강제 고정 */
-.menu-select {
-  position: absolute !important;
-  top: 12px !important;
-  left: 12px !important;
-  width: 22px !important;
-  height: 22px !important;
-  z-index: 999 !important;
-  cursor: pointer !important;
-}

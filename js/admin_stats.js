@@ -506,7 +506,10 @@ function renderWeeklyDeptStats(data, holidays, range) {
             });
         }
 
-        rows.sort((a, b) => a.dept.localeCompare(b.dept)).forEach(row => {
+        // 조직도 순서(sort_order)를 우선하고, 없으면 기존처럼 가나다순으로 정렬한다.
+        rows.sort((a, b) =>
+            ((a.sort_order ?? 999999) - (b.sort_order ?? 999999)) || a.dept.localeCompare(b.dept)
+        ).forEach(row => {
             const isTripDept = (row.display_dept || row.dept).includes("(출장)");
             if (isTripDept && !hasAnyMeal(row)) return;  
 
