@@ -3,94 +3,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>신청 변경 내역 - 식수 신청 시스템</title>
-  <link rel="stylesheet" href="css/employees.css" />
-  <style>
-    /* ===== admin_logs 전용 보강 스타일 (employees.css 기반) ===== */
-
-    /* 콘텐츠 섹션 헤더 */
-    .section-head {
-      display: flex;
-      align-items: center;
-      gap: 0.625rem;
-      margin: 0 0 0.25rem;
-    }
-    .section-head .section-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 0.625rem;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      color: #fff;
-      font-size: 1.2rem;
-      flex: 0 0 auto;
-    }
-    .section-head .section-text strong {
-      display: block;
-      font-size: 1.15rem;
-      color: var(--text);
-      line-height: 1.25;
-    }
-    .section-head .section-text span {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    /* 필터 카드: 입력 + 버튼 정렬 */
-    .filter-card .search-flex { align-items: flex-end; }
-    .filter-card .input-box.compact { flex: 0 1 11rem; }
-    .filter-card select {
-      padding: 0.625rem;
-      border: 0.0625rem solid var(--line);
-      border-radius: 0.5rem;
-      outline: none;
-      background: #fff;
-      color: var(--text);
-      font-size: 0.95rem;
-    }
-    .filter-actions {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      align-items: flex-end;
-    }
-    .btn-download { background: #166534; color: #fff; }
-
-    /* 테이블: 변경 전/후 상태 강조 (JS 출력 텍스트 그대로 유지) */
-    .table-card table { min-width: 48rem; }
-    .table-card thead th { position: sticky; top: 0; z-index: 1; }
-    .table-container { max-height: 32rem; overflow-y: auto; }
-    .empty-row td { color: var(--muted); font-weight: 500; padding: 1.75rem 0.875rem; }
-
-    /* Toast */
-    .toast {
-      min-width: 11.25rem;
-      border-radius: 0.75rem;
-      padding: 0.75rem 0.875rem;
-      background: rgba(15, 23, 42, 0.92);
-      box-shadow: var(--shadow);
-      color: #fff;
-      display: none;
-      font-size: 0.95rem;
-      text-align: center;
-      position: fixed;
-      left: 50%;
-      bottom: 1.5rem;
-      transform: translateX(-50%);
-      z-index: 3000;
-    }
-    .toast.show { display: block; }
-
-    @media (max-width: 768px) {
-      .erp-layout { grid-template-columns: 1fr; }
-      .erp-nav { flex-direction: row; flex-wrap: wrap; }
-      .nav-item { flex: 1 1 auto; text-align: center; }
-      .filter-card .input-box.compact { flex: 1 1 8rem; }
-    }
-  </style>
+  <title>신청 변경 내역</title>
+  <link rel="stylesheet" href="css/check_style.css" />
   <script>
   const savedUser = sessionStorage.getItem("currentUser");
   if (!savedUser) {
@@ -105,150 +19,64 @@
   </script>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <img src="logo/SnSYS_logo.png" alt="회사 로고" />
-        <div class="title">
-          <strong>에스엔시스 식수 신청 시스템</strong>
-          <span>Change Logs</span>
-        </div>
-      </div>
-      <div class="top-actions">
-        <div class="pill">👤 관리자 모드</div>
-      </div>
-    </header>
+  <h2>📋 식수 신청 변경 내역</h2>
 
-    <main class="shell">
-      <div class="erp-layout">
-        <aside class="erp-sidebar">
-          <nav class="erp-nav">
-            <button class="nav-item active">🕒 변경 내역</button>
-            <button class="nav-item" onclick="location.href='admin_dashboard.html'">📊 대시보드</button>
-            <button class="nav-item" onclick="location.href='index.html'">🏠 메인화면</button>
-          </nav>
-        </aside>
-
-        <div class="erp-content">
-
-          <!-- ===== 식수 신청 변경 내역 ===== -->
-          <div class="section-head">
-            <span class="section-icon">📋</span>
-            <div class="section-text">
-              <strong>식수 신청 변경 내역</strong>
-              <span>직원 식수 신청의 변경 이력을 조회합니다.</span>
-            </div>
-          </div>
-
-          <section class="card filter-card">
-            <div class="search-flex">
-              <div class="input-box compact">
-                <label>시작일</label>
-                <input type="date" id="logStartDate" />
-              </div>
-              <div class="input-box compact">
-                <label>종료일</label>
-                <input type="date" id="logEndDate" />
-              </div>
-              <div class="input-box compact">
-                <label>이름</label>
-                <input type="text" id="logEmpName" placeholder="이름 검색" />
-              </div>
-              <div class="input-box compact">
-                <label>부서</label>
-                <input type="text" id="logEmpDept" placeholder="부서 검색" />
-              </div>
-              <div class="filter-actions">
-                <button class="btn btn-primary" onclick="loadLogs()">🔍 조회</button>
-                <button class="btn btn-download" onclick="downloadExcel()">📥 다운로드</button>
-              </div>
-            </div>
-          </section>
-
-          <section class="card table-card">
-            <div class="table-container">
-              <table>
-                <thead id="log-head">
-                  <tr>
-                    <th>날짜</th>
-                    <th>식사유형</th>
-                    <th>부서명</th>
-                    <th>이름</th>
-                    <th>이전상태</th>
-                    <th>변경상태</th>
-                    <th>변경일시</th>
-                  </tr>
-                </thead>
-                <tbody id="log-body"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- ===== 방문자 및 협력사 신청 변경 로그 ===== -->
-          <div class="section-head">
-            <span class="section-icon">🧾</span>
-            <div class="section-text">
-              <strong>방문자 및 협력사 신청 변경 로그</strong>
-              <span>방문자·협력사 식수 신청의 변경 이력을 조회합니다.</span>
-            </div>
-          </div>
-
-          <section class="card filter-card">
-            <div class="search-flex">
-              <div class="input-box compact">
-                <label>시작일</label>
-                <input type="date" id="logVisitorStartDate" />
-              </div>
-              <div class="input-box compact">
-                <label>종료일</label>
-                <input type="date" id="logVisitorEndDate" />
-              </div>
-              <div class="input-box compact">
-                <label>이름</label>
-                <input type="text" id="logVisitorEmpName" placeholder="이름 검색" />
-              </div>
-              <div class="input-box compact">
-                <label>부서</label>
-                <input type="text" id="logVisitorEmpDept" placeholder="부서 검색" />
-              </div>
-              <div class="input-box compact">
-                <label>구분</label>
-                <select id="logVisitorType">
-                  <option value="">전체</option>
-                  <option value="협력사">협력사</option>
-                  <option value="방문자">방문자</option>
-                </select>
-              </div>
-              <div class="filter-actions">
-                <button class="btn btn-primary" onclick="loadVisitorLogs()">🔍 조회</button>
-                <button class="btn btn-download" onclick="downloadVisitorExcel()">📥 다운로드</button>
-              </div>
-            </div>
-          </section>
-
-          <section class="card table-card">
-            <div class="table-container">
-              <table>
-                <thead id="visitor-log-head">
-                  <tr>
-                    <th>날짜</th>
-                    <th>부서명</th>
-                    <th>이름</th>
-                    <th>이전상태</th>
-                    <th>변경상태</th>
-                    <th>변경일시</th>
-                  </tr>
-                </thead>
-                <tbody id="visitor-log-body">
-                  <tr class="empty-row"><td colspan="6" style="text-align:center;">로딩 중...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-        </div>
-      </div>
-    </main>
+  <div class="filter-container">
+    <input type="date" id="logStartDate" />
+    <input type="date" id="logEndDate" />
+    <input type="text" id="logEmpName" placeholder="이름" />
+    <input type="text" id="logEmpDept" placeholder="부서" />
+    <button onclick="loadLogs()">🔍 조회</button>
+    <button onclick="downloadExcel()">📥 다운로드</button>
+    <button class="dashboard-btn" onclick="window.location.href='admin_dashboard.html'">← 관리자 대시보드</button>
+  </div>
+  </br>
+  </br>
+  <div class="table-container">
+    <table>
+      <thead id="log-head">
+        <tr>
+          <th>날짜</th>
+          <th>식사유형</th>
+          <th>부서명</th>
+          <th>이름</th>
+          <th>이전상태</th>
+          <th>변경상태</th>
+          <th>변경일시</th>
+        </tr>
+      </thead>
+      <tbody id="log-body"></tbody>
+    </table>
+  </div>
+  </br>
+  <h3>📋 방문자 및 협력사 신청 변경 로그</h3>
+  <div class="table-container">
+    <input type="date" id="logVisitorStartDate" />
+    <input type="date" id="logVisitorEndDate" />
+    <input type="text" id="logVisitorEmpName" placeholder="이름" />
+    <input type="text" id="logVisitorEmpDept" placeholder="부서" />
+    <select id="logVisitorType">
+      <option value="">전체</option>
+      <option value="협력사">협력사</option>
+      <option value="방문자">방문자</option>
+    </select>
+    <button onclick="loadVisitorLogs()">🔍 조회</button>
+    <button onclick="downloadVisitorExcel()">📥 다운로드</button>
+      <table>
+        <thead id="log-head">
+              <tr>
+                  <th>날짜</th>
+                  <th>부서명</th>
+                  <th>이름</th>
+                  <th>이전상태</th>
+                  <th>변경상태</th>
+                  <th>변경일시</th>
+              </tr>
+          </thead>
+          <tbody id="visitor-log-body">
+              <tr><td colspan="6" style="text-align:center;">로딩 중...</td></tr>
+          </tbody>
+      </table>
   </div>
 
   <div id="toast" class="toast"></div>
